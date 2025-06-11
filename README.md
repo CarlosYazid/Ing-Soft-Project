@@ -1,2 +1,2 @@
-# Ing-Soft-Backend
-Backend del projecto de Ingenieria de Software
+# Ing-Soft-Project
+Projecto de Ingenieria de Software
