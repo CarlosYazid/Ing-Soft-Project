@@ -22,7 +22,7 @@ app.include_router(userRouter)
 app.include_router(authRouter)
 
 # Static files configuration
-app.mount("/", StaticFiles(directory="../../frontend/dist", html=True), name="frontend")
+app.mount("/", StaticFiles(directory="../frontend/dist", html=True), name="frontend")
 
 
 @app.get("/")

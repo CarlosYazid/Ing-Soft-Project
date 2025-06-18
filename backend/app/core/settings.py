@@ -1,30 +1,37 @@
-from pydantic import BaseSettings, EmailStr, SecretStr, Field
+from pydantic import EmailStr, SecretStr, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
+
 
 class Settings(BaseSettings):
     # General
     app_name: str = "InventaryApp"
     environment: str = "development"  # development | production | staging
     debug: bool = True
+    model_config = SettingsConfigDict(env_file=os.path.join(os.path.dirname(__file__), "../../.env"), env_file_encoding='utf-8', extra='allow')
 
     # Supabase
-    db_url: str = Field(..., env="DATABASE_URL")
-    db_key: SecretStr = Field(..., env="DATABASE_KEY")
+    db_url: str = Field(..., alias="database_url")
+    db_key: SecretStr = Field(..., alias="database_key")
 
     # SMTP (Gmail)
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
-    smtp_corp_email: EmailStr = Field(..., env="CORP_USER")
-    smtp_corp_password: SecretStr = Field(..., env="CORP_PASSWORD")
+    smtp_corp_email: EmailStr = Field(..., alias="corp_user")
+    smtp_corp_password: SecretStr = Field(..., alias="corp_password")
+
+    frontend_url: str = Field(..., alias="frontend_url")
 
     # Otros (opcional: CORS, JWT, etc.)
-    allowed_origins: list[str] = ["http://localhost:5173"]
+    allowed_origins: list[str] = []
     allow_credentials: bool = True
     allow_methods: list[str] = ["*"]
     allow_headers: list[str] = ["*"]
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    
+    def model_post_init(self, __context):
+        # Solo agrega si no está ya en la lista
+        if self.frontend_url not in self.allowed_origins:
+            self.allowed_origins.append(self.frontend_url)
 
 
 SETTINGS = Settings()
