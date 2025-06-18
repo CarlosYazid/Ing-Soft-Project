@@ -14,7 +14,7 @@ develop-eggs/
 downloads/
 eggs/
 .eggs/
-lib/
+#lib/ /la necesitamos para el frontend
 lib64/
 parts/
 sdist/
