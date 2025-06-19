@@ -28,8 +28,6 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).select("*").eq("id", product_id).execute()
 
-        print(response.data)
-
         if not(bool(response.data)):
             raise HTTPException(detail="Product not found", status_code=404)
 

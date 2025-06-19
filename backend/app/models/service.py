@@ -30,10 +30,6 @@ class Service(ServiceBase):
                                                   "name": "Example Service",
                                                   "short_description": "This is an example service.",
                                                   "price": 49.99,
-                                                  "service_inputs": {
-                                                      1: 2, # Example product ID to quantity mapping
-                                                      2: 1
-                                                  },
                                                   "description": "Detailed description of the example service.",
                                                   "cost": 30.00,
                                                   "created_at": "2023-01-01T00:00:00Z",
@@ -58,6 +54,7 @@ class ServiceInput(BaseModel):
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
+                                                  "service_id": 1,
                                                   "product_id": 1,
                                                   "quantity": 2
                                               }

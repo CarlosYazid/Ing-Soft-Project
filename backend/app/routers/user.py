@@ -22,8 +22,7 @@ async def get_employees_base(request: Request):
 
 @router.post("/employee")
 async def create_employee(request: Request, 
-                          employee: Employee,
-                          current_user : dict = Depends(AuthService.current_user)):
+                          employee: Employee):
     """
     Create a new employee.
     """
@@ -190,8 +189,7 @@ async def get_clients_base(request: Request):
 
 @router.post("/client")
 async def create_client(request: Request,
-                        client: Client,
-                         current_user: dict = Depends(AuthService.current_user)):
+                        client: Client):
     """
     Create a new client.
     """

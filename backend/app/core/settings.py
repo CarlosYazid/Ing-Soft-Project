@@ -23,6 +23,7 @@ class Settings(BaseSettings):
     order_table: str = Field(..., alias="order_table")
     order_service_table: str = Field(..., alias="order_service_table")
     order_product_table: str = Field(..., alias="order_product_table")
+    payment_table: str = Field(..., alias="payment_table")
 
     # SMTP (Gmail)
     smtp_host: str = "smtp.gmail.com"
