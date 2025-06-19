@@ -51,6 +51,21 @@
 			errors
 		};
 	}
+	function obtenerIdUnicoProducto(): number {
+		const productosRaw = localStorage.getItem('productos');
+		const productos: { id: number }[] = productosRaw ? JSON.parse(productosRaw) : [];
+
+		// Obtener todos los IDs existentes
+		const ids = new Set(productos.map((p) => p.id));
+
+		// Buscar el menor número posible no repetido
+		let nuevoId = 1;
+		while (ids.has(nuevoId)) {
+			nuevoId++;
+		}
+
+		return nuevoId;
+	}
 
 	function getProductFormValues(form: HTMLFormElement): productForm {
 		const formData = new FormData(form);
@@ -64,6 +79,7 @@
 		const picture = formData.get('picture') as File;
 
 		return {
+			id: obtenerIdUnicoProducto(),
 			productName,
 			description,
 			cost,
@@ -74,6 +90,15 @@
 		};
 	}
 	$inspect(infoDialog);
+	function agregarProductoAlStorage(producto: any): void {
+		const productosRaw = localStorage.getItem('productos');
+		const productos = productosRaw ? JSON.parse(productosRaw) : [];
+
+		productos.push(producto);
+
+		localStorage.setItem('productos', JSON.stringify(productos));
+	}
+
 	function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		const form = event.currentTarget as HTMLFormElement;
@@ -81,7 +106,10 @@
 		const validation = validateProductForm(values);
 
 		infoDialog = validation.valid;
-		if (validation.valid) form.reset();
+		if (validation.valid) {
+			agregarProductoAlStorage(values);
+			form.reset();
+		}
 	}
 </script>
 

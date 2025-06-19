@@ -20,8 +20,8 @@
 
 		products = productMocks.map((p: any) => ({
 			id: p.id,
-			category: p.category,
 			name: p.productName,
+			category: p.category,
 			price: p.price,
 			stock: p.stock
 		}));
