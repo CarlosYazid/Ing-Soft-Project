@@ -245,7 +245,7 @@
 	</div>
 
 	<div class="mt-4 flex items-center justify-between">
-		<Button type="submit">Submit</Button>
+		<Button type="submit" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Submit</Button>
 		<Button class="bg-red-700 hover:bg-red-500" href="/gestionar-productos">Regresar</Button>
 	</div>
 </form>
