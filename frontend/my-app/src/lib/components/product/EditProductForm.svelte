@@ -9,24 +9,41 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import { cn } from '$lib/utils';
+	import { tick } from 'svelte';
 
 	import type { productForm } from '../types';
 
-	let editProduct: productForm | null = null;
-	let infoDialog: boolean = false;
-
-	let productName = '';
-	let description = '';
-	let cost = 0;
-	let price = 0;
-	let category = '';
-	let stock = 0;
-	let picture: File | null = null;
-
-	const categories = [
+	const categoriesComboBox = [
 		{ value: 'papeleria', label: 'Papelería' },
 		{ value: 'comestible', label: 'Comestible' }
 	];
+
+	let open = $state(false);
+	let value = $state('');
+	let triggerRef = $state<HTMLButtonElement>(null!);
+
+	const selectedValue = $derived(categoriesComboBox.find((f) => f.value === value)?.label);
+
+	// We want to refocus the trigger button when the user selects
+	// an item from the list so users can continue navigating the
+	// rest of the form with the keyboard.
+	function closeAndFocusTrigger() {
+		open = false;
+		tick().then(() => {
+			triggerRef.focus();
+		});
+	}
+
+	let editProduct: productForm | null = $state(null);
+	let infoDialog: boolean = $state(false);
+
+	let productName = $state('');
+	let description = $state('');
+	let cost = $state(0);
+	let price = $state(0);
+	let category = $state('');
+	let stock = $state(0);
+	let picture: File | null = $state(null);
 
 	function getAll(): productForm[] {
 		const raw = localStorage.getItem('productos');
@@ -42,10 +59,6 @@
 	}
 	function editProducto(p: productForm) {
 		const list = getAll().map((x) => (x.id === p.id ? p : x));
-		saveAll(list);
-	}
-	function deleteProducto(id: number) {
-		const list = getAll().filter((x) => x.id !== id);
 		saveAll(list);
 	}
 
@@ -110,7 +123,7 @@
 	}
 </script>
 
-<form on:submit|preventDefault={handleSubmit} class="w-sm md:w-md" enctype="multipart/form-data">
+<form onsubmit={handleSubmit} class="w-sm md:w-md" enctype="multipart/form-data">
 	<div class="flex flex-col gap-6">
 		<div>
 			<Label for="ProductName">Nombre de Producto</Label>
@@ -141,26 +154,37 @@
 		</div>
 
 		<div>
-			<Label for="category">Categoría</Label>
-			<Popover.Root>
-				<Popover.Trigger class="w-full justify-between">
-					{#if category}
-						{categories.find((c) => c.value === category)?.label}
-					{:else}
-						Selecciona una Categoría...
-					{/if}
-					<ChevronsUpDownIcon class="opacity-50" />
+			<Popover.Root bind:open>
+				<Popover.Trigger bind:ref={triggerRef}>
+					{#snippet child({ props })}
+						<Button
+							{...props}
+							variant="outline"
+							class="w-full justify-between"
+							role="combobox"
+							aria-expanded={open}
+						>
+							{selectedValue || 'Select a category...'}
+							<ChevronsUpDownIcon class="opacity-50" />
+						</Button>
+					{/snippet}
 				</Popover.Trigger>
-				<Popover.Content class="w-sm p-0 md:w-md">
+				<Popover.Content class="w-full p-0">
 					<Command.Root>
-						<Command.Input placeholder="Buscar Categoría..." />
+						<Command.Input placeholder="Search category..." />
 						<Command.List>
-							<Command.Empty>No encontrada</Command.Empty>
-							<Command.Group>
-								{#each categories as c}
-									<Command.Item value={c.value} onselect={() => (category = c.value)}>
-										<CheckIcon class={cn(category !== c.value && 'text-transparent')} />
-										{c.label}
+							<Command.Empty>No category found.</Command.Empty>
+							<Command.Group value="categoriesComboBox">
+								{#each categoriesComboBox as category (category.value)}
+									<Command.Item
+										value={category.value}
+										onSelect={() => {
+											value = category.value;
+											closeAndFocusTrigger();
+										}}
+									>
+										<CheckIcon class={cn(value !== category.value && 'text-transparent')} />
+										{category.label}
 									</Command.Item>
 								{/each}
 							</Command.Group>
@@ -168,7 +192,7 @@
 					</Command.Root>
 				</Popover.Content>
 			</Popover.Root>
-			<Input type="hidden" name="category" value={category} />
+			<Input type="hidden" name="category" {value} />
 		</div>
 
 		<div>
