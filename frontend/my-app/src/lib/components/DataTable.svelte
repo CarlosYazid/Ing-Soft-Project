@@ -1,7 +1,9 @@
 <script lang="ts">
 	import ConfirmDialog from './common/ConfirmDialog.svelte';
+	import EditDialog from './common/EditDialog.svelte';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import type { productForm } from './types';
+	import ProductCard from './product/ProductCard.svelte';
 
 	let { columns, data } = $props();
 
@@ -37,8 +39,8 @@
 
 	let editar = $state(false);
 	function onEdit(row: any) {
+		saveEditProduct(row);
 		editar = true;
-		fila = row;
 	}
 
 	let eliminar = $state(false);
@@ -47,9 +49,16 @@
 		fila = row;
 	}
 
-	let edicionConfirmada = $state(false);
-	function confirmedEdit(row: any) {
-		edicionConfirmada = true;
+	function saveEditProduct(product: any): void {
+		localStorage.setItem('editProduct', JSON.stringify(product));
+		const raw = localStorage.getItem('products');
+		if (!raw) return;
+		console.log(raw);
+		const products: productForm[] = JSON.parse(raw);
+		const filtered = products.filter((p) => Number(p.id) !== Number(product.id));
+		console.log(filtered);
+
+		localStorage.setItem('products', JSON.stringify(filtered));
 	}
 
 	function confirmedDelete(row: any) {
@@ -140,6 +149,6 @@
 
 {#key editar}
 	{#if editar}
-		<ConfirmDialog parametro={fila} callback={confirmedEdit} />
+		<EditDialog />
 	{/if}
 {/key}

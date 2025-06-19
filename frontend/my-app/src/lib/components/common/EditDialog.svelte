@@ -1,17 +1,9 @@
 <script lang="ts">
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-
-	let open = $state(true);
-
-	const { callback, parametro } = $props();
-
-	function handleContinue() {
-		callback(parametro);
-		open = false;
-	}
+	import Button from '../ui/button/button.svelte';
 </script>
 
-<AlertDialog.Root bind:open>
+<AlertDialog.Root open={true}>
 	<AlertDialog.Content>
 		<AlertDialog.Header>
 			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
@@ -22,7 +14,7 @@
 		</AlertDialog.Header>
 		<AlertDialog.Footer>
 			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={handleContinue}>Continue</AlertDialog.Action>
+			<Button href="/gestionar-productos/edit-product">Confirm</Button>
 		</AlertDialog.Footer>
 	</AlertDialog.Content>
 </AlertDialog.Root>

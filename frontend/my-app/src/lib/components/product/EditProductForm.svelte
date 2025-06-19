@@ -1,0 +1,201 @@
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import { Input } from '$lib/components/ui/input';
+	import { Label } from '$lib/components/ui/label';
+	import { Button } from '$lib/components/ui/button/index.js';
+	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
+	import * as Popover from '$lib/components/ui/popover/index.js';
+	import * as Command from '$lib/components/ui/command/index.js';
+	import CheckIcon from '@lucide/svelte/icons/check';
+	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
+	import { cn } from '$lib/utils';
+
+	import type { productForm } from '../types';
+
+	let editProduct: productForm | null = null;
+	let infoDialog: boolean = false;
+
+	let productName = '';
+	let description = '';
+	let cost = 0;
+	let price = 0;
+	let category = '';
+	let stock = 0;
+	let picture: File | null = null;
+
+	const categories = [
+		{ value: 'papeleria', label: 'Papelería' },
+		{ value: 'comestible', label: 'Comestible' }
+	];
+
+	function getAll(): productForm[] {
+		const raw = localStorage.getItem('productos');
+		return raw ? JSON.parse(raw) : [];
+	}
+	function saveAll(list: productForm[]) {
+		localStorage.setItem('productos', JSON.stringify(list));
+	}
+	function addProducto(p: productForm) {
+		const list = getAll();
+		list.push(p);
+		saveAll(list);
+	}
+	function editProducto(p: productForm) {
+		const list = getAll().map((x) => (x.id === p.id ? p : x));
+		saveAll(list);
+	}
+	function deleteProducto(id: number) {
+		const list = getAll().filter((x) => x.id !== id);
+		saveAll(list);
+	}
+
+	function obtenerIdUnicoProducto(): number {
+		const ids = new Set(getAll().map((p) => p.id));
+		let nuevoId = 1;
+		while (ids.has(nuevoId)) nuevoId++;
+		return nuevoId;
+	}
+
+	onMount(() => {
+		const raw = localStorage.getItem('editProduct');
+		if (raw) {
+			editProduct = JSON.parse(raw);
+			localStorage.removeItem('editProduct');
+		}
+
+		if (editProduct) {
+			({ productName, description, cost, price, category, stock } = editProduct);
+		}
+	});
+
+	function validateProductForm(data: productForm) {
+		const errors: Record<string, string> = {};
+		if (!data.productName.trim()) errors.productName = 'El nombre es obligatorio.';
+		if (!data.description.trim()) errors.description = 'La descripción es obligatoria.';
+		if (data.cost < 0) errors.cost = 'El costo no puede ser negativo.';
+		if (data.price <= 0) errors.price = 'El precio debe ser mayor a cero.';
+		if (!data.category.trim()) errors.category = 'La categoría es obligatoria.';
+		if (data.stock < 0) errors.stock = 'El stock no puede ser negativo.';
+		if (!data.picture || data.picture.size === 0) errors.picture = 'Debes subir una imagen válida.';
+
+		return { valid: Object.keys(errors).length === 0, errors };
+	}
+
+	async function handleSubmit(event: SubmitEvent) {
+		event.preventDefault();
+		const form = event.currentTarget as HTMLFormElement;
+		const formData = new FormData(form);
+		const newProduct: productForm = {
+			id: editProduct ? editProduct.id : obtenerIdUnicoProducto(),
+			productName: formData.get('ProductName')?.toString().trim() || '',
+			description: formData.get('description')?.toString().trim() || '',
+			cost: Number(formData.get('cost')) || 0,
+			price: Number(formData.get('price')) || 0,
+			category: formData.get('category')?.toString().trim() || '',
+			stock: Number(formData.get('stock')) || 0,
+			picture: formData.get('picture') as File
+		};
+
+		const { valid } = validateProductForm(newProduct);
+		infoDialog = valid;
+
+		if (valid) {
+			if (editProduct) {
+				editProducto(newProduct);
+			} else {
+				addProducto(newProduct);
+			}
+			form.reset();
+		}
+	}
+</script>
+
+<form on:submit|preventDefault={handleSubmit} class="w-sm md:w-md" enctype="multipart/form-data">
+	<div class="flex flex-col gap-6">
+		<div>
+			<Label for="ProductName">Nombre de Producto</Label>
+			<Input name="ProductName" bind:value={productName} required />
+		</div>
+
+		<div>
+			<Label for="description">Descripción</Label>
+			<Input name="description" bind:value={description} required />
+		</div>
+
+		<div>
+			<Label for="cost">Costo de Compra</Label>
+			<div class="flex items-center gap-1">
+				<span>$</span>
+				<Input name="cost" type="number" bind:value={cost} min="0" required />
+				<Input value="COP" class="w-16" disabled />
+			</div>
+		</div>
+
+		<div>
+			<Label for="price">Precio de Venta</Label>
+			<div class="flex items-center gap-1">
+				<span>$</span>
+				<Input name="price" type="number" bind:value={price} min="0" required />
+				<Input value="COP" class="w-16" disabled />
+			</div>
+		</div>
+
+		<div>
+			<Label for="category">Categoría</Label>
+			<Popover.Root>
+				<Popover.Trigger class="w-full justify-between">
+					{#if category}
+						{categories.find((c) => c.value === category)?.label}
+					{:else}
+						Selecciona una Categoría...
+					{/if}
+					<ChevronsUpDownIcon class="opacity-50" />
+				</Popover.Trigger>
+				<Popover.Content class="w-sm p-0 md:w-md">
+					<Command.Root>
+						<Command.Input placeholder="Buscar Categoría..." />
+						<Command.List>
+							<Command.Empty>No encontrada</Command.Empty>
+							<Command.Group>
+								{#each categories as c}
+									<Command.Item value={c.value} onselect={() => (category = c.value)}>
+										<CheckIcon class={cn(category !== c.value && 'text-transparent')} />
+										{c.label}
+									</Command.Item>
+								{/each}
+							</Command.Group>
+						</Command.List>
+					</Command.Root>
+				</Popover.Content>
+			</Popover.Root>
+			<Input type="hidden" name="category" value={category} />
+		</div>
+
+		<div>
+			<Label for="stock">Stock</Label>
+			<Input name="stock" type="number" bind:value={stock} min="0" />
+		</div>
+
+		<div>
+			<Label for="picture">Imagen</Label>
+			<Input
+				name="picture"
+				type="file"
+				required={!editProduct}
+				onchange={(e) => {
+					const files = (e.target as HTMLInputElement).files;
+					if (files?.length) picture = files[0];
+				}}
+			/>
+		</div>
+	</div>
+
+	<div class="mt-4 flex justify-between">
+		<Button type="submit">{editProduct ? 'Actualizar' : 'Crear'}</Button>
+		<Button href="/gestionar-productos" variant="outline">Regresar</Button>
+	</div>
+</form>
+
+{#if infoDialog}
+	<SuccessOrFailDialog {infoDialog} contentDialog="" />
+{/if}

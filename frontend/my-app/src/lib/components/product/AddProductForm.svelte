@@ -95,7 +95,7 @@
 		const productos = productosRaw ? JSON.parse(productosRaw) : [];
 
 		productos.push(producto);
-
+		eliminarProductoExacto(product);
 		localStorage.setItem('productos', JSON.stringify(productos));
 	}
 
@@ -110,6 +110,20 @@
 			agregarProductoAlStorage(values);
 			form.reset();
 		}
+	}
+
+	function eliminarProductoExacto(productoAEliminar: productForm): void {
+		const raw = localStorage.getItem('productos');
+		if (!raw) return;
+
+		const productos: productForm[] = JSON.parse(raw);
+
+		// Usamos JSON.stringify para comparar todos los campos
+		const filtrados = productos.filter(
+			(p) => JSON.stringify(p) !== JSON.stringify(productoAEliminar)
+		);
+
+		localStorage.setItem('productos', JSON.stringify(filtrados));
 	}
 
 	/*Estado para reciclar lógica*/
