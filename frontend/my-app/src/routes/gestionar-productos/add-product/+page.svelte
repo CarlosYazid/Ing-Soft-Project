@@ -3,5 +3,16 @@
 </script>
 
 <div class="flex justify-center">
-	<AddProductForm />
+	<AddProductForm
+		form={{
+			id: 0,
+			productName: '',
+			description: '',
+			cost: 0,
+			price: 0,
+			category: '',
+			stock: 0,
+			picture: null
+		}}
+	/>
 </div>

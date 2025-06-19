@@ -111,13 +111,30 @@
 			form.reset();
 		}
 	}
+
+	/*Estado para reciclar lógica*/
+	let product = $props();
+	let id = $state(product.id);
+	let productName = $state(product.productName);
+	let description = $state(product.description);
+	let cost = $state(product.cost);
+	let price = $state(product.price);
+	let category = $state(product.category);
+	let stock = $state(product.stock);
+	let picture = $state<File | null>(product.picture);
 </script>
 
 <form id="form" onsubmit={handleSubmit} class="w-sm md:w-md" enctype="multipart/form-data">
 	<div class="flex flex-col gap-6">
 		<div class="grid gap-2">
 			<Label for="ProductName">Nombre de Producto</Label>
-			<Input name="ProductName" type="text" placeholder="Compás" required />
+			<Input
+				name="ProductName"
+				type="text"
+				placeholder="Compás"
+				bind:value={productName}
+				required
+			/>
 		</div>
 
 		<div class="grid gap-2">
@@ -126,6 +143,7 @@
 				name="description"
 				type="text"
 				placeholder="Compás metálico con rueda de precisión de marca Mapped"
+				bind:value={description}
 				required
 			/>
 		</div>
@@ -134,7 +152,7 @@
 			<Label for="cost">Costo de Compra</Label>
 			<div class="flex items-center gap-1">
 				<span class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">$</span>
-				<Input type="text" name="cost" id="cost" placeholder="0.00" required />
+				<Input type="text" name="cost" id="cost" placeholder="0.00" bind:value={cost} required />
 				<Input value="COP" class="w-16" disabled />
 			</div>
 		</div>
@@ -143,7 +161,7 @@
 			<Label for="price">Precio de Venta</Label>
 			<div class="flex items-center gap-1">
 				<span class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">$</span>
-				<Input type="text" name="price" id="price" placeholder="0.00" required />
+				<Input type="text" name="price" id="price" placeholder="0.00" bind:value={price} required />
 				<Input value="COP" class="w-16" disabled />
 			</div>
 		</div>
@@ -161,7 +179,7 @@
 								role="combobox"
 								aria-expanded={open}
 							>
-								{selectedValue || 'Selecciona una Categoría...'}
+								{selectedValue || category || 'Selecciona una Categoría...'}
 								<ChevronsUpDownIcon class="opacity-50" />
 							</Button>
 						{/snippet}
@@ -195,12 +213,20 @@
 
 		<div class="grid gap-2">
 			<Label for="stock">Cantidad a ingresar</Label>
-			<Input name="stock" type="text" placeholder="20" required />
+			<Input name="stock" type="text" placeholder="20" bind:value={stock} required />
 		</div>
 
 		<div class="grid gap-2">
 			<Label for="picture">Imagen de Producto</Label>
-			<Input name="picture" type="file" required />
+			<Input
+				name="picture"
+				type="file"
+				required
+				onchange={(e) => {
+					const input = e.target as HTMLInputElement;
+					picture = input.files?.[0] || null;
+				}}
+			/>
 		</div>
 	</div>
 
