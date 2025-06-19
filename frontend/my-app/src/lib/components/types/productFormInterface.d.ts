@@ -1,4 +1,5 @@
 export interface productForm {
+	id: number;
 	productName: string;
 	description: string;
 	cost: number;

@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
 	import DataTable from '$lib/components/DataTable.svelte';
-	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
+	import type { productForm } from '$lib';
+
+	import { onMount } from 'svelte';
+	let productMocks: Object[] = $state([]);
+	let products = $derived(productMocks);
 
 	const columns = [
 		{ label: 'ID', field: 'id' },
@@ -10,23 +14,34 @@
 		{ label: 'Precio', field: 'price' },
 		{ label: 'Stock', field: 'stock' }
 	];
+	onMount(() => {
+		let data = JSON.parse(localStorage.getItem('productos') || '[]');
+		productMocks = data;
 
-	let products = [
-		{ id: 1, name: 'Producto A', category: 'Categoria 1', price: '$10.000', stock: 100 },
-		{ id: 2, name: 'Producto B', category: 'Categoria 2', price: '$20.000', stock: 50 },
-		{ id: 3, name: 'Producto C', category: 'Categoria 1', price: '$15.000', stock: 75 },
-		{ id: 4, name: 'Producto D', category: 'Categoria 3', price: '$30.000', stock: 20 },
-		{ id: 5, name: 'Producto E', category: 'Categoria 2', price: '$25.000', stock: 10 },
-		{ id: 6, name: 'Producto F', category: 'Categoria 1', price: '$18.000', stock: 60 },
-		{ id: 7, name: 'Producto G', category: 'Categoria 3', price: '$22.000', stock: 30 }
-	];
+		products = productMocks.map((p: any) => ({
+			id: p.id,
+			category: p.category,
+			name: p.productName,
+			price: p.price,
+			stock: p.stock
+		}));
+	});
 </script>
 
 <div class="mt-4 flex justify-end">
 	<Button href="/gestionar-productos/add-product" size="lg" class="mr-4 mb-4"
 		>Añadir nuevo producto</Button
 	>
+	<Button
+		onclick={() => {
+			productMocks = JSON.parse(localStorage.getItem('productos') || '[]');
+		}}
+		size="lg"
+		class="mr-4 mb-4">Actualizar Estado</Button
+	>
 </div>
 <div>
-	<DataTable {columns} data={products} />
+	{#key productMocks}
+		<DataTable {columns} data={products} />
+	{/key}
 </div>
