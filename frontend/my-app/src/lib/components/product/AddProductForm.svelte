@@ -10,11 +10,13 @@
 
 	// Tipado
 	import type { productForm } from '../types';
+	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
 
 	// Estados
 	let open = $state(false);
 	let value = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
+	let infoDialog = $state();
 
 	const categories = [
 		{ value: 'papeleria', label: 'Papelería' },
@@ -78,14 +80,8 @@
 		const values = getProductFormValues(form);
 		const validation = validateProductForm(values);
 
-		console.log(values);
-
-		if (!validation.valid) {
-			console.log('Errores:', validation.errors);
-			return;
-		}
-
-		console.log('Datos válidos:', values);
+		infoDialog = validation.valid;
+		if (validation.valid) form.reset();
 	}
 </script>
 
@@ -184,3 +180,9 @@
 		<Button type="submit">Submit</Button>
 	</div>
 </form>
+
+{#key infoDialog}
+	{#if infoDialog}
+		<SuccessOrFailDialog {infoDialog} contentDialog="" />
+	{/if}
+{/key}
