@@ -65,17 +65,17 @@ class Employee(UserBase):
                                             json_schema_extra={
                                                 "example": {
                                                     "id": 1,
-                                                    "email": "employee@example.com",
-                                                    "name": "Employee Doe",
+                                                    "email": "doro@example.com",
+                                                    "name": "Dorotea Hernandez",
                                                     "phone": "555-555-5555",
                                                     "created_at": "2023-01-01T00:00:00Z",
                                                     "updated_at": "2023-01-02T00:00:00Z",
                                                     "state": True,
                                                     "documentID": 123456789,
                                                     "birth_date": "1990-01-01T00:00:00Z",
-                                                    "first_name": "Employee",
-                                                    "last_name": "Doe",
-                                                    "role": "employee",
+                                                    "first_name": "Dorotea",
+                                                    "last_name": "Hernandez",
+                                                    "role": "Empleado",
                                                     
                                                 }
                                             },
