@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, UploadFile
 
 from db import get_db_client
 from models import Product, ProductCategory, ProductTypes
@@ -61,10 +61,23 @@ class ProductCrud:
         return [Product.model_validate(product) for product in response.data]
     
     @classmethod
-    async def create_product(cls, product: Product) -> Product:
+    async def create_product(cls, product: Product, image: UploadFile) -> Product:
         """Create a new product."""
 
         client = await get_db_client()
+        
+        if image:
+            
+            filename = product.name.replace(" ", "_").lower() + "_" + image.filename
+            file_content = await image.read()
+            
+            response = await client.storage.from_(SETTINGS.bucket_name).upload(
+                filename, file_content
+            )
+            if response.status_code != 200:
+                raise HTTPException(detail="Failed to upload image", status_code=500)
+        
+            product.image_url = f"{SETTINGS.db_url}/storage/v1/object/public/{SETTINGS.bucket_name}/{filename}"
 
         response = await client.table(SETTINGS.product_table).insert(product.model_dump()).execute()
 
@@ -74,10 +87,22 @@ class ProductCrud:
         return Product.model_validate(response.data[0])
     
     @classmethod
-    async def update_product(cls, product_id: int, fields: dict) -> Product:
+    async def update_product(cls, product_id: int, fields: dict, image: UploadFile = None) -> Product:
         """Update an existing product."""
 
         client = await get_db_client()
+
+        if image:
+            filename = fields.get("name", "").replace(" ", "_").lower() + "_" + image.filename
+            file_content = await image.read()
+
+            response = await client.storage.from_(SETTINGS.bucket_name).upload(
+                filename, file_content
+            )
+            if response.status_code != 200:
+                raise HTTPException(detail="Failed to upload image", status_code=500)
+
+            fields["image_url"] = f"{SETTINGS.db_url}/storage/v1/object/public/{SETTINGS.bucket_name}/{filename}"
 
         response = await client.table(SETTINGS.product_table).update(fields).eq("id", product_id).execute()
 

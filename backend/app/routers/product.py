@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, UploadFile, File
 
 from models import Product
 from crud import ProductCrud
@@ -46,25 +46,26 @@ async def get_product_base_by_id_2(request: Request, id: int):
     return await ProductService.get_product_base_by_id(id)
 
 @router.post("/")
-async def create_product(request: Request, product: Product):
+async def create_product(request: Request, product: Product,
+                         image : UploadFile = File(None)):
     """
     Create a new product.
     """
-    return await ProductCrud.create_product(product)
+    return await ProductCrud.create_product(product, image)
 
 @router.post("/{_id}")
-async def update_product_by_id(request: Request, _id: int, fields: dict):
+async def update_product_by_id(request: Request, _id: int, fields: dict, image: UploadFile = File(None)):
     """
     Update an existing product by ID.
     """
-    return await ProductCrud.update_product(_id, fields)
+    return await ProductCrud.update_product(_id, fields, image)
 
 @router.post("/")
-async def update_product_by_id_2(request: Request, id: int, fields: dict):
+async def update_product_by_id_2(request: Request, id: int, fields: dict, image: UploadFile = File(None)):
     """
     Update an existing product by ID.
     """
-    return await ProductCrud.update_product(id, fields)
+    return await ProductCrud.update_product(id, fields, image)
 
 @router.delete("/{_id}")
 async def delete_product_by_id(request: Request, _id: int):
