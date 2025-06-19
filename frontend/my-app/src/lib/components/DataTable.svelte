@@ -1,8 +1,8 @@
 <script lang="ts">
 	import ConfirmDialog from './common/ConfirmDialog.svelte';
 	import EditDialog from './common/EditDialog.svelte';
-	import * as Table from '$lib/components/ui/table/index.js';
 	import type { productForm } from './types';
+	import * as Table from '$lib/components/ui/table/index.js';
 
 	let { columns, data } = $props();
 
@@ -34,39 +34,7 @@
 		});
 	}
 
-	let fila = $state({});
-
-	let editar = $state(false);
-	function onEdit(row: any) {
-		saveEditProduct(row);
-		editar = true;
-	}
-
-	let eliminar = $state(false);
-	function onDelete(row: any) {
-		eliminar = true;
-		fila = row;
-	}
-
-	function saveEditProduct(product: any): void {
-		localStorage.setItem('editProduct', JSON.stringify(product));
-		const raw = localStorage.getItem('products');
-		if (!raw) return;
-		console.log(raw);
-		const products: productForm[] = JSON.parse(raw);
-		const filtered = products.filter((p) => Number(p.id) !== Number(product.id));
-		console.log(filtered);
-
-		localStorage.setItem('products', JSON.stringify(filtered));
-	}
-
-	function confirmedDelete(row: any) {
-		const productos = JSON.parse(localStorage.getItem('productos')!);
-
-		const productosFiltrados = productos.filter((p: any) => p.id !== row.id);
-
-		localStorage.setItem('productos', JSON.stringify(productosFiltrados));
-	}
+	
 </script>
 
 {#key sortedData}
@@ -140,14 +108,4 @@
 	</div>
 {/key}
 
-{#key eliminar}
-	{#if eliminar}
-		<ConfirmDialog parametro={fila} callback={confirmedDelete} />
-	{/if}
-{/key}
 
-{#key editar}
-	{#if editar}
-		<EditDialog />
-	{/if}
-{/key}

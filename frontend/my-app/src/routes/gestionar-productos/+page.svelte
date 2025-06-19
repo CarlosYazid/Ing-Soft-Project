@@ -1,4 +1,7 @@
 <script lang="ts">
+	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
+	import EditDialog from '$lib/components/common/EditDialog.svelte';
+	import type { productForm } from '$lib/components/types';
 	import { onMount } from 'svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
@@ -38,14 +41,54 @@
 		}));
 		recargar();
 	});
+
+	let fila = $state({});
+
+	let editar = $state(false);
+	function onEdit(row: any) {
+		saveEditProduct(row);
+		editar = true;
+	}
+
+	let eliminar = $state(false);
+	function onDelete(row: any) {
+		eliminar = true;
+		fila = row;
+	}
+
+	//Cuando tengamos la base de datos esto chao
+	function saveEditProduct(product: any): void {
+		localStorage.setItem('editProduct', JSON.stringify(product));
+		const raw = localStorage.getItem('products');
+		if (!raw) return;
+		console.log(raw);
+		const products: productForm[] = JSON.parse(raw);
+		const filtered = products.filter((p) => Number(p.id) !== Number(product.id));
+		console.log(filtered);
+
+		localStorage.setItem('products', JSON.stringify(filtered));
+	}
+
+	function confirmedDelete(row: any) {
+		const productos = JSON.parse(localStorage.getItem('productos')!);
+
+		const productosFiltrados = productos.filter((p: any) => p.id !== row.id);
+
+		localStorage.setItem('productos', JSON.stringify(productosFiltrados));
+	}
 </script>
 
 <div class="mt-4 flex justify-end">
 	<Button
-		href="/gestionar-productos"
+		href="/gestionar-productos/add-product"
 		size="lg"
-		class="mb-4 mr-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 		>Añadir nuevo producto</Button
+	>
+	<Button
+		onclick={recargar}
+		size="lg"
+		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Actualizar Estado</Button
 	>
 </div>
 
@@ -73,9 +116,16 @@
 						<Table.Cell class="p-4">{product.price}</Table.Cell>
 						<Table.Cell class="p-4">{product.stock}</Table.Cell>
 						<Table.Cell class="flex max-w-max justify-center gap-2"
-							><Button class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
-								><SquarePen /></Button
-							><Button class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
+							><Button
+								onclick={() => {
+									onEdit(product);
+								}}
+								class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"><SquarePen /></Button
+							><Button
+								onclick={() => {
+									onDelete(product);
+								}}
+								class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
 							></Table.Cell
 						>
 					</Table.Row>
@@ -83,8 +133,16 @@
 			</Table.Body>
 		</Table.Root>
 	{/key}
-	<Button href="/gestionar-productos/add-product" size="lg" class="mb-4 mr-4">
-		Añadir nuevo producto
-	</Button>
-	<Button onclick={recargar} size="lg" class="mb-4 mr-4">Actualizar Estado</Button>
 </div>
+
+{#key eliminar}
+	{#if eliminar}
+		<ConfirmDialog parametro={fila} callback={confirmedDelete} />
+	{/if}
+{/key}
+
+{#key editar}
+	{#if editar}
+		<EditDialog />
+	{/if}
+{/key}
