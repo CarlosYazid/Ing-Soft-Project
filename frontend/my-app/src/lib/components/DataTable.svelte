@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Button from './ui/button/button.svelte';
+
 	export let columns: { label: string; field: string }[] = [];
 	export let data: any[] = [];
 
@@ -49,7 +51,7 @@
 					{#each columns as column}
 						<th
 							class="cursor-pointer px-4 py-3 text-left font-semibold text-gray-700 hover:underline"
-							on:click={() => toggleSort(column.field)}
+							onclick={() => toggleSort(column.field)}
 						>
 							{column.label}
 							{#if sortField === column.field}
@@ -73,7 +75,7 @@
 							<div class="relative">
 								<button
 									class="rounded px-2 py-1 text-gray-600 hover:bg-gray-100"
-									on:click={() => (row.showMenu = !row.showMenu)}
+									onclick={() => (row.showMenu = !row.showMenu)}
 								>
 									⋮
 								</button>
@@ -81,17 +83,17 @@
 								{#if row.showMenu}
 									<div
 										class="absolute right-0 z-20 mt-1 w-32 rounded border bg-white shadow-md"
-										on:mouseleave={() => (row.showMenu = false)}
+										onmouseleave={() => (row.showMenu = false)}
 									>
 										<button
 											class="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
-											on:click={() => onEdit(row)}
+											onclick={() => onEdit(row)}
 										>
 											Editar
 										</button>
 										<button
 											class="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-100"
-											on:click={() => onDelete(row)}
+											onclick={() => onDelete(row)}
 										>
 											Eliminar
 										</button>

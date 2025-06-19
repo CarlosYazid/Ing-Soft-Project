@@ -2,14 +2,8 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import DataTable from '$lib/components/DataTable.svelte';
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
-
-	const columns = [
-		{ label: 'ID', field: 'id' },
-		{ label: 'Nombre', field: 'name' },
-		{ label: 'Categoria', field: 'category' },
-		{ label: 'Precio', field: 'price' },
-		{ label: 'Stock', field: 'stock' }
-	];
+	import * as Table from '$lib/components/ui/table/index.js';
+	import { Trash2, SquarePen } from '@lucide/svelte';
 
 	let products = [
 		{ id: 1, name: 'Producto A', category: 'Categoria 1', price: '$10.000', stock: 100 },
@@ -23,8 +17,43 @@
 </script>
 
 <div class="mt-4 flex justify-end">
-	<Button href="/gestionar-productos" size="lg" class="mr-4 mb-4">Añadir nuevo producto</Button>
+	<Button
+		href="/gestionar-productos"
+		size="lg"
+		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+		>Añadir nuevo producto</Button
+	>
 </div>
-<div>
-	<DataTable {columns} data={products} />
+
+<div class="px-8">
+	<h3 class="font-semiboldc mt-8 bg-zinc-500/15 text-lg">Lista de Productos Actuales</h3>
+	<Table.Root>
+		<Table.Caption>Productos Actuales en la Base de Datos</Table.Caption>
+		<Table.Header class="bg-zinc-500/10">
+			<Table.Row>
+				<Table.Head class="p-4">ID</Table.Head>
+				<Table.Head class="p-4">Nombre</Table.Head>
+				<Table.Head class="p-4">Categoría</Table.Head>
+				<Table.Head class="p-4">Precio</Table.Head>
+				<Table.Head class="p-4">Stock</Table.Head>
+				<Table.Head class="p-4"></Table.Head>
+			</Table.Row>
+		</Table.Header>
+		<Table.Body>
+			{#each products as product (product.id)}
+				<Table.Row>
+					<Table.Cell class="p-4">{product.id}</Table.Cell>
+					<Table.Cell class="p-4">{product.name}</Table.Cell>
+					<Table.Cell class="p-4">{product.category}</Table.Cell>
+					<Table.Cell class="p-4">{product.price}</Table.Cell>
+					<Table.Cell class="p-4">{product.stock}</Table.Cell>
+					<Table.Cell class="flex max-w-max justify-center gap-2"
+						><Button class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"><SquarePen /></Button
+						><Button class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
+						></Table.Cell
+					>
+				</Table.Row>
+			{/each}
+		</Table.Body>
+	</Table.Root>
 </div>
