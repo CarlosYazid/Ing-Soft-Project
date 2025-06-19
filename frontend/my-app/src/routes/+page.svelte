@@ -2,9 +2,12 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 </script>
 
-<div>
-	<h1 class="font-playfair text-center text-3xl">Telecomunicaciones San Antonio</h1>
+<div class="mt-50">
+	<h1 class="text-center text-3xl font-medium">Telecomunicaciones San Antonio</h1>
 	<div class="mt-4 flex justify-center">
-		<Button href="/mi-negocio" size="lg">Mi Negocio</Button>
+		<Button href="#" size="lg">Registrar Nueva Venta</Button>
+	</div>
+	<div class="mt-4 flex justify-center">
+		<Button href="/mi-negocio" size="lg">Gestionar Mi Negocio</Button>
 	</div>
 </div>
