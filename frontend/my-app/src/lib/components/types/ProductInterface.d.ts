@@ -1,7 +1,7 @@
-import { BaseProductInterface } from './BaseProductInterface';
-import { ConsumibleProduct } from './ConsumibleProductInterface';
+import { BaseProductInterface } from './baseProductInterface';
+import { ConsumibleProduct } from './consumibleProductInterface';
 
 export interface ProductInterface extends BaseProductInterface, ConsumibleProduct {
 	cost: int;
-	img: HTMLImageElement;
+	img: file;
 }
