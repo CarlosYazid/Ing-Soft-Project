@@ -76,7 +76,7 @@ class Order(OrderBase):
                                                   "id": 1,
                                                   "user_id": 1,
                                                   "total_price": 59.99,
-                                                  "status": "Pending",
+                                                  "status": "Pendiente",
                                                   "employee_id": 1,
                                                   "created_at": "2023-01-01T00:00:00Z",
                                                   "updated_at": "2023-01-01T00:00:00Z"

@@ -13,16 +13,20 @@
 
 <AlertDialog.Root bind:open>
 	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete your account and remove your data
-				from our servers.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<AlertDialog.Action onclick={handleContinue}>Continue</AlertDialog.Action>
-		</AlertDialog.Footer>
+		<div class="flex h-full flex-col items-center justify-center">
+			<AlertDialog.Header>
+				<AlertDialog.Title>¿Está seguro que desea eliminar el producto?</AlertDialog.Title>
+				<AlertDialog.Description>
+					Esta acción no se puede deshacer. El producto será eliminado permanentemente.
+				</AlertDialog.Description>
+			</AlertDialog.Header>
+			<AlertDialog.Footer>
+				<AlertDialog.Cancel>Cancelar</AlertDialog.Cancel>
+				<AlertDialog.Action
+					onclick={handleContinue}
+					class="bg-red-700 hover:bg-red-300 hover:text-red-700">Eliminar</AlertDialog.Action
+				>
+			</AlertDialog.Footer>
+		</div>
 	</AlertDialog.Content>
 </AlertDialog.Root>

@@ -215,7 +215,9 @@
 	</div>
 
 	<div class="mt-4 flex justify-between">
-		<Button type="submit">{editProduct ? 'Actualizar' : 'Crear'}</Button>
+		<Button type="submit" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700 "
+			>{editProduct ? 'Actualizar' : 'Crear'}</Button
+		>
 		<Button href="/gestionar-productos" variant="outline">Regresar</Button>
 	</div>
 </form>

@@ -5,16 +5,18 @@
 
 <AlertDialog.Root open={true}>
 	<AlertDialog.Content>
-		<AlertDialog.Header>
-			<AlertDialog.Title>Are you absolutely sure?</AlertDialog.Title>
-			<AlertDialog.Description>
-				This action cannot be undone. This will permanently delete your account and remove your data
-				from our servers.
-			</AlertDialog.Description>
-		</AlertDialog.Header>
-		<AlertDialog.Footer>
-			<AlertDialog.Cancel>Cancel</AlertDialog.Cancel>
-			<Button href="/gestionar-productos/edit-product">Confirm</Button>
-		</AlertDialog.Footer>
+		<div class="flex h-full flex-col items-center justify-center">
+			<AlertDialog.Header>
+				<AlertDialog.Title>¿Está seguro que desea editar el producto?</AlertDialog.Title>
+				<AlertDialog.Description></AlertDialog.Description>
+			</AlertDialog.Header>
+			<AlertDialog.Footer>
+				<AlertDialog.Cancel>Cancelar</AlertDialog.Cancel>
+				<Button
+					href="/gestionar-productos/edit-product"
+					class=" bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Confirmar</Button
+				>
+			</AlertDialog.Footer>
+		</div>
 	</AlertDialog.Content>
 </AlertDialog.Root>

@@ -9,6 +9,7 @@ class ProductCategory(str, Enum):
     """
 
     CONSUMABLES = "Consumibles"
+    
     STATIONERY = "Papelería"
 
 class ProductTypes(str, Enum):
@@ -81,16 +82,16 @@ class Product(ProductBase):
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
-                                                  "name": "Example Stationery",
-                                                  "short_description": "This is an example stationery product.",
+                                                  "name": "Ejemplo de producto de papelería",
+                                                  "short_description": "Este es un producto de papelería de ejemplo.",
                                                   "price": 9.99,
-                                                  "category": "stationery",
-                                                  "description": "Detailed description of the example stationery product.",
-                                                  "cost": 5.00,
+                                                  "category": "Papelería",
                                                   "stock": 50,
+                                                  "description": "Descripción detallada del producto de papelería de ejemplo.",
+                                                  "cost": 5.00,
                                                   "created_at": "2023-01-01T00:00:00Z",
                                                   "updated_at": "2023-01-01T00:00:00Z",
-                                                  "type": "general_stationery"
+                                                  "type": "Papelería_general"
                                               }
                                           },
                                           json_encoders={
