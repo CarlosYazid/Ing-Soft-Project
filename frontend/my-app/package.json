@@ -50,5 +50,8 @@
 		"typescript-eslint": "^8.20.0",
 		"vite": "^6.2.6",
 		"vitest": "^3.2.3"
+	},
+	"dependencies": {
+		"mode-watcher": "^1.0.8"
 	}
 }
