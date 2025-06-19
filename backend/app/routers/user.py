@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends
 
-from models import Employee, Admin, Client
+from models import Employee, Client
 from crud import UserCrud
 from services import AuthService
 
@@ -27,15 +27,6 @@ async def create_employee(request: Request,
     # Here you would typically call a service to handle the creation logic
     return await UserCrud.create_employee(employee)
 
-@router.post("/admin")
-async def create_admin(request: Request,
-                       admin: Admin,
-                       current_user: dict = Depends(AuthService.current_user)):
-    """
-    Create a new admin.
-    """
-    # Here you would typically call a service to handle the creation logic
-    return await UserCrud.create_admin(admin)
 
 @router.post("/client")
 async def create_client(request: Request,
