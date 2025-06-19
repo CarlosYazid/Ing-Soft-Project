@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     # Supabase
     db_url: str = Field(..., alias="database_url")
     db_key: SecretStr = Field(..., alias="database_key")
+    employee_table: str = Field(..., alias="employee_table")
+    admin_table: str = Field(..., alias="admin_table")
+    client_table: str = Field(..., alias="client_table")
 
     # SMTP (Gmail)
     smtp_host: str = "smtp.gmail.com"
@@ -21,7 +24,8 @@ class Settings(BaseSettings):
     smtp_corp_password: SecretStr = Field(..., alias="corp_password")
 
     frontend_url: str = Field(..., alias="frontend_url")
-
+    reset_password_url: str = Field(..., alias="reset_password_url")
+    
     # Otros (opcional: CORS, JWT, etc.)
     allowed_origins: list[str] = []
     allow_credentials: bool = True
