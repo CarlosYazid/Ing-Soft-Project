@@ -3,9 +3,8 @@
 	import EditDialog from './common/EditDialog.svelte';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import type { productForm } from './types';
-	import ProductCard from './product/ProductCard.svelte';
 
-	let { columns, data } = $props();
+	let { columns, data } = $props();	
 
 	let sortField = $state('');
 	let sortAsc = $state(true);
