@@ -46,7 +46,7 @@ class Payment(PaymentBase):
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
-                                                  "user": 1,
+                                                  "user_id": 1,
                                                   "amount": 1000.00,
                                                   "method": "Crédito_en_tiempo",
                                                   "status": "Pendiente",

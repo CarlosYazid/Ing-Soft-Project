@@ -35,7 +35,6 @@ class OrderService:
             "status": order.status,
         }) for order in orders]
         
-        
     @classmethod
     async def get_orders_base_by_status(cls, status: str) -> list[OrderBase]:
         """Retrieve orders by status."""

@@ -42,8 +42,8 @@ class Client(UserBase):
                                                   "phone": "987-654-3210",
                                                   "created_at": "2023-01-01T00:00:00Z",
                                                   "updated_at": "2023-01-02T00:00:00Z",
+                                                  "state": True,
                                                   "documentID": 987654321,
-                                                  "state": True
                                               }
                                           },
                                           json_encoders={
@@ -66,16 +66,17 @@ class Employee(UserBase):
                                                 "example": {
                                                     "id": 1,
                                                     "email": "employee@example.com",
-                                                    "username": "employeedoe",
                                                     "name": "Employee Doe",
                                                     "phone": "555-555-5555",
                                                     "created_at": "2023-01-01T00:00:00Z",
-                                                    "birth_date": "1990-01-01T00:00:00Z",
+                                                    "updated_at": "2023-01-02T00:00:00Z",
+                                                    "state": True,
                                                     "documentID": 123456789,
+                                                    "birth_date": "1990-01-01T00:00:00Z",
                                                     "first_name": "Employee",
                                                     "last_name": "Doe",
                                                     "role": "employee",
-                                                    "state": True
+                                                    
                                                 }
                                             },
                                             json_encoders={
