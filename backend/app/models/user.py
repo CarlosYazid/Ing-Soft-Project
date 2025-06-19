@@ -5,8 +5,8 @@ from abc import ABC
 from enum import Enum
 
 class EmployeeRole(str, Enum):
-    ADMIN = "admin"
-    EMPLOYEE = "employee"
+    ADMIN = "Admin"
+    EMPLOYEE = "Empleado"
 
 class AbstractUser(ABC, BaseModel):
     id: int = Field(..., description="User's unique identifier")

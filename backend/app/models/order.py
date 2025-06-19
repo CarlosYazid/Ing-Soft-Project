@@ -7,9 +7,10 @@ class OrderStatus(str, Enum):
     """
     Enum for order statuses.
     """
-    PENDING = "Pending"
-    COMPLETED = "Completed"
-    CANCELLED = "Cancelled"
+    PENDING = "Pendiente"
+    COMPLETED = "Completada"
+    CANCELLED = "Cancelada"
+    REFUNDED = "Reembolsada"
 
 class OrderProduct(BaseModel):
     """
