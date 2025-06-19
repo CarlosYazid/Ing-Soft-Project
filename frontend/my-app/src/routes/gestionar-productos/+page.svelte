@@ -75,6 +75,8 @@
 		const productosFiltrados = productos.filter((p: any) => p.id !== row.id);
 
 		localStorage.setItem('productos', JSON.stringify(productosFiltrados));
+
+		recargar();
 	}
 </script>
 
