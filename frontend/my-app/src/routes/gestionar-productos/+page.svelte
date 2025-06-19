@@ -23,7 +23,9 @@
 </script>
 
 <div class="mt-4 flex justify-end">
-	<Button href="/gestionar-productos" size="lg" class="mr-4 mb-4">Añadir nuevo producto</Button>
+	<Button href="/gestionar-productos/add-product" size="lg" class="mr-4 mb-4"
+		>Añadir nuevo producto</Button
+	>
 </div>
 <div>
 	<DataTable {columns} data={products} />

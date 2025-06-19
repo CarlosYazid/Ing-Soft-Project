@@ -73,7 +73,7 @@
 			picture
 		};
 	}
-
+	$inspect(infoDialog);
 	function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		const form = event.currentTarget as HTMLFormElement;
@@ -176,8 +176,9 @@
 		</div>
 	</div>
 
-	<div class="intems-center mt-4 flex">
+	<div class="mt-4 flex items-center justify-between">
 		<Button type="submit">Submit</Button>
+		<Button class="bg-red-700 hover:bg-red-500" href="/gestionar-productos">Regresar</Button>
 	</div>
 </form>
 
