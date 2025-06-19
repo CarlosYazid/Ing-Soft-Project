@@ -3,8 +3,6 @@ from typing import Optional
 from datetime import datetime
 from enum import Enum
 
-
-
 class ProductCategory(str, Enum):
     """
     Enum for product categories.
@@ -13,9 +11,9 @@ class ProductCategory(str, Enum):
     CONSUMABLES = "Consumibles"
     STATIONERY = "Papelería"
 
-class StationeryType(str, Enum):
+class ProductTypes(str, Enum):
     """
-    Enum for stationery types.
+    Enum for product types.
     """
 
     GENERAL_STATIONERY = "Papelería_general"
@@ -31,11 +29,6 @@ class StationeryType(str, Enum):
     OFFICE_SUPPLIES = "Suministros_de_oficina"
 
     TECHNOLOGY_AND_ACCESSORIES = "Tecnología_y_accesorios"
-
-class ConsumableType(str, Enum):
-    """
-    Enum for consumable product types.
-    """
 
     CHIPS_AND_SALTY_SNACKS = "Chips_y_snacks_salados"
     
@@ -67,6 +60,7 @@ class ProductBase(BaseModel):
     price: float = Field(..., description="Product's price")
     category: ProductCategory = Field(..., description="Category of the product")
     stock: int = Field(..., description="Available stock of the product")
+    image_url: Optional[str] = Field(None, description="URL of the product image")
     
 
 
@@ -78,14 +72,8 @@ class Product(ProductBase):
     cost : float = Field(..., description="Cost of the product")
     created_at: datetime = Field(..., description="Timestamp when the product was created")
     updated_at: datetime = Field(..., description="Timestamp when the product was last updated")
-    
-
-class Stationery(Product):
-    """
-    Stationery model for the API response.
-    """
-    
-    type: StationeryType = Field(..., description="Type of the stationery product")
+    expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
+    type: Optional[ProductTypes] = Field(None, description="Type of the product")
     
     model_config: ConfigDict = ConfigDict(str_to_lower=True,
                                           str_strip_whitespace=True,
@@ -103,35 +91,6 @@ class Stationery(Product):
                                                   "created_at": "2023-01-01T00:00:00Z",
                                                   "updated_at": "2023-01-01T00:00:00Z",
                                                   "type": "general_stationery"
-                                              }
-                                          },
-                                          json_encoders={
-                                              datetime: lambda v: v.isoformat()
-                                          })
-class Consumable(Product):
-    """
-    Consumable model for the API response.
-    """
-    expiration_date: datetime = Field(..., description="Expiration date of the consumable product")
-    type: ConsumableType = Field(..., description="Type of the consumable product")
-
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "id": 1,
-                                                  "name": "Example Consumable",
-                                                  "short_description": "This is an example consumable product.",
-                                                  "price": 19.99,
-                                                  "category": "consumables",
-                                                  "description": "Detailed description of the example consumable product.",
-                                                  "cost": 10.00,
-                                                  "stock": 100,
-                                                  "created_at": "2023-01-01T00:00:00Z",
-                                                  "updated_at": "2023-01-01T00:00:00Z",
-                                                  "expiration_date": "2024-01-01T00:00:00Z",
-                                                  "type": "chips_and_salty_snacks"
                                               }
                                           },
                                           json_encoders={

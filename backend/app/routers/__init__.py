@@ -1,5 +1,12 @@
-from routers.user import router as userRouter
-from routers.auth import router as authRouter
-from routers.service import router as serviceRouter
-from routers.produtc import router as productRouter
-from routers.order import router as orderRouter
+from routers.user import router as UserRouter
+from routers.auth import router as AuthRouter
+from routers.service import router as ServiceRouter
+from routers.product import router as ProductRouter
+from routers.order import router as OrderRouter
+__all__ = [
+    "UserRouter",
+    "AuthRouter",
+    "ServiceRouter",
+    "ProductRouter",
+    "OrderRouter"
+]

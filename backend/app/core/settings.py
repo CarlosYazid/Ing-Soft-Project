@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     employee_table: str = Field(..., alias="employee_table")
     admin_table: str = Field(..., alias="admin_table")
     client_table: str = Field(..., alias="client_table")
+    bucket_name: str = Field(..., alias="bucket_name")
+    service_table: str = Field(..., alias="service_table")
+    product_table: str = Field(..., alias="product_table")
+    service_inputs_table: str = Field(..., alias="service_inputs_table")
 
     # SMTP (Gmail)
     smtp_host: str = "smtp.gmail.com"
@@ -24,7 +28,13 @@ class Settings(BaseSettings):
     smtp_corp_password: SecretStr = Field(..., alias="corp_password")
 
     frontend_url: str = Field(..., alias="frontend_url")
+    home_url: str = Field(..., alias="home_url")
+
+    # Auth
+    sign_in_redirect_url: str = Field(..., alias="sign_in_redirect_url")
     reset_password_url: str = Field(..., alias="reset_password_url")
+    algorithm: str = Field(..., alias="jwt_algorithm")
+    jwt_secret: SecretStr = Field(..., alias="jwt_secret")
     
     # Otros (opcional: CORS, JWT, etc.)
     allowed_origins: list[str] = []

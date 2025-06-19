@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
 
+
 class ServiceBase(BaseModel):
     """
     Base model for services.
@@ -10,7 +11,6 @@ class ServiceBase(BaseModel):
     name: str = Field(..., description="Name of the service")
     short_description: Optional[str] = Field(None, description="Short description of the service")
     price: float = Field(..., description="Price of the service")
-    service_inputs : dict[int, int] = Field(..., description="Inputs required for the service, mapping product to quantity")
     
 class Service(ServiceBase):
     """
@@ -42,4 +42,23 @@ class Service(ServiceBase):
                                           },
                                           json_encoders={
                                               datetime: lambda v: v.isoformat()
+                                          })
+
+class ServiceInput(BaseModel):
+    """
+    Model for service input.
+    """
+    id: int = Field(..., description="Service input's unique identifier")
+    service_id: int = Field(..., description="ID of the service that requires the product")
+    product_id: int = Field(..., description="ID of the product required for the service")
+    quantity: int = Field(..., description="Quantity of the product required for the service")
+    
+    model_config: ConfigDict = ConfigDict(str_to_lower=True,
+                                          str_strip_whitespace=True,
+                                          json_schema_extra={
+                                              "example": {
+                                                  "id": 1,
+                                                  "product_id": 1,
+                                                  "quantity": 2
+                                              }
                                           })

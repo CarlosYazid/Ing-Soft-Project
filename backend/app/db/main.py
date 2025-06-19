@@ -1,7 +1,7 @@
-from supabase import create_client, Client
-
+# db.py
+from supabase import acreate_client, AsyncClient
 from core import SETTINGS
 
-
-DB_CLIENT : Client = create_client(SETTINGS.db_url, SETTINGS.db_key.get_secret_value())
+async def get_db_client() -> AsyncClient:
+    return await acreate_client(SETTINGS.db_url, SETTINGS.db_key.get_secret_value())
 

@@ -1,1 +1,1 @@
-from db.main import DB_CLIENT as client
+from db.main import get_db_client
