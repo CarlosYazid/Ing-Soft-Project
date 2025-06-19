@@ -78,6 +78,41 @@
 
 		recargar();
 	}
+
+	// Gestionar lógica sort
+	const columns = [
+		{ title: 'ID', key: 'id' },
+		{ title: 'Nombre', key: 'productName' },
+		{ title: 'Categoría', key: 'category' },
+		{ title: 'Precio', key: 'price' },
+		{ title: 'Stock', key: 'stock' }
+	];
+
+	let sortField = $state('');
+	let sortAsc = $state(true);
+
+	function toggleSort(field: string) {
+		if (sortField === field) {
+			sortAsc = !sortAsc;
+		} else {
+			sortField = field;
+			sortAsc = true;
+		}
+
+		products = [...products].sort((a, b) => {
+			if (!sortField) return 0;
+			const valA = a[sortField as keyof Product];
+			const valB = b[sortField as keyof Product];
+
+			if (typeof valA === 'number' && typeof valB === 'number') {
+				return sortAsc ? valA - valB : valB - valA;
+			}
+			if (typeof valA === 'string' && typeof valB === 'string') {
+				return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+			}
+			return 0;
+		});
+	}
 </script>
 
 <div class="mt-4 flex justify-end">
@@ -101,11 +136,14 @@
 			<Table.Caption>Productos Actuales en la Base de Datos</Table.Caption>
 			<Table.Header class="bg-zinc-500/10">
 				<Table.Row>
-					<Table.Head class="p-4">ID</Table.Head>
-					<Table.Head class="p-4">Nombre</Table.Head>
-					<Table.Head class="p-4">Categoría</Table.Head>
-					<Table.Head class="p-4">Precio</Table.Head>
-					<Table.Head class="p-4">Stock</Table.Head>
+					{#each columns as column (column.key)}
+						<Table.Head onclick={() => toggleSort(column.key)} class="p-4">
+							{column.title}
+							{#if sortField === column.key}
+								{sortAsc ? ' ↓' : ' ↑'}
+							{/if}
+						</Table.Head>
+					{/each}
 					<Table.Head class="p-4"></Table.Head>
 				</Table.Row>
 			</Table.Header>
