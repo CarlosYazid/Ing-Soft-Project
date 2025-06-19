@@ -122,11 +122,6 @@
 		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 		>Añadir nuevo producto</Button
 	>
-	<Button
-		onclick={recargar}
-		size="lg"
-		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Actualizar Estado</Button
-	>
 </div>
 
 <div class="px-8">
