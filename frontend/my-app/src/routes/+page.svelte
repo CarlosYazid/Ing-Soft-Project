@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
 </script>
@@ -13,4 +11,3 @@
 		<Button href="/mi-negocio" size="lg">Gestionar Mi Negocio</Button>
 	</div>
 </div>
->>>>>>> 58d286ec4ca08ce14e77af0ef5a0d0426dd813ea
