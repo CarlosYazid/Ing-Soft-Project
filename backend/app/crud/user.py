@@ -15,7 +15,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).select("*").execute()
 
-        if response is None or response.count == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="No employees found", status_code=404)
 
         return [Employee.model_validate(employee) for employee in response.data]
@@ -29,7 +29,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).insert(employee.model_dump()).execute()
 
-        if response.data is not None:
+        if not(bool(response.data)):
             raise HTTPException(detail="Employee creation failed", status_code=400)
         return Employee.model_validate(response.data[0])
 
@@ -41,7 +41,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).update(fields).eq("id", _id).execute()
 
-        if response.data is not None:
+        if not(bool(response.data)):
 
             if not cls.exist_employee_by_id(_id):
                 raise HTTPException(detail="Employee not found", status_code=404)
@@ -58,7 +58,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).update(fields).eq("email", email).execute()
 
-        if response.data is not None:
+        if not(bool(response.data)):
 
             if not cls.exist_employee_by_email(email):
                 raise HTTPException(detail="Employee not found", status_code=404)
@@ -75,7 +75,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).select("*").eq("id", employee_id).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
 
             raise HTTPException(detail="Employee not found", status_code=404)
 
@@ -89,7 +89,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).select("*").eq("email", email).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Employee not found", status_code=404)
 
         return Employee.model_validate(response.data[0])
@@ -102,7 +102,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).select("email").eq("email", email).execute()
 
-        return response.data is not None and response.count > 0
+        return bool(response.data)
 
     @classmethod
     async def exist_employee_by_id(cls, employee_id: int) -> bool:
@@ -112,7 +112,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).select("id").eq("id", employee_id).execute()
 
-        return response.data is not None and response.count > 0
+        return bool(response.data)
 
     @classmethod
     async def delete_employee_by_id(cls, employee_id: int) -> bool:
@@ -122,7 +122,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).delete().eq("id", employee_id).execute()
 
-        if response is None or response.count == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Employee not found", status_code=404)
 
         return True
@@ -134,7 +134,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.employee_table).delete().eq("email", email).execute()
 
-        if response is None or response.count == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Employee not found", status_code=404)
 
         return True
@@ -147,7 +147,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).select("*").execute()
 
-        if response.data is None or response.count == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="No clients found", status_code=404)
 
         return [Client.model_validate(client) for client in response.data]
@@ -160,7 +160,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).insert(client.model_dump()).execute()
 
-        if response.data is not None:
+        if not(bool(response.data)):
             raise HTTPException(detail="Client creation failed", status_code=400)
         return Client.model_validate(response.data[0])
     
@@ -172,7 +172,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).update(fields).eq("id", _id).execute()
 
-        if response.data is not None:
+        if not(bool(response.data)):
 
             if not cls.exist_client_by_id(_id):
                 raise HTTPException(detail="Client not found", status_code=404)
@@ -189,7 +189,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).update(fields).eq("email", email).execute()
 
-        if response.data is not None:
+        if not(bool(response.data)):
 
             if not cls.exist_client_by_email(email):
                 raise HTTPException(detail="Client not found", status_code=404)
@@ -206,7 +206,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).select("email").eq("email", email).execute()
 
-        return response.data is not None and response.count > 0
+        return bool(response.data)
     
     @classmethod
     async def exist_client_by_id(cls, _id: int) -> bool:
@@ -216,7 +216,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).select("id").eq("id", _id).execute()
 
-        return response.data is not None and response.count > 0
+        return bool(response.data)
     
     @classmethod
     async def read_client_by_id(cls, client_id: int) -> Client:
@@ -226,7 +226,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).select("*").eq("id", client_id).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Client not found", status_code=404)
 
         return Client.model_validate(response.data[0])
@@ -239,7 +239,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).select("*").eq("email", email).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Client not found", status_code=404)
 
         return Client.model_validate(response.data[0])
@@ -252,7 +252,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).delete().eq("id", client_id).execute()
 
-        if response is None or response.count == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Client not found", status_code=404)
 
         return True
@@ -265,7 +265,7 @@ class UserCrud:
 
         response = await client.table(SETTINGS.client_table).delete().eq("email", email).execute()
 
-        if response is None or response.count == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Client not found", status_code=404)
 
         return True

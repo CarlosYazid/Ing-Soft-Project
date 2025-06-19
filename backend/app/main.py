@@ -4,8 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from core import SETTINGS
-from routers import UserRouter, AuthRouter
-from services import AuthService
+from routers import UserRouter, AuthRouter, OrderRouter, ProductRouter, ServiceRouter, PaymentRouter
 
 
 app = FastAPI()
@@ -23,6 +22,10 @@ app.add_middleware(
 # Include routers
 app.include_router(UserRouter)
 app.include_router(AuthRouter)
+app.include_router(OrderRouter)
+app.include_router(ProductRouter)
+app.include_router(ServiceRouter)
+app.include_router(PaymentRouter)
 
 # Static files configuration
 app.mount("/static", StaticFiles(directory="../frontend/my-app/static", html=True), name="frontend")

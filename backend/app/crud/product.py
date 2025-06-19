@@ -15,7 +15,7 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).select("*").execute()
 
-        if response.data is None or response.count == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="No products found", status_code=404)
 
         return [Product.model_validate(product) for product in response.data]
@@ -28,7 +28,9 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).select("*").eq("id", product_id).execute()
 
-        if response.data is None or len(response.data) == 0:
+        print(response.data)
+
+        if not(bool(response.data)):
             raise HTTPException(detail="Product not found", status_code=404)
 
         return Product.model_validate(response.data[0])
@@ -41,7 +43,7 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).select("*").eq("category", category).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="No products found in this category", status_code=404)
 
         return [Product.model_validate(product) for product in response.data]
@@ -55,7 +57,7 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).select("*").eq("type", product_type).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="No products found of this type", status_code=404)
 
         return [Product.model_validate(product) for product in response.data]
@@ -68,7 +70,7 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).insert(product.model_dump()).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Failed to create product", status_code=500)
 
         return Product.model_validate(response.data[0])
@@ -81,7 +83,7 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).update(fields).eq("id", product_id).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Failed to update product", status_code=500)
 
         return Product.model_validate(response.data[0])
@@ -94,7 +96,7 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).delete().eq("id", product_id).execute()
 
-        if response.data is None or len(response.data) == 0:
+        if not(bool(response.data)):
             raise HTTPException(detail="Failed to delete product", status_code=500)
         
         return None
@@ -107,4 +109,4 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).select("id").eq("id", product_id).execute()
 
-        return response.data is not None and response.count > 0
+        return not(bool(response.data))
