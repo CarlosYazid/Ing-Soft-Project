@@ -61,12 +61,6 @@ async def update_service_by_id(request: Request, _id: int, fields: dict):
     """
     return await ServiceCrud.update_service(_id, fields)
 
-@router.post("/")
-async def update_service_by_id_2(request: Request, id: int, fields: dict):
-    """
-    Update an existing service by ID.
-    """
-    return await ServiceCrud.update_service(id, fields)
 
 @router.delete("/{_id}")
 async def delete_service_by_id(request: Request, _id: int):

@@ -46,7 +46,7 @@ async def get_payment_base_by_id_2(request: Request, id: int):
     """
     return await PaymentService.get_payment_base_by_id(id)
 
-@router.post("/")
+@router.post("")
 async def create_payment(request: Request, payment: Payment):
     """
     Create a new payment.
@@ -59,13 +59,6 @@ async def update_payment_by_id(request: Request, _id: int, fields: dict):
     Update an existing payment by ID.
     """
     return await PaymentCrud.update_payment(_id, fields)
-
-@router.post("/")
-async def update_payment_by_id_2(request: Request, id: int, fields: dict):
-    """
-    Update an existing payment by ID.
-    """
-    return await PaymentCrud.update_payment(id, fields)
 
 @router.get("/user/{user_id}")
 async def get_payments_by_user(request: Request, user_id: int):

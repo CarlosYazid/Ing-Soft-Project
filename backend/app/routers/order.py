@@ -60,12 +60,6 @@ async def update_order_by_id(request: Request, _id: int, fields: dict):
     """
     return await OrderCrud.update_order(_id, fields)
 
-@router.post("/")
-async def update_order_by_id_2(request: Request, id: int, fields: dict):
-    """
-    Update an existing order by ID.
-    """
-    return await OrderCrud.update_order(id, fields)
 
 @router.delete("/{_id}")
 async def delete_order_by_id(request: Request, _id: int):

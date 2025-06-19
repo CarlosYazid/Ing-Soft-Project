@@ -60,13 +60,6 @@ async def update_product_by_id(request: Request, _id: int, fields: dict, image: 
     """
     return await ProductCrud.update_product(_id, fields, image)
 
-@router.post("/")
-async def update_product_by_id_2(request: Request, id: int, fields: dict, image: UploadFile = File(None)):
-    """
-    Update an existing product by ID.
-    """
-    return await ProductCrud.update_product(id, fields, image)
-
 @router.delete("/{_id}")
 async def delete_product_by_id(request: Request, _id: int):
     """

@@ -50,12 +50,6 @@ async def update_employee_by_email(request: Request, email: str, fields: dict):
     """
     return await UserCrud.update_employee_by_email(email, fields)
 
-@router.post("/employee/")
-async def update_employee_by_email_2(request: Request, email: str, fields: dict):
-    """
-    Update an existing employee by email.
-    """
-    return await UserCrud.update_employee_by_email(email, fields)
 
 @router.get("/employee/{_id}")
 async def get_employee_by_id(request: Request, _id: int):
