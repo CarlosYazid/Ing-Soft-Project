@@ -47,14 +47,14 @@ async def get_product_base_by_id_2(request: Request, id: int):
 
 @router.post("/")
 async def create_product(request: Request, product: Product,
-                         image : UploadFile = File(None)):
+                         image : UploadFile = File(..., media_type="image/*",max_length=1024*1024*5)):
     """
     Create a new product.
     """
     return await ProductCrud.create_product(product, image)
 
 @router.post("/{_id}")
-async def update_product_by_id(request: Request, _id: int, fields: dict, image: UploadFile = File(None)):
+async def update_product_by_id(request: Request, _id: int, fields: dict, image: UploadFile = File(..., media_type="image/*",max_length=1024*1024*5)):
     """
     Update an existing product by ID.
     """
