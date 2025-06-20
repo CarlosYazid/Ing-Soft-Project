@@ -1,6 +1,8 @@
-from fastapi import APIRouter, Request, Depends, UploadFile, File
+from fastapi import APIRouter, Request, Depends, UploadFile, File, Form
+from typing import Optional
+from datetime import datetime
 
-from models import Product
+from models import Product, ProductCategory, ProductTypes
 from crud import ProductCrud
 from services import AuthService, ProductService
 
@@ -46,19 +48,29 @@ async def get_product_base_by_id_2(request: Request, id: int):
     return await ProductService.get_product_base_by_id(id)
 
 @router.post("/")
-async def create_product(request: Request, product: Product,
-                         image : UploadFile = File(..., media_type="image/*",max_length=1024*1024*5)):
-    """
-    Create a new product.
-    """
-    return await ProductCrud.create_product(product, image)
+async def create_product(request: Request, product: Product):
+    
+    return await ProductCrud.create_product(product)
+
 
 @router.post("/{_id}")
-async def update_product_by_id(request: Request, _id: int, fields: dict, image: UploadFile = File(..., media_type="image/*",max_length=1024*1024*5)):
+async def update_product_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing product by ID.
     """
-    return await ProductCrud.update_product(_id, fields, image)
+    return await ProductCrud.update_product(_id, fields)
+
+
+@router.post("/image/{_id}")
+async def update_product_image(request: Request, _id: int, image: UploadFile = File(...)):
+    """ Update the image of a product by ID."""
+    return await ProductCrud.upload_image(_id, image)
+
+@router.post("/image/")
+async def update_product_image_2(request: Request, id: int, image: UploadFile = File(...)):
+    """ Update the image of a product by ID."""
+    return await ProductCrud.upload_image(id, image)
+
 
 @router.delete("/{_id}")
 async def delete_product_by_id(request: Request, _id: int):

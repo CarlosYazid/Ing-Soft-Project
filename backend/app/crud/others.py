@@ -10,7 +10,7 @@ class PaymentCrud:
         """Create a new payment."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.payment_table).insert(payment.model_dump()).execute()
+        response = await client.table(SETTINGS.payment_table).insert(payment.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to create payment", status_code=500)

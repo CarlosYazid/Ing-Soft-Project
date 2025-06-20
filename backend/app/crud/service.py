@@ -38,7 +38,7 @@ class ServiceCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).insert(service_data.model_dump()).execute()
+        response = await client.table(SETTINGS.service_table).insert(service_data.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to create service", status_code=500)

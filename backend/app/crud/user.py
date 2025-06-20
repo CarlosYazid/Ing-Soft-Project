@@ -27,7 +27,7 @@ class UserCrud:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).insert(employee.model_dump()).execute()
+        response = await client.table(SETTINGS.employee_table).insert(employee.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Employee creation failed", status_code=400)
@@ -158,7 +158,7 @@ class UserCrud:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).insert(client.model_dump()).execute()
+        response = await client.table(SETTINGS.client_table).insert(client.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Client creation failed", status_code=400)

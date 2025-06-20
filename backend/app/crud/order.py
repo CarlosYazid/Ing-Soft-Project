@@ -23,7 +23,7 @@ class OrderCrud:
         """Create a new order."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.order_table).insert(order.model_dump()).execute()
+        response = await client.table(SETTINGS.order_table).insert(order.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to create order", status_code=500)
@@ -81,7 +81,7 @@ class OrderCrud:
         """Add a service to an order."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.order_service_table).insert(order_service.model_dump()).execute()
+        response = await client.table(SETTINGS.order_service_table).insert(order_service.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to add service to order", status_code=500)
@@ -93,7 +93,7 @@ class OrderCrud:
         """Add a product to an order."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.order_product_table).insert(order_product.model_dump()).execute()
+        response = await client.table(SETTINGS.order_product_table).insert(order_product.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to add product to order", status_code=500)

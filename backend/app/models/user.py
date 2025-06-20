@@ -22,7 +22,7 @@ class UserBase(AbstractUser):
     created_at: datetime = Field(..., description="Timestamp when the user was created")
     updated_at: Optional[datetime] = Field(None, description="Timestamp when the user was last updated")
     state : bool = Field(default=True, description="Is the user active?")
-    documentID: int = Field(..., description="User's document ID", alias="documentid")
+    documentid: int = Field(..., description="User's document ID")
 
 class Client(UserBase):
     
@@ -43,7 +43,7 @@ class Client(UserBase):
                                                   "created_at": "2023-01-01T00:00:00Z",
                                                   "updated_at": "2023-01-02T00:00:00Z",
                                                   "state": True,
-                                                  "documentID": 987654321,
+                                                  "documentid": 987654321,
                                               }
                                           },
                                           json_encoders={
@@ -71,7 +71,7 @@ class Employee(UserBase):
                                                     "created_at": "2023-01-01T00:00:00Z",
                                                     "updated_at": "2023-01-02T00:00:00Z",
                                                     "state": True,
-                                                    "documentID": 123456789,
+                                                    "documentid": 123456789,
                                                     "birth_date": "1990-01-01T00:00:00Z",
                                                     "first_name": "Dorotea",
                                                     "last_name": "Hernandez",
