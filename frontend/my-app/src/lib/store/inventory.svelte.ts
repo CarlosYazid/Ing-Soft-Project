@@ -65,7 +65,7 @@ export const inventory = new Inventory([
 		category: 'Cuadernos',
 		stock: 200,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 2,
@@ -76,7 +76,7 @@ export const inventory = new Inventory([
 		category: 'Esferos y Lápices',
 		stock: 150,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 3,
@@ -87,7 +87,7 @@ export const inventory = new Inventory([
 		category: 'Marcadores y Resaltadores',
 		stock: 90,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 4,
@@ -98,7 +98,7 @@ export const inventory = new Inventory([
 		category: 'Papelería Creativa',
 		stock: 180,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 5,
@@ -109,6 +109,6 @@ export const inventory = new Inventory([
 		category: 'Organización',
 		stock: 100,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	}
 ]);

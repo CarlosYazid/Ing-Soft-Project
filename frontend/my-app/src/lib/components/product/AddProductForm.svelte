@@ -7,22 +7,23 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import { cn } from '$lib/utils';
+	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
+	import { goto } from '$app/navigation';
 
 	import { inventory } from '$lib/store';
+	import { validateProduct } from '$lib/utils/validarProductForm';
 
 	// Tipado
-	import type { ProductFormInput } from '$lib/types';
-	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
+	import type { ProductFormInput, ProductInterface } from '$lib/types';
 
 	// Estados
 	let open = $state(false);
-	let value = $state('');
 	let triggerRef = $state<HTMLButtonElement>(null!);
 	let infoDialog = $state();
 
 	const categories = [
-		{ value: 'papeleria', label: 'Papelería' },
-		{ value: 'comestible', label: 'Comestible' }
+		{ value: 'Papelería', label: 'Papelería' },
+		{ value: 'Comestible', label: 'Comestible' }
 	];
 
 	let selectedValue = $derived(categories.find((c) => c.value === value)?.label);
@@ -35,47 +36,38 @@
 
 	/*Reciclar lógica*/
 	let product = inventory.editProduct;
+	let value = $state(product?.category || '');
 
 	/*Lógica de formulario*/
-	/* function getFormData(event: Event): ProductFormInput {
+	function getFormData(event: Event): ProductFormInput {
 		const formData = new FormData(event.target as HTMLFormElement);
 		const data: ProductFormInput = {
+			id: product?.id || 0, // Es 0 si se añade un producto
 			name: (formData.get('ProductName') as string) || '',
 			description: (formData.get('description') as string) || '',
 			cost: (formData.get('cost') as string) || '',
 			price: (formData.get('price') as string) || '',
 			category: (formData.get('category') as string) || '',
 			stock: (formData.get('stock') as string) || '',
-			picture: (formData.get('picture') as File) || null
-			// Si tu formulario tuviera un campo para id y expirationDate
-			// id: (formData.get('id') as string) || undefined,
-			// expirationDate: (formData.get('expirationDate') as string) || '',
+			img: (formData.get('picture') as File) || null,
+			expirationDate: '' // Se controla desde otro lugar
 		};
-
-		// El ID es solo relevante si estás editando un producto existente
-		// y tu formulario tiene un input hidden para el ID.
-		// Por ejemplo: <input type="hidden" name="id" value={product?.id} />
-		const productId = formData.get('id');
-		if (productId) {
-			data.id = productId as string;
-		}
 
 		return data;
 	}
 
 	async function handleSubmit(event: Event) {
-		event.preventDefault(); // Evita la recarga de la página por defecto del formulario
+		event.preventDefault();
 
 		const formData = getFormData(event);
 		console.log('Datos del formulario crudos:', formData);
 
 		// 1. Validar la información obtenida
 		const errors = validateProduct(formData);
-		formErrors = errors; // Asigna los errores al estado reactivo
 
 		if (Object.keys(errors).length > 0) {
 			console.error('Errores de validación:', errors);
-			// Aquí puedes mostrar los errores al usuario en el formulario
+			// Aquí se mostrarán los errores al usuario en el formulario (Llamar a la modal usar lógica con states como en la página de gestionar-productos)
 			return; // Detiene el envío si hay errores
 		}
 
@@ -83,47 +75,42 @@
 
 		// 2. Convertir a ProductInterface (con tipos correctos)
 		const newProductData: ProductInterface = {
-			// Si el ID existe (para edición), inclúyelo
-			...(product?.id && { id: product.id }), // O si viene del formData: id: parseInt(formData.id, 10)
-			name: formData.ProductName, // Mapea ProductName a name
+			id: formData.id,
+			name: formData.name,
 			description: formData.description,
 			cost: parseInt(formData.cost, 10),
 			price: parseFloat(formData.price),
 			category: formData.category,
 			stock: parseInt(formData.stock, 10),
-			img: formData.picture,
-			expirationDate: Date.now() // Asumiendo que se genera automáticamente
-			// Si tuvieras un campo de fecha de expiración en el formulario:
-			// expirationDate: new Date(formData.expirationDate).getTime(),
+			img: formData.img,
+			expirationDate: formData.expirationDate
 		};
 
 		console.log('Producto listo para procesar:', newProductData);
 
 		// 3. Procesar el producto (añadir o editar)
 		try {
-			if (product?.id) {
-				// Lógica para editar un producto existente
-				// inventory.updateProduct(newProductData); // Asume que tienes un método updateProduct
+			if (product) {
+				inventory.removeProductById(product.id);
+				inventory.addProduct(newProductData);
+				inventory.clearEditProduct();
+
 				console.log('Producto editado:', newProductData);
-				// Si la navegación es solo después de una confirmación en otro lado,
-				// no redirecciones aquí, o redirecciona a una página de éxito.
 				goto('/gestionar-productos'); // Redirecciona después de editar
 			} else {
 				// Lógica para añadir un nuevo producto
-				await inventory.addProduct(newProductData); // Asume que addProduct es async y guarda en DB
+				inventory.addProduct(newProductData);
 				console.log('Producto añadido:', newProductData);
-				goto('/gestionar-productos'); // Redirecciona después de añadir
+				goto('/gestionar-productos');
 			}
-			alert(`Producto ${product?.id ? 'actualizado' : 'añadido'} con éxito!`);
 		} catch (error) {
 			console.error('Error al guardar el producto:', error);
 			alert('Hubo un error al guardar el producto. Por favor, intenta de nuevo.');
-			// Aquí podrías actualizar el estado `formErrors` con un error general
 		}
-	} */
+	}
 </script>
 
-<form id="form" class="w-sm md:w-md" enctype="multipart/form-data">
+<form onsubmit={handleSubmit} id="form" class="w-sm md:w-md" enctype="multipart/form-data">
 	<div class="flex flex-col gap-6">
 		<div class="grid gap-2">
 			<Label for="ProductName">Nombre de Producto</Label>
