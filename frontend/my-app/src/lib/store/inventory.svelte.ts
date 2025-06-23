@@ -1,10 +1,9 @@
-import type { ProductInterface } from '$lib/types/ProductInterface';
-import type { ProductRow } from '$lib/types';
+import type { ProductInterface } from '$lib/types/';
 
 class Inventory {
 	#products: ProductInterface[] = $state([]);
-	#editProduct: ProductRow | null = $state(null);
-	#deleteProduct: ProductRow | null = $state(null);
+	#editProduct: ProductInterface | null = $state(null);
+	#deleteProduct: ProductInterface | null = $state(null);
 
 	constructor(initialData: ProductInterface[]) {
 		this.#products = initialData;
@@ -16,6 +15,10 @@ class Inventory {
 
 	removeProductById(id: number) {
 		this.#products = this.#products.filter((p) => p.id !== id);
+	}
+
+	findProductById(id: number): ProductInterface | null {
+		return this.#products.find((p) => p.id === id) || null;
 	}
 
 	clearEditProduct() {
@@ -34,19 +37,19 @@ class Inventory {
 		this.#products = p;
 	}
 
-	get editProduct(): ProductRow | null {
+	get editProduct(): ProductInterface | null {
 		return this.#editProduct;
 	}
 
-	get deleteProduct(): ProductRow | null {
+	get deleteProduct(): ProductInterface | null {
 		return this.#deleteProduct;
 	}
 
-	set editProduct(p: ProductRow) {
+	set editProduct(p: ProductInterface) {
 		this.#editProduct = p;
 	}
 
-	set deleteProduct(p: ProductRow) {
+	set deleteProduct(p: ProductInterface) {
 		this.#deleteProduct = p;
 	}
 }

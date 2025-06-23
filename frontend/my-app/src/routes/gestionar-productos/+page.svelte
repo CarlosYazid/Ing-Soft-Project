@@ -24,7 +24,7 @@
 	let editar = $state(false);
 	function onEdit(row: any) {
 		editar = true;
-		inventory.editProduct = row;
+		inventory.editProduct = inventory.findProductById(row.id)!;
 	}
 
 	function confirmedEdit() {
@@ -41,7 +41,7 @@
 	let eliminar = $state(false);
 	function onDelete(row: any) {
 		eliminar = true;
-		inventory.deleteProduct = row;
+		inventory.deleteProduct = inventory.findProductById(row.id)!;
 	}
 
 	function confirmedDelete() {
@@ -49,6 +49,7 @@
 		//Lógica delete
 		if (inventory.deleteProduct) {
 			inventory.removeProductById(inventory.deleteProduct.id);
+			inventory.clearDeleteProduct();
 		}
 	}
 
