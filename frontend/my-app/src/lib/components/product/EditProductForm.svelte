@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount } from 'svelte'; //Reemplazar lógica por COntextAPI
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button/index.js';
@@ -11,7 +11,7 @@
 	import { cn } from '$lib/utils';
 	import { tick } from 'svelte';
 
-	import type { productForm } from '../types';
+	import type { productForm } from '../../types';
 
 	const categoriesComboBox = [
 		{ value: 'papeleria', label: 'Papelería' },
@@ -24,9 +24,6 @@
 
 	const selectedValue = $derived(categoriesComboBox.find((f) => f.value === value)?.label);
 
-	// We want to refocus the trigger button when the user selects
-	// an item from the list so users can continue navigating the
-	// rest of the form with the keyboard.
 	function closeAndFocusTrigger() {
 		open = false;
 		tick().then(() => {
@@ -127,19 +124,19 @@
 	<div class="flex flex-col gap-6">
 		<div>
 			<Label for="ProductName">Nombre de Producto</Label>
-			<Input name="ProductName" bind:value={productName} required />
+			<Input name="ProductName" value={productName} required />
 		</div>
 
 		<div>
 			<Label for="description">Descripción</Label>
-			<Input name="description" bind:value={description} required />
+			<Input name="description" value={description} required />
 		</div>
 
 		<div>
 			<Label for="cost">Costo de Compra</Label>
 			<div class="flex items-center gap-1">
 				<span>$</span>
-				<Input name="cost" type="number" bind:value={cost} min="0" required />
+				<Input name="cost" type="number" value={cost} min="0" required />
 				<Input value="COP" class="w-16" disabled />
 			</div>
 		</div>
@@ -148,7 +145,7 @@
 			<Label for="price">Precio de Venta</Label>
 			<div class="flex items-center gap-1">
 				<span>$</span>
-				<Input name="price" type="number" bind:value={price} min="0" required />
+				<Input name="price" type="number" value={price} min="0" required />
 				<Input value="COP" class="w-16" disabled />
 			</div>
 		</div>
@@ -192,12 +189,12 @@
 					</Command.Root>
 				</Popover.Content>
 			</Popover.Root>
-			<Input type="hidden" name="category" {value} />
+			<Input type="hidden" name="category" bind:value />
 		</div>
 
 		<div>
 			<Label for="stock">Stock</Label>
-			<Input name="stock" type="number" bind:value={stock} min="0" />
+			<Input name="stock" type="number" value={stock} min="0" />
 		</div>
 
 		<div>

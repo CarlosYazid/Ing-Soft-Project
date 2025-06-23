@@ -1,82 +1,60 @@
 <script lang="ts">
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
-	import EditDialog from '$lib/components/common/EditDialog.svelte';
-	import type { productForm } from '$lib/components/types';
-	import { onMount } from 'svelte';
+	import type { ProductInterface, ProductRow } from '$lib/types';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { Trash2, SquarePen } from '@lucide/svelte';
+	import { inventory } from '$lib/store/index';
+	import { goto } from '$app/navigation';
 
-	interface Product {
-		id: number;
-		productName: string;
-		category: string;
-		price: number;
-		stock: number;
-	}
+	let productMocks: ProductInterface[] = $derived(inventory.products);
+	$inspect(productMocks);
 
-	let productMocks: Product[] = $state([]);
-	let products = $derived(productMocks);
-
-	function getAll(): Product[] {
-		const raw = localStorage.getItem('productos');
-		return raw ? JSON.parse(raw) : [];
-	}
-
-	function saveAll(list: Product[]) {
-		localStorage.setItem('productos', JSON.stringify(list));
-	}
-
-	function recargar() {
-		productMocks = getAll();
-	}
-
-	onMount(() => {
-		products = productMocks.map((p) => ({
+	let products: ProductRow[] = $derived(
+		productMocks.map((p) => ({
 			id: p.id,
-			productName: p.productName,
+			name: p.name,
 			category: p.category,
 			price: p.price,
 			stock: p.stock
-		}));
-		recargar();
-	});
+		}))
+	);
 
-	let fila = $state({});
-
+	//Lógica modal de editar producto
 	let editar = $state(false);
 	function onEdit(row: any) {
-		saveEditProduct(row);
 		editar = true;
+		inventory.editProduct = row;
 	}
 
+	function confirmedEdit() {
+		editar = false;
+		goto('/gestionar-productos/edit-product');
+	}
+
+	function canceledEdit() {
+		editar = false;
+		inventory.clearEditProduct();
+	}
+
+	//Lógica modal de eliminar producto
 	let eliminar = $state(false);
 	function onDelete(row: any) {
 		eliminar = true;
-		fila = row;
+		inventory.deleteProduct = row;
 	}
 
-	//Cuando tengamos la base de datos esto chao
-	function saveEditProduct(product: any): void {
-		localStorage.setItem('editProduct', JSON.stringify(product));
-		const raw = localStorage.getItem('products');
-		if (!raw) return;
-		console.log(raw);
-		const products: productForm[] = JSON.parse(raw);
-		const filtered = products.filter((p) => Number(p.id) !== Number(product.id));
-		console.log(filtered);
-
-		localStorage.setItem('products', JSON.stringify(filtered));
+	function confirmedDelete() {
+		eliminar = false;
+		//Lógica delete
+		if (inventory.deleteProduct) {
+			inventory.removeProductById(inventory.deleteProduct.id);
+		}
 	}
 
-	function confirmedDelete(row: any) {
-		const productos = JSON.parse(localStorage.getItem('productos')!);
-
-		const productosFiltrados = productos.filter((p: any) => p.id !== row.id);
-
-		localStorage.setItem('productos', JSON.stringify(productosFiltrados));
-
-		recargar();
+	function canceledDelete() {
+		eliminar = false;
+		inventory.clearDeleteProduct();
 	}
 
 	// Gestionar lógica sort
@@ -101,8 +79,8 @@
 
 		products = [...products].sort((a, b) => {
 			if (!sortField) return 0;
-			const valA = a[sortField as keyof Product];
-			const valB = b[sortField as keyof Product];
+			const valA = a[sortField as keyof ProductRow];
+			const valB = b[sortField as keyof ProductRow];
 
 			if (typeof valA === 'number' && typeof valB === 'number') {
 				return sortAsc ? valA - valB : valB - valA;
@@ -146,11 +124,11 @@
 				{#each products as product (product.id)}
 					<Table.Row>
 						<Table.Cell class="p-4">{product.id}</Table.Cell>
-						<Table.Cell class="p-4">{product.productName}</Table.Cell>
+						<Table.Cell class="p-4">{product.name}</Table.Cell>
 						<Table.Cell class="p-4">{product.category}</Table.Cell>
 						<Table.Cell class="p-4">{product.price}</Table.Cell>
 						<Table.Cell class="p-4">{product.stock}</Table.Cell>
-						<Table.Cell class="flex max-w-max justify-center gap-2"
+						<Table.Cell class="flex w-full justify-end gap-2"
 							><Button
 								onclick={() => {
 									onEdit(product);
@@ -170,14 +148,24 @@
 	{/key}
 </div>
 
-{#key eliminar}
-	{#if eliminar}
-		<ConfirmDialog parametro={fila} callback={confirmedDelete} />
-	{/if}
-{/key}
+{#if eliminar}
+	<ConfirmDialog
+		callbackOnTrue={confirmedDelete}
+		callbackOnFalse={canceledDelete}
+		title={'¿Está seguro que desea eliminar el producto?'}
+		description={'Esta acción no se puede deshacer. El producto será eliminado permanentemente.'}
+		btnClass={'bg-red-700 hover:bg-red-300 hover:text-red-700'}
+		action={'Eliminar'}
+	/>
+{/if}
 
-{#key editar}
-	{#if editar}
-		<EditDialog />
-	{/if}
-{/key}
+{#if editar}
+	<ConfirmDialog
+		callbackOnTrue={confirmedEdit}
+		callbackOnFalse={canceledEdit}
+		title={'¿Está seguro que desea editar el producto?'}
+		description={''}
+		btnClass={'bg-blue-700 hover:bg-blue-300 hover:text-blue-700'}
+		action={'Editar'}
+	/>
+{/if}

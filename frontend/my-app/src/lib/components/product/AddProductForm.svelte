@@ -9,7 +9,7 @@
 	import { cn } from '$lib/utils';
 
 	// Tipado
-	import type { productForm } from '../types';
+	import type { productForm } from '../../types';
 	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
 
 	// Estados
@@ -29,116 +29,16 @@
 		open = false;
 		triggerRef?.focus();
 	}
-
-	function validateProductForm(data: productForm): {
-		valid: boolean;
-		errors: Partial<Record<keyof productForm, string>>;
-	} {
-		const errors: Partial<Record<keyof productForm, string>> = {};
-
-		if (!data.productName.trim()) errors.productName = 'El nombre es obligatorio.';
-		if (!data.description.trim()) errors.description = 'La descripción es obligatoria.';
-		if (data.cost < 0) errors.cost = 'El costo no puede ser negativo.';
-		if (data.price <= 0) errors.price = 'El precio debe ser mayor a cero.';
-		if (!data.category.trim()) errors.category = 'La categoría es obligatoria.';
-		if (data.stock < 0) errors.stock = 'El stock no puede ser negativo.';
-		if (!data.picture || !(data.picture instanceof File) || data.picture.size === 0) {
-			errors.picture = 'Debes subir una imagen válida.';
-		}
-
-		return {
-			valid: Object.keys(errors).length === 0,
-			errors
-		};
-	}
-	function obtenerIdUnicoProducto(): number {
-		const productosRaw = localStorage.getItem('productos');
-		const productos: { id: number }[] = productosRaw ? JSON.parse(productosRaw) : [];
-
-		// Obtener todos los IDs existentes
-		const ids = new Set(productos.map((p) => p.id));
-
-		// Buscar el menor número posible no repetido
-		let nuevoId = 1;
-		while (ids.has(nuevoId)) {
-			nuevoId++;
-		}
-
-		return nuevoId;
-	}
-
-	function getProductFormValues(form: HTMLFormElement): productForm {
-		const formData = new FormData(form);
-
-		const productName = (formData.get('ProductName') || '').toString().trim();
-		const description = (formData.get('description') || '').toString().trim();
-		const cost = Number(formData.get('cost')) || 0;
-		const price = Number(formData.get('price')) || 0;
-		const category = (formData.get('category') || '').toString().trim();
-		const stock = Number(formData.get('stock')) || 0;
-		const picture = formData.get('picture') as File;
-
-		return {
-			id: obtenerIdUnicoProducto(),
-			productName,
-			description,
-			cost,
-			price,
-			category,
-			stock,
-			picture
-		};
-	}
 	$inspect(infoDialog);
-	function agregarProductoAlStorage(producto: any): void {
-		const productosRaw = localStorage.getItem('productos');
-		const productos = productosRaw ? JSON.parse(productosRaw) : [];
-
-		productos.push(producto);
-		eliminarProductoExacto(product);
-		localStorage.setItem('productos', JSON.stringify(productos));
-	}
-
-	function handleSubmit(event: SubmitEvent) {
-		event.preventDefault();
-		const form = event.currentTarget as HTMLFormElement;
-		const values = getProductFormValues(form);
-		const validation = validateProductForm(values);
-
-		infoDialog = validation.valid;
-		if (validation.valid) {
-			agregarProductoAlStorage(values);
-			form.reset();
-		}
-	}
-
-	function eliminarProductoExacto(productoAEliminar: productForm): void {
-		const raw = localStorage.getItem('productos');
-		if (!raw) return;
-
-		const productos: productForm[] = JSON.parse(raw);
-
-		// Usamos JSON.stringify para comparar todos los campos
-		const filtrados = productos.filter(
-			(p) => JSON.stringify(p) !== JSON.stringify(productoAEliminar)
-		);
-
-		localStorage.setItem('productos', JSON.stringify(filtrados));
-	}
 
 	/*Estado para reciclar lógica*/
 	let product = $props();
-	let id = $state(product.id);
-	let productName = $state(product.productName);
-	let description = $state(product.description);
-	let cost = $state(product.cost);
-	let price = $state(product.price);
-	let category = $state(product.category);
-	let stock = $state(product.stock);
-	let picture = $state<File | null>(product.picture);
+	$inspect(product);
+
+	
 </script>
 
-<form id="form" onsubmit={handleSubmit} class="w-sm md:w-md" enctype="multipart/form-data">
+<form id="form" class="w-sm md:w-md" enctype="multipart/form-data">
 	<div class="flex flex-col gap-6">
 		<div class="grid gap-2">
 			<Label for="ProductName">Nombre de Producto</Label>
@@ -146,9 +46,10 @@
 				name="ProductName"
 				type="text"
 				placeholder="Compás"
-				bind:value={productName}
+				value={product.productName}
 				required
 			/>
+			<input type="text" value={product.productName} />
 		</div>
 
 		<div class="grid gap-2">
@@ -157,7 +58,7 @@
 				name="description"
 				type="text"
 				placeholder="Compás metálico con rueda de precisión de marca Mapped"
-				bind:value={description}
+				value={product.description}
 				required
 			/>
 		</div>
@@ -166,7 +67,7 @@
 			<Label for="cost">Costo de Compra</Label>
 			<div class="flex items-center gap-1">
 				<span class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">$</span>
-				<Input type="text" name="cost" id="cost" placeholder="0.00" bind:value={cost} required />
+				<Input type="text" name="cost" id="cost" placeholder="0.00" value={product.cost} required />
 				<Input value="COP" class="w-16" disabled />
 			</div>
 		</div>
@@ -175,7 +76,14 @@
 			<Label for="price">Precio de Venta</Label>
 			<div class="flex items-center gap-1">
 				<span class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">$</span>
-				<Input type="text" name="price" id="price" placeholder="0.00" bind:value={price} required />
+				<Input
+					type="text"
+					name="price"
+					id="price"
+					placeholder="0.00"
+					value={product.price}
+					required
+				/>
 				<Input value="COP" class="w-16" disabled />
 			</div>
 		</div>
@@ -193,7 +101,7 @@
 								role="combobox"
 								aria-expanded={open}
 							>
-								{selectedValue || category || 'Selecciona una Categoría...'}
+								{selectedValue || product.category || 'Selecciona una Categoría...'}
 								<ChevronsUpDownIcon class="opacity-50" />
 							</Button>
 						{/snippet}
@@ -227,7 +135,7 @@
 
 		<div class="grid gap-2">
 			<Label for="stock">Cantidad a ingresar</Label>
-			<Input name="stock" type="text" placeholder="20" bind:value={stock} required />
+			<Input name="stock" type="text" placeholder="20" value={product.stock} required />
 		</div>
 
 		<div class="grid gap-2">
@@ -238,7 +146,7 @@
 				required
 				onchange={(e) => {
 					const input = e.target as HTMLInputElement;
-					picture = input.files?.[0] || null;
+					product.picture = input.files?.[0] || null;
 				}}
 			/>
 		</div>
