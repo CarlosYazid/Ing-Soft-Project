@@ -2,11 +2,13 @@
 	import { Input } from '$lib/components/ui/input';
 	import { Label } from '$lib/components/ui/label';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import { Textarea } from '$lib/components/ui/textarea/index.js';
 	import * as Command from '$lib/components/ui/command/index.js';
 	import * as Popover from '$lib/components/ui/popover/index.js';
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import { cn } from '$lib/utils';
+
 	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
 	import { goto } from '$app/navigation';
 
@@ -15,11 +17,11 @@
 
 	// Tipado
 	import type { ProductFormInput, ProductInterface } from '$lib/types';
+	import { formatErrorsToString } from '$lib/utils/formatterProductFormErrors';
 
 	// Estados
 	let open = $state(false);
 	let triggerRef = $state<HTMLButtonElement>(null!);
-	let infoDialog = $state();
 
 	const categories = [
 		{ value: 'Papelería', label: 'Papelería' },
@@ -32,7 +34,6 @@
 		open = false;
 		triggerRef?.focus();
 	}
-	$inspect(infoDialog);
 
 	/*Reciclar lógica*/
 	let product = inventory.editProduct;
@@ -68,10 +69,14 @@
 		if (Object.keys(errors).length > 0) {
 			console.error('Errores de validación:', errors);
 			// Aquí se mostrarán los errores al usuario en el formulario (Llamar a la modal usar lógica con states como en la página de gestionar-productos)
+			showDialog = true;
+			isFormValid = false;
+			formErrors = formatErrorsToString(errors);
 			return; // Detiene el envío si hay errores
 		}
 
 		console.log('¡Datos del formulario válidos!');
+		isFormValid = true;
 
 		// 2. Convertir a ProductInterface (con tipos correctos)
 		const newProductData: ProductInterface = {
@@ -96,18 +101,24 @@
 				inventory.clearEditProduct();
 
 				console.log('Producto editado:', newProductData);
-				goto('/gestionar-productos'); // Redirecciona después de editar
+				showDialog = true;
 			} else {
 				// Lógica para añadir un nuevo producto
 				inventory.addProduct(newProductData);
 				console.log('Producto añadido:', newProductData);
-				goto('/gestionar-productos');
+				showDialog = true;
 			}
 		} catch (error) {
 			console.error('Error al guardar el producto:', error);
 			alert('Hubo un error al guardar el producto. Por favor, intenta de nuevo.');
 		}
 	}
+
+	// Lógica para controlar la modal
+	let showDialog = $state();
+	$inspect(showDialog);
+	let isFormValid = $state(false);
+	let formErrors = $state('');
 </script>
 
 <form onsubmit={handleSubmit} id="form" class="w-sm md:w-md" enctype="multipart/form-data">
@@ -119,9 +130,8 @@
 
 		<div class="grid gap-2">
 			<Label for="description">Descripción de Producto</Label>
-			<Input
+			<Textarea
 				name="description"
-				type="text"
 				placeholder="Compás metálico con rueda de precisión de marca Mapped"
 				value={product?.description}
 				required
@@ -238,6 +248,15 @@
 	</div>
 </form>
 
-{#if infoDialog}
-	<SuccessOrFailDialog {infoDialog} contentDialog="" />
+{#if showDialog}
+	<SuccessOrFailDialog
+		infoDialog={isFormValid}
+		callback={() => {
+			showDialog = false;
+			if (isFormValid) {
+				goto('/gestionar-productos');
+			}
+		}}
+		contentDialog={isFormValid ? '' : formErrors}
+	/>
 {/if}
