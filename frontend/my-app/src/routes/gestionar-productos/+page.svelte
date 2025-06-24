@@ -104,7 +104,7 @@
 </div>
 
 <div class="px-8">
-	<h3 class="font-semiboldc mt-8 bg-zinc-500/15 p-4 text-lg">Lista de Productos Actuales</h3>
+	<h3 class=" mt-8 bg-zinc-500/15 p-4 text-lg font-bold">Lista de Productos Actuales</h3>
 	{#key productMocks}
 		<Table.Root>
 			<Table.Caption>Productos Actuales en la Base de Datos</Table.Caption>
