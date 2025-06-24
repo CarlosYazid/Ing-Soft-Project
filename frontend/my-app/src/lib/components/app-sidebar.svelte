@@ -9,6 +9,10 @@
 	import MapIcon from '@lucide/svelte/icons/map';
 	import Settings2Icon from '@lucide/svelte/icons/settings-2';
 	import SquareTerminalIcon from '@lucide/svelte/icons/square-terminal';
+	import Bolt from '@lucide/svelte/icons/bolt';
+	import ShoppingCart from '@lucide/svelte/icons/shopping-cart';
+	import { House } from '@lucide/svelte';
+	import { Button } from '$lib/components/ui/button/index.js';
 
 	// This is sample data.
 	const data = {
@@ -36,44 +40,41 @@
 		],
 		navMain: [
 			{
-				title: 'Playground',
+				title: 'Realizar Nueva Venta',
 				url: '#',
-				icon: SquareTerminalIcon,
+				icon: ShoppingCart,
 				isActive: true,
 				items: [
 					{
-						title: 'History',
+						title: 'Realizar Venta',
 						url: '#'
 					},
 					{
-						title: 'Starred',
+						title: 'Seleccionar Productos',
 						url: '#'
 					},
 					{
-						title: 'Settings',
+						title: 'Seleccionar Servicios',
 						url: '#'
 					}
 				]
 			},
 			{
-				title: 'Models',
-				url: '#',
-				icon: BotIcon,
+				title: 'Gestionar Mi Negocio',
+				url: '/mi-negocio',
+				icon: Bolt,
 				items: [
 					{
-						title: 'Genesis',
-						url: '#'
+						title: 'Gestionar Productos',
+						url: '/gestionar-productos'
 					},
 					{
-						title: 'Explorer',
-						url: '#'
-					},
-					{
-						title: 'Quantum',
-						url: '#'
+						title: 'Gestionar Servicios',
+						url: '/gestionar-servicios'
 					}
 				]
-			},
+			}
+			/*
 			{
 				title: 'Documentation',
 				url: '#',
@@ -119,8 +120,8 @@
 						url: '#'
 					}
 				]
-			}
-		],
+			}*/
+		] /*,
 		projects: [
 			{
 				name: 'Design Engineering',
@@ -137,7 +138,7 @@
 				url: '#',
 				icon: MapIcon
 			}
-		]
+		]*/
 	};
 </script>
 
@@ -157,15 +158,16 @@
 </script>
 
 <Sidebar.Root {collapsible} {...restProps}>
-	<Sidebar.Header>
-		<TeamSwitcher teams={data.teams} />
-	</Sidebar.Header>
+	<Sidebar.Header
+		><Button href="/" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"><House /></Button
+		></Sidebar.Header
+	>
 	<Sidebar.Content>
 		<NavMain items={data.navMain} />
-		<NavProjects projects={data.projects} />
+		<!--<NavProjects projects={data.projects} />-->
 	</Sidebar.Content>
 	<Sidebar.Footer>
-		<NavUser user={data.user} />
+		<!--<NavUser user={data.user} />-->
 	</Sidebar.Footer>
 	<Sidebar.Rail />
 </Sidebar.Root>

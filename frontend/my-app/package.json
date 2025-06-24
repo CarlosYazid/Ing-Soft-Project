@@ -30,7 +30,7 @@
 		"@testing-library/jest-dom": "^6.6.3",
 		"@testing-library/svelte": "^5.2.4",
 		"@types/node": "^24.0.3",
-		"bits-ui": "^2.8.2",
+		"bits-ui": "^2.8.8",
 		"clsx": "^2.1.1",
 		"embla-carousel-svelte": "^8.6.0",
 		"eslint": "^9.18.0",

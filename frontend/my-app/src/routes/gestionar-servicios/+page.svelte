@@ -76,7 +76,7 @@
 	>
 </div>
 <h3 class="font-semiboldc mt-8 px-10 pb-5 text-lg font-bold">Lista de Servicios Actuales</h3>
-<div class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4 px-10">
+<div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4 px-10">
 	{#each services as service (service.id)}
 		<Card.Root>
 			<Card.Header>
