@@ -1,0 +1,25 @@
+<script lang="ts">
+	import { Button } from '$lib/components/ui/button/index.js';
+	import ProductCardOrdenSummary from '$lib/components/product/ProductCardOrdenSummary.svelte';
+</script>
+
+<div class="mt-4 flex justify-end">
+	<Button
+		href="/new-sale/select-products"
+		size="lg"
+		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+		>Seleccionar Productos</Button
+	>
+	<Button
+		href="/new-sale/select-services"
+		size="lg"
+		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+		>Seleccionar Servicios</Button
+	>
+</div>
+<div class="px-8">
+	<h3 class="font-semiboldc mt-8 text-2xl font-bold">Lista de Venta Actual</h3>
+	<h3 class="font-semiboldc mt-8 bg-zinc-500/5 text-lg">Lista de Productos Seleccionados</h3>
+	<div></div>
+	<h3 class="font-semiboldc mt-8 bg-zinc-500/5 text-lg">Lista de Servicios Seleccionados</h3>
+</div>
