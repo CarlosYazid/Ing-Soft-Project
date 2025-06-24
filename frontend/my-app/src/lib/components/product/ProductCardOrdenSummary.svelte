@@ -28,6 +28,6 @@
 
 			<Button class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button>
 		</div>
-		<p class="flex justify-end text-sm text-gray-500">Stock: {product.stock}</p>
+		<p class="flex justify-end text-sm text-gray-500">Stock: {product.stock - quantity}</p>
 	</Card.Content>
 </Card.Root>
