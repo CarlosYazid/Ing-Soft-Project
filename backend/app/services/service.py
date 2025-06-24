@@ -1,14 +1,14 @@
-from models import ServiceBase, ProductBase
+from models import ServiceBasePlusID, ProductBasePlusID
 from crud import ServiceCrud
 
 
 class ServiceService:
     @classmethod
-    async def get_all_services_base(cls) -> list[ServiceBase]:
+    async def get_all_services_base(cls) -> list[ServiceBasePlusID]:
         """Retrieve all services."""
         
         services = await ServiceCrud.get_all_services()
-        return [ServiceBase.model_validate(
+        return [ServiceBasePlusID.model_validate(
             {"id": service.id,
              "name": service.name,
              "short_description": service.short_description,
@@ -17,10 +17,10 @@ class ServiceService:
         
 
     @classmethod
-    async def get_service_base_by_id(cls, service_id: int) -> ServiceBase:
+    async def get_service_base_by_id(cls, service_id: int) -> ServiceBasePlusID:
         """Retrieve a service by ID."""
         service = await ServiceCrud.get_service_by_id(service_id)
-        return ServiceBase.model_validate(
+        return ServiceBasePlusID.model_validate(
             {"id": service.id,
              "name": service.name,
              "short_description": service.short_description,
@@ -29,10 +29,10 @@ class ServiceService:
         )
     
     @classmethod
-    async def get_input_services_by_service_id(cls, service_id: int) -> list[ProductBase]:
+    async def get_input_services_by_service_id(cls, service_id: int) -> list[ProductBasePlusID]:
         """Retrieve input products for a service by service ID."""
         products = await ServiceCrud.get_input_services_by_service(service_id)
-        return [ProductBase.model_validate(
+        return [ProductBasePlusID.model_validate(
             {"id": product.id,
              "name": product.name,
              "short_description": product.short_description,

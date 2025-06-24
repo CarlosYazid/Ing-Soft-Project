@@ -14,7 +14,7 @@ class UserService:
              "created_at": user.created_at,
              "updated_at": user.updated_at,
              "state": user.state,
-             "documentid": user.documentID,
+             "documentid": user.documentid,
             }) for user in users]
 
     @classmethod
@@ -29,7 +29,7 @@ class UserService:
              "created_at": user.created_at,
              "updated_at": user.updated_at,
              "state": user.state,
-             "documentid": user.documentID,
+             "documentid": user.documentid,
             }
         )
         
@@ -45,7 +45,7 @@ class UserService:
              "created_at": user.created_at,
              "updated_at": user.updated_at,
              "state": user.state,
-             "documentid": user.documentID,
+             "documentid": user.documentid,
             }
         )
         
@@ -61,7 +61,7 @@ class UserService:
              "created_at": user.created_at,
              "updated_at": user.updated_at,
              "state": user.state,
-             "documentid": user.documentID,
+             "documentid": user.documentid,
             }) for user in users]
     
     @classmethod
@@ -76,7 +76,7 @@ class UserService:
              "created_at": user.created_at,
              "updated_at": user.updated_at,
              "state": user.state,
-             "documentid": user.documentID,
+             "documentid": user.documentid,
             }
         )
     
@@ -92,6 +92,6 @@ class UserService:
              "created_at": user.created_at,
              "updated_at": user.updated_at,
              "state": user.state,
-             "documentid": user.documentID,
+             "documentid": user.documentid,
             }
         )

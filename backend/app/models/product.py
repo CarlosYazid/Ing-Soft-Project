@@ -55,7 +55,6 @@ class ProductBase(BaseModel):
     """
     Base model for product schemas.
     """
-    id: int = Field(..., description="Product's unique identifier")
     name: str = Field(..., description="Product's name")
     short_description: Optional[str] = Field(None, description="Short description of the product")
     price: float = Field(..., description="Product's price")
@@ -65,16 +64,67 @@ class ProductBase(BaseModel):
     
 
 
-class Product(ProductBase):
+
+class ProductBasePlusID(ProductBase):
     """
-    Product model for the API response.
+    Base model for product schemas with ID.
+    """
+    id: int = Field(..., description="Product's unique identifier")
+    
+    model_config: ConfigDict = ConfigDict(str_to_lower=True,
+                                          str_strip_whitespace=True,
+                                          use_enum_values=True,
+                                          json_schema_extra={
+                                              "example": {
+                                                  "id": 1,
+                                                  "name": "Ejemplo de producto de papelería",
+                                                  "short_description": "Este es un producto de papelería de ejemplo.",
+                                                  "price": 9.99,
+                                                  "category": "Papelería",
+                                                  "stock": 50,
+                                                  "image_url": "https://example.com/image.jpg",
+                                              }
+                                          })
+
+
+class ProductCreate(ProductBase):
+    """
+    Product model for the API request.
     """
     description: Optional[str] = Field(None, description="Product's description")
-    cost : float = Field(..., description="Cost of the product")
+    cost: float = Field(..., description="Cost of the product")
     created_at: datetime = Field(..., description="Timestamp when the product was created")
     updated_at: datetime = Field(..., description="Timestamp when the product was last updated")
     expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
     type: Optional[ProductTypes] = Field(None, description="Type of the product")
+    
+    model_config: ConfigDict = ConfigDict(str_to_lower=True,
+                                          str_strip_whitespace=True,
+                                          use_enum_values=True,
+                                          json_schema_extra={
+                                              "example": {
+                                                  "name": "Ejemplo de producto de papelería",
+                                                  "short_description": "Este es un producto de papelería de ejemplo.",
+                                                  "price": 9.99,
+                                                  "category": "Papelería",
+                                                  "stock": 50,
+                                                  "description": "Descripción detallada del producto de papelería de ejemplo.",
+                                                  "cost": 5.00,
+                                                  "created_at": "2023-01-01T00:00:00Z",
+                                                  "updated_at": "2023-01-01T00:00:00Z",
+                                                  "type": "Papelería_general",
+                                                  "image_url": "https://example.com/image.jpg",
+                                              }
+                                          },
+                                          json_encoders={
+                                              datetime: lambda v: v.isoformat()
+                                          })
+
+class Product(ProductCreate):
+    """
+    Product model for the API response.
+    """
+    id: int = Field(..., description="Product's unique identifier")
     
     model_config: ConfigDict = ConfigDict(str_to_lower=True,
                                           str_strip_whitespace=True,

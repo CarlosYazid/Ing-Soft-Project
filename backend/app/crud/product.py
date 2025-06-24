@@ -1,7 +1,7 @@
 from fastapi import HTTPException, UploadFile
 
 from db import get_db_client
-from models import Product, ProductCategory, ProductTypes
+from models import Product, ProductCategory, ProductTypes, ProductCreate
 from core import SETTINGS
 
 
@@ -39,7 +39,7 @@ class ProductCrud:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("*").eq("category", category).execute()
+        response = await client.table(SETTINGS.product_table).select("*").eq("category", category.capitalize()).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="No products found in this category", status_code=404)
@@ -53,7 +53,7 @@ class ProductCrud:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("*").eq("type", product_type).execute()
+        response = await client.table(SETTINGS.product_table).select("*").eq("type", product_type.capitalize()).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="No products found of this type", status_code=404)
@@ -61,7 +61,7 @@ class ProductCrud:
         return [Product.model_validate(product) for product in response.data]
     
     @classmethod
-    async def create_product(cls, product: Product) -> Product:
+    async def create_product(cls, product: ProductCreate) -> Product:
         """Create a new product."""
         
         client = await get_db_client()
@@ -81,6 +81,10 @@ class ProductCrud:
         """Upload an image for a product and return the URL."""
         
         client = await get_db_client()
+        
+        # Check if the product exists before attempting to upload an image
+        if not(cls.exist_product_by_id(product_id)):
+            raise HTTPException(status_code=404, detail="Product not found")
 
         name, ext = image.filename.split(".")[-2:]
         
@@ -118,6 +122,10 @@ class ProductCrud:
 
         client = await get_db_client()
         
+        # Check if the product exists before attempting to update
+        if not(cls.exist_product_by_id(product_id)):
+            raise HTTPException(detail="Product not found", status_code=404)
+        
         if "image_url" in fields:
             fields.pop("image_url")
             
@@ -135,12 +143,17 @@ class ProductCrud:
 
         client = await get_db_client()
 
+        # Check if the product exists before attempting to delete
+        if not await cls.exist_product_by_id(product_id):
+            raise HTTPException(detail="Product not found", status_code=404)
+
+
         response = await client.table(SETTINGS.product_table).delete().eq("id", product_id).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to delete product", status_code=500)
         
-        return None
+        return bool(response.data)
     
     @classmethod
     async def exist_product_by_id(cls, product_id: int) -> bool:
@@ -150,4 +163,4 @@ class ProductCrud:
 
         response = await client.table(SETTINGS.product_table).select("id").eq("id", product_id).execute()
 
-        return not(bool(response.data))
+        return bool(response.data)

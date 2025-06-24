@@ -2,7 +2,7 @@ from fastapi import APIRouter, Request, Depends, UploadFile, File, Form
 from typing import Optional
 from datetime import datetime
 
-from models import Product, ProductCategory, ProductTypes
+from models import ProductCreate, ProductCategory, ProductTypes
 from crud import ProductCrud
 from services import AuthService, ProductService
 
@@ -48,7 +48,7 @@ async def get_product_base_by_id_2(request: Request, id: int):
     return await ProductService.get_product_base_by_id(id)
 
 @router.post("/")
-async def create_product(request: Request, product: Product):
+async def create_product(request: Request, product: ProductCreate):
     
     return await ProductCrud.create_product(product)
 
@@ -87,14 +87,14 @@ async def delete_product_by_id_2(request: Request, id: int):
     return await ProductCrud.delete_product(id)
 
 @router.get("/category/{category}")
-async def get_products_by_category(request: Request, category: str):
+async def get_products_by_category(request: Request, category: ProductCategory):
     """
     Get products by category.
     """
     return await ProductCrud.get_products_by_category(category)
 
 @router.get("/type/{product_type}")
-async def get_products_by_type(request: Request, product_type: str):
+async def get_products_by_type(request: Request, product_type: ProductTypes):
     """
     Get products by type.
     """
@@ -102,27 +102,27 @@ async def get_products_by_type(request: Request, product_type: str):
 
 
 @router.get("/base/category/{category}")
-async def get_products_base_by_category(category: str):
+async def get_products_base_by_category(request: Request, category: ProductCategory):
     """
     Get products by category in base format.
     """
     return await ProductService.get_products_base_by_category(category)
 
 @router.get("/base/type/{product_type}")
-async def get_products_base_by_type(request : Request,product_type: str):
+async def get_products_base_by_type(request : Request, product_type: ProductTypes):
     """
     Get products by type in base format.
     """
     return await ProductService.get_products_base_by_type(product_type)
 @router.get("/base/category/")
-async def get_products_base_by_category_2(request: Request, category: str):
+async def get_products_base_by_category_2(request: Request, category: ProductCategory):
     """
     Get products by category in base format.
     """
     return await ProductService.get_products_base_by_category(category)
 
 @router.get("/base/type/")
-async def get_products_base_by_type_2(request: Request, product_type: str):
+async def get_products_base_by_type_2(request: Request, product_type: ProductTypes):
     """
     Get products by type in base format.
     """

@@ -1,7 +1,7 @@
 from fastapi import HTTPException
 
 from db import get_db_client
-from models import Employee, Client
+from models import Employee, Client, EmployeeCreate, ClientCreate
 from core import SETTINGS
 
 class UserCrud:
@@ -22,7 +22,7 @@ class UserCrud:
     
     
     @classmethod
-    async def create_employee(cls, employee : Employee) -> Employee:
+    async def create_employee(cls, employee : EmployeeCreate) -> Employee:
         """Create a new employee."""
 
         client = await get_db_client()
@@ -153,12 +153,12 @@ class UserCrud:
         return [Client.model_validate(client) for client in response.data]
 
     @classmethod
-    async def create_client(cls, client: Client) -> Client:
+    async def create_client(cls, client_: ClientCreate) -> Client:
         """Create a new client."""
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).insert(client.model_dump(mode="json")).execute()
+        response = await client.table(SETTINGS.client_table).insert(client_.model_dump(mode="json")).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Client creation failed", status_code=400)
@@ -177,7 +177,7 @@ class UserCrud:
             if not cls.exist_client_by_id(_id):
                 raise HTTPException(detail="Client not found", status_code=404)
 
-            raise HTTPException(detail="Client update failed", status_code=400)
+            raise HTTPException(detail="Client update failed", status_code=500)
 
         return Client.model_validate(response.data[0])
     
@@ -194,7 +194,7 @@ class UserCrud:
             if not cls.exist_client_by_email(email):
                 raise HTTPException(detail="Client not found", status_code=404)
 
-            raise HTTPException(detail="Client update failed", status_code=400)
+            raise HTTPException(detail="Client update failed", status_code=500)
 
         return Client.model_validate(response.data[0])
     
@@ -249,11 +249,15 @@ class UserCrud:
         """Delete a client by ID."""
 
         client = await get_db_client()
+        
+        # check if the client exists
+        if not await cls.exist_client_by_id(client_id):
+            raise HTTPException(detail="Client not found", status_code=404)
 
         response = await client.table(SETTINGS.client_table).delete().eq("id", client_id).execute()
 
         if not(bool(response.data)):
-            raise HTTPException(detail="Client not found", status_code=404)
+            raise HTTPException(detail="Failed delete client", status_code=500)
 
         return True
     
@@ -262,10 +266,14 @@ class UserCrud:
         """Delete a client by email."""
 
         client = await get_db_client()
+        
+        # check if the client exists
+        if not await cls.exist_client_by_email(email):
+            raise HTTPException(detail="Client not found", status_code=404)
 
         response = await client.table(SETTINGS.client_table).delete().eq("email", email).execute()
 
         if not(bool(response.data)):
-            raise HTTPException(detail="Client not found", status_code=404)
+            raise HTTPException(detail="Failed delete client", status_code=500)
 
         return True
