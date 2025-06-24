@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends
 
-from models import Order
+from models import OrderCreate, OrderStatus, OrderServiceCreate, OrderProductCreate
 from crud import OrderCrud
 from services import AuthService, OrderService
 
@@ -47,7 +47,7 @@ async def get_order_base_by_id_2(request: Request, id: int):
     return await OrderService.get_order_base_by_id(id)
 
 @router.post("/")
-async def create_order(request: Request, order: Order):
+async def create_order(request: Request, order: OrderCreate):
     """
     Create a new order.
     """
@@ -104,28 +104,28 @@ async def get_orders_base_by_client_id_2(request: Request, client_id: int):
     return await OrderService.get_orders_base_by_client_id(client_id)
 
 @router.get("/status/{status}")
-async def get_orders_by_status(request: Request, status: str):
+async def get_orders_by_status(request: Request, status: OrderStatus):
     """
     Retrieve orders by status.
     """
     return await OrderCrud.get_orders_by_status(status)
 
 @router.get("/status/")
-async def get_orders_by_status_2(request: Request, status: str):
+async def get_orders_by_status_2(request: Request, status: OrderStatus):
     """
     Retrieve orders by status.
     """
     return await OrderCrud.get_orders_by_status(status)
 
 @router.get("/status/base/{status}")
-async def get_orders_base_by_status(request: Request, status: str):
+async def get_orders_base_by_status(request: Request, status: OrderStatus):
     """
     Retrieve orders by status in base format.
     """
     return await OrderService.get_orders_base_by_status(status)
 
 @router.get("/status/base/")
-async def get_orders_base_by_status_2(request: Request, status: str):
+async def get_orders_base_by_status_2(request: Request, status: OrderStatus):
     """
     Retrieve orders by status in base format.
     """
@@ -159,8 +159,8 @@ async def get_order_service_by_id_2(request: Request, order_service_id: int):
     """
     return await OrderCrud.get_order_services(order_service_id)
 
-@router.post("/services")
-async def create_order_service(request: Request, order_service: Order):
+@router.post("/services/")
+async def create_order_service(request: Request, order_service: OrderServiceCreate):
     """
     Create a new order service.
     """
@@ -232,8 +232,8 @@ async def get_order_product_by_id_2(request: Request, id: int):
     """
     return await OrderCrud.get_order_product_by_id(id)
 
-@router.post("/products")
-async def create_order_product(request: Request, order_product: Order):
+@router.post("/products/")
+async def create_order_product(request: Request, order_product: OrderProductCreate):
     """
     Create a new order product.
     """
@@ -282,7 +282,7 @@ async def get_orders_products_by_order_id(request: Request, order_id: int):
     """
     return await OrderCrud.get_orders_product_by_order_id(order_id)
 
-@router.get("/products/order/")
+@router.get("/products/orders/")
 async def get_order_products_by_order_id_2(request: Request, order_id: int):
     """
     Retrieve order products by order ID.

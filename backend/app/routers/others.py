@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends
 
-from models import Payment
+from models import PaymentCreate, PaymentMethod, PaymentStatus
 from crud import PaymentCrud
 from services import AuthService, PaymentService
 
@@ -46,8 +46,8 @@ async def get_payment_base_by_id_2(request: Request, id: int):
     """
     return await PaymentService.get_payment_base_by_id(id)
 
-@router.post("")
-async def create_payment(request: Request, payment: Payment):
+@router.post("/")
+async def create_payment(request: Request, payment: PaymentCreate):
     """
     Create a new payment.
     """
@@ -74,29 +74,43 @@ async def get_payments_base_by_user(request: Request, user_id: int):
     """
     return await PaymentService.get_payments_base_by_user(user_id)
 
+@router.get("/user/")
+async def get_payments_by_user_2(request: Request, user_id: int):
+    """
+    Retrieve payments by user ID.
+    """
+    return await PaymentCrud.get_payments_by_user(user_id)
+
+@router.get("/base/user/")
+async def get_payments_base_by_user_2(request: Request, user_id: int):
+    """
+    Retrieve payments by user ID in base format.
+    """
+    return await PaymentService.get_payments_base_by_user(user_id)
+
 @router.get("/status/{status}")
-async def get_payments_by_status(request: Request, status: str):
+async def get_payments_by_status(request: Request, status: PaymentStatus):
     """
     Retrieve payments by status.
     """
     return await PaymentCrud.get_payments_by_status(status)
 
 @router.get("/base/status/{status}")
-async def get_payments_base_by_status(request: Request, status: str):
+async def get_payments_base_by_status(request: Request, status: PaymentStatus):
     """
     Retrieve payments by status in base format.
     """
     return await PaymentService.get_payments_base_by_status(status)
 
 @router.get("/method/{method}")
-async def get_payments_by_method(request : Request,method: str):
+async def get_payments_by_method(request : Request, method: PaymentMethod):
     """
     Retrieve payments by method.
     """
     return await PaymentCrud.get_payments_by_method(method)
 
 @router.get("/base/method/{method}")
-async def get_payments_base_by_method(request : Request, method: str):
+async def get_payments_base_by_method(request : Request, method: PaymentMethod):
     """
     Retrieve payments by method in base format.
     """
@@ -116,43 +130,30 @@ async def delete_payment_by_id_2(request: Request, id: int):
     """
     return await PaymentCrud.delete_payment(id)
 
-@router.get("/user/")
-async def get_payments_by_user_2(request: Request, user_id: int):
-    """
-    Retrieve payments by user ID.
-    """
-    return await PaymentCrud.get_payments_by_user(user_id)
-
-@router.get("/base/user/")
-async def get_payments_base_by_user_2(request: Request, user_id: int):
-    """
-    Retrieve payments by user ID in base format.
-    """
-    return await PaymentService.get_payments_base_by_user(user_id)
 
 @router.get("/status/")
-async def get_payments_by_status_2(request: Request, status: str):
+async def get_payments_by_status_2(request: Request, status: PaymentStatus):
     """
     Retrieve payments by status.
     """
     return await PaymentCrud.get_payments_by_status(status)
 
 @router.get("/base/status/")
-async def get_payments_base_by_status_2(request: Request, status: str):
+async def get_payments_base_by_status_2(request: Request, status: PaymentStatus):
     """
     Retrieve payments by status in base format.
     """
     return await PaymentService.get_payments_base_by_status(status)
 
 @router.get("/method/")
-async def get_payments_by_method_2(request: Request, method: str):
+async def get_payments_by_method_2(request: Request, method: PaymentMethod):
     """
     Retrieve payments by method.
     """
     return await PaymentCrud.get_payments_by_method(method)
 
 @router.get("/base/method/")
-async def get_payments_base_by_method_2(request: Request, method: str):
+async def get_payments_base_by_method_2(request: Request, method: PaymentMethod):
     """
     Retrieve payments by method in base format.
     """

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends
 
-from models import Service
+from models import ServiceCreate
 from crud import ServiceCrud
 from services import AuthService, ServiceService
 
@@ -48,7 +48,7 @@ async def get_service_base_by_id_2(request: Request, id: int):
 
 
 @router.post("/")
-async def create_service(request: Request, service: Service):
+async def create_service(request: Request, service: ServiceCreate):
     """
     Create a new service.
     """
