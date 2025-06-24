@@ -1,2 +1,1 @@
-export * from './validarProductForm';
-export * from './formatterProductFormErrors';
+export * from './product';

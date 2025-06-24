@@ -1,4 +1,4 @@
-import type { ProductInterface } from '$lib/types/';
+import type { ProductInterface } from '$lib/types';
 
 class Inventory {
 	#products: ProductInterface[] = $state([]);

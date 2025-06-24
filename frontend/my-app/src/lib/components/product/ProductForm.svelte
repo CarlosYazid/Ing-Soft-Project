@@ -13,11 +13,11 @@
 	import { goto } from '$app/navigation';
 
 	import { inventory } from '$lib/store';
-	import { validateProduct } from '$lib/utils/validarProductForm';
+	import { validateProduct } from '$lib/utils/product/validarProductForm';
 
 	// Tipado
 	import type { ProductFormInput, ProductInterface } from '$lib/types';
-	import { formatErrorsToString } from '$lib/utils/formatterProductFormErrors';
+	import { formatErrorsToString } from '$lib/utils/product/formatterProductFormErrors';
 
 	// Estados
 	let open = $state(false);
