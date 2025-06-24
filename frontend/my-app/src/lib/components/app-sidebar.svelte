@@ -13,6 +13,7 @@
 	import ShoppingCart from '@lucide/svelte/icons/shopping-cart';
 	import { House } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button/index.js';
+	import Building from '@lucide/svelte/icons/building';
 
 	// This is sample data.
 	const data = {
@@ -23,19 +24,9 @@
 		},
 		teams: [
 			{
-				name: 'Acme Inc',
-				logo: GalleryVerticalEndIcon,
-				plan: 'Enterprise'
-			},
-			{
-				name: 'Acme Corp.',
-				logo: AudioWaveformIcon,
-				plan: 'Startup'
-			},
-			{
-				name: 'Evil Corp.',
-				logo: CommandIcon,
-				plan: 'Free'
+				name: 'Telecomunicaciones San Antonio',
+				logo: Building,
+				plan: ''
 			}
 		],
 		navMain: [
@@ -158,10 +149,7 @@
 </script>
 
 <Sidebar.Root {collapsible} {...restProps}>
-	<Sidebar.Header
-		><Button href="/" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"><House /></Button
-		></Sidebar.Header
-	>
+	<Sidebar.Header><TeamSwitcher teams={data.teams} /></Sidebar.Header>
 	<Sidebar.Content>
 		<NavMain items={data.navMain} />
 		<!--<NavProjects projects={data.projects} />-->
