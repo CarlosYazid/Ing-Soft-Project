@@ -52,12 +52,7 @@ export interface ConsumibleProduct extends BaseProductInterface {
 export interface ProductInterface extends ConsumibleProduct {
 	/** El costo de adquisición del producto. Se tipa como number para consistencia. */
 	cost: number;
-	// Si esta ProductInterface es la respuesta final del backend, también podrías añadir
-	// created_at: string;
-	// updated_at: string;
-	// u otras propiedades que el backend devuelva.
-	// Esto se solapa con el Product que te di antes, considera cuál usarás como 'fuente de la verdad'
-	// para los datos del backend. Generalmente, la respuesta de la API es la que manda.
+	cantidad?: number;
 }
 
 /**

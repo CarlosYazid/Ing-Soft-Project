@@ -1,53 +1,44 @@
 // src/lib/stores/service.ts
-import type { service } from '$lib/types';
+import type { service, ProductInterface } from '$lib/types';
 
 class Service {
-	#services: service[] = $state([]);
-	#editService: service | null = $state(null);
-	#deleteService: service | null = $state(null);
+	services: service[] = $state([]);
+	editService: service | null = $state(null);
+	deleteService: service | null = $state(null);
+	productsToAdd: ProductInterface[] = $state([]);
 
 	addService(service: service) {
-		this.#services.push(service);
+		this.services.push(service);
 	}
 
 	removeServiceById(id: number) {
-		this.#services = this.#services.filter((s) => s.id !== id);
+		this.services = this.services.filter((s) => s.id !== id);
 	}
 
 	findServiceById(id: number): service | null {
-		return this.#services.find((s) => s.id === id) || null;
+		return this.services.find((s) => s.id === id) || null;
 	}
 
 	clearEditService() {
-		this.#editService = null;
+		this.editService = null;
 	}
 
 	clearDeleteService() {
-		this.#deleteService = null;
+		this.deleteService = null;
 	}
 
-	get services(): service[] {
-		return this.#services;
+	clearProductsToAdd() {
+		this.productsToAdd = [];
 	}
 
-	set services(services: service[]) {
-		this.#services = services;
+	addProductToService(product: ProductInterface) {
+		serviceStore.productsToAdd.push(product);
+		//Llamar a la base de datos
 	}
 
-	get editService(): service | null {
-		return this.#editService;
-	}
-
-	set editService(service: service | null) {
-		this.#editService = service;
-	}
-
-	get deleteService(): service | null {
-		return this.#deleteService;
-	}
-
-	set deleteService(service: service | null) {
-		this.#deleteService = service;
+	deleteProductFromService(product: ProductInterface) {
+		serviceStore.productsToAdd.pop();
+		//Llamar a la base de datos
 	}
 }
 
