@@ -15,7 +15,7 @@ function toService(data: any): service {
 	};
 }
 
-export async function getAllServices(): Promise<service[]> {
+async function getAllServices(): Promise<service[]> {
 	try {
 		const rawServices = await api.get(`${SERVICE_BASE_PATH}/all`);
 		return rawServices.map(toService);
@@ -25,9 +25,9 @@ export async function getAllServices(): Promise<service[]> {
 	}
 }
 
-export async function createService(partialService: service): Promise<service> {
+async function createService(partialService: service): Promise<service> {
 	try {
-		const nuevoServicio = {
+		const payload = {
 			name: partialService.name ?? '',
 			price: partialService.price ?? 0,
 			cost: 0,
@@ -37,7 +37,7 @@ export async function createService(partialService: service): Promise<service> {
 			updated_at: new Date().toISOString()
 		};
 
-		const created = await api.post(`${SERVICE_BASE_PATH}/`, partialService);
+		const created = await api.post(`${SERVICE_BASE_PATH}/`, payload);
 		return toService(created);
 	} catch (error) {
 		console.error('Error al crear el servicio:', error);
@@ -45,19 +45,19 @@ export async function createService(partialService: service): Promise<service> {
 	}
 }
 
-export async function updateService(id: number, updatedFields: service): Promise<service> {
+async function updateService(id: number, updatedFields: service): Promise<service> {
 	try {
-		const updatedServicio = {
+		const payload = {
 			name: updatedFields.name ?? '',
 			price: updatedFields.price ?? 0,
 			cost: 0,
 			description: '',
 			short_description: '',
-			created_at: new Date().toISOString(), // o puedes traer esto del backend si quieres más precisión
+			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
 		};
 
-		const updated = await api.putJson(`${SERVICE_BASE_PATH}/${id}`, updatedServicio);
+		const updated = await api.putJson(`${SERVICE_BASE_PATH}/${id}`, payload);
 		return toService(updated);
 	} catch (error) {
 		console.error(`Error al actualizar el servicio con ID ${id}:`, error);
@@ -65,10 +65,7 @@ export async function updateService(id: number, updatedFields: service): Promise
 	}
 }
 
-/**
- * Elimina un servicio por ID.
- */
-export async function deleteServiceById(id: number): Promise<void> {
+async function deleteServiceById(id: number): Promise<void> {
 	try {
 		await api.delete(`${SERVICE_BASE_PATH}/${id}`);
 	} catch (error) {
@@ -76,3 +73,11 @@ export async function deleteServiceById(id: number): Promise<void> {
 		throw new Error('No se pudo eliminar el servicio');
 	}
 }
+
+// Exportamos los métodos en un solo objeto
+export const serviceController = {
+	getAllServices,
+	createService,
+	updateService,
+	deleteServiceById
+};

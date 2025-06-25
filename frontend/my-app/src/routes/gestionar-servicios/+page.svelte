@@ -1,74 +1,32 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Trash2, SquarePen } from '@lucide/svelte';
+	import { toast, Toaster } from 'svelte-sonner';
 
-	let products = [
-		{
-			id: 1,
-			name: 'Producto A',
-			description: 'Descripción del Producto A',
-			price: 10000,
-			category: 'Categoría 1',
-			stock: 50
-		},
-		{
-			id: 2,
-			name: 'Producto B',
-			description: 'Descripción del Producto B',
-			price: 20000,
-			category: 'Categoría 2',
-			stock: 30
-		},
-		{
-			id: 3,
-			name: 'Producto C',
-			description: 'Descripción del Producto C',
-			price: 30000,
-			category: 'Categoría 1',
-			stock: 20
-		},
-		{
-			id: 4,
-			name: 'Producto D',
-			description: 'Descripción del Producto D',
-			price: 40000,
-			category: 'Categoría 3',
-			stock: 10
+	import { onMount } from 'svelte';
+
+	import { serviceStore } from '$lib';
+	import { serviceController } from '$lib';
+
+	let services = $derived(serviceStore.services);
+
+	onMount(async () => {
+		try {
+			services = await serviceController.getAllServices();
+		} catch (e: any) {
+			toast('Algo ha salido mal', {
+				description: e.message || 'No se han podido cargar los productos',
+				action: {
+					label: 'Aceptar',
+					onClick: () => console.info('Aceptar')
+				}
+			});
 		}
-	];
-	let services = [
-		{
-			id: 1,
-			name: 'Impresión',
-			shortDescription: '',
-			price: '$10.000',
-			listProducts: [products[0], products[2]]
-		},
-		{
-			id: 2,
-			name: 'Fotocopia',
-			shortDescription: '',
-			price: '$20.000',
-			listProducts: [products[1], products[3]]
-		},
-		{
-			id: 3,
-			name: 'Plastificado',
-			shortDescription: '',
-			price: '$30.000',
-			listProducts: [products[0], products[1]]
-		},
-		{
-			id: 4,
-			name: 'Envolver Regalo',
-			shortDescription: '',
-			price: '$40.000',
-			listProducts: [products[3], products[2], products[1]]
-		}
-	];
+	});
 </script>
+
+<Toaster />
 
 <div class="mt-4 flex justify-end">
 	<Button
@@ -96,10 +54,10 @@
 				<Card.Description>Costo fijo: {service.price}</Card.Description>
 			</Card.Header>
 			<Card.Content>
-				<h1>Productos Asociados:</h1>
+				<!-- <h1>Productos Asociados:</h1>
 				{#each service.listProducts as product (product.id)}
 					<p class="text-sm">{product.name}</p>
-				{/each}
+				{/each} -->
 			</Card.Content>
 		</Card.Root>
 	{/each}
