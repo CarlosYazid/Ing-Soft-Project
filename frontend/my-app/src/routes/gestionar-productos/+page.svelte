@@ -22,6 +22,7 @@
 
 	//Lógica modal de editar producto
 	let editar = $state(false);
+
 	function onEdit(row: any) {
 		editar = true;
 		inventory.editProduct = inventory.findProductById(row.id)!;

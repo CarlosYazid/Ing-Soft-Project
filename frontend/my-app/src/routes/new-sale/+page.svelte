@@ -4,6 +4,23 @@
 	import ProductCardOrdenSummary from '$lib/components/product/ProductCardOrdenSummary.svelte';
 	import { orderProducts } from '$lib/data/products.js';
 	import { orderServices } from '$lib/data/products.js';
+	import { goto } from '$app/navigation';
+	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
+
+	let confirmar = $state(false);
+
+	function confirm() {
+		confirmar = true;
+	}
+
+	function confirmedSale() {
+		confirmar = false;
+		goto('/new-sale/confirm-sale');
+	}
+
+	function canceledSale() {
+		confirmar = false;
+	}
 </script>
 
 <div class="mt-4 flex justify-end">
@@ -39,11 +56,26 @@
 					<p class="text-lg font-semibold">Productos Seleccionados: {orderProducts.length}</p>
 					<p class="text-lg font-semibold">Servicios Seleccionados: {orderServices.length}</p>
 					<p class="text-lg font-semibold">Total Venta: $0.00</p>
-					<Button size="lg" class="bg-green-700 hover:bg-green-300 hover:text-green-700"
-						>Confirmar Venta</Button
+					<Button
+						onclick={() => {
+							confirm();
+						}}
+						size="lg"
+						class="bg-green-700 hover:bg-green-300 hover:text-green-700">Continuar Venta</Button
 					>
 				</div>
 			</Card.Content>
 		</Card.Root>
 	</div>
 </div>
+
+{#if confirmar}
+	<ConfirmDialog
+		callbackOnTrue={confirmedSale}
+		callbackOnFalse={canceledSale}
+		title={'¿Está seguro que desea continuar con la venta?'}
+		description={''}
+		btnClass={'bg-green-700 hover:bg-green-300 hover:text-green-700'}
+		action={'Continuar'}
+	/>
+{/if}

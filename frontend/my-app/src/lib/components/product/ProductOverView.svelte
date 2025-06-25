@@ -29,7 +29,7 @@
 					<p class="font-semibold text-gray-900 dark:text-white">
 						Precio Total: ${(product.price * quantity).toLocaleString()}
 					</p>
-					<Input type="number" bind:value={quantity} class="w-15" />
+					<Input type="number" bind:value={quantity} class="w-15" min="1" max={product.stock} />
 					<Button class=" bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 						>Agregar a la Lista de Venta Actual <ShoppingBasket /></Button
 					>

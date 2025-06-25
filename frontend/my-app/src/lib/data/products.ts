@@ -86,3 +86,21 @@ export let orderServices = [
 	{ service: services[1], quantity: 2 },
 	{ service: services[2], quantity: 1 }
 ];
+
+export let clients = [
+	{
+		id: 1,
+		name: 'Cliente A',
+		number: '123456789'
+	},
+	{
+		id: 2,
+		name: 'Cliente B',
+		number: '987654321'
+	},
+	{
+		id: 3,
+		name: 'Cliente C',
+		number: '456789123'
+	}
+];

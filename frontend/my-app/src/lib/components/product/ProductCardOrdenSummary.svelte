@@ -24,7 +24,7 @@
 				<h3 class="text-base font-semibold">Precio Total</h3>
 				<p class="text-sm font-semibold">${(product.price * quantity).toLocaleString()}</p>
 			</div>
-			<Input type="number" bind:value={quantity} class="w-15" />
+			<Input type="number" bind:value={quantity} class="w-15" min="1" max={product.stock} />
 
 			<Button class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button>
 		</div>
