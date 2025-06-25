@@ -7,7 +7,7 @@
 	import { inventory } from '$lib/store/index';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import { toast } from 'svelte-sonner';
+	import { toast, Toaster } from 'svelte-sonner';
 	import { productController } from '$lib/controllers';
 
 	let productsInventory: ProductInterface[] = $derived(inventory.products);
@@ -51,7 +51,7 @@
 		eliminar = false;
 		//Lógica delete
 		if (inventory.deleteProduct) {
-			inventory.removeProductById(inventory.deleteProduct.id);
+			productController.deleteById(inventory.deleteProduct.id);
 			inventory.clearDeleteProduct();
 		}
 	}
@@ -98,18 +98,12 @@
 
 	onMount(async () => {
 		try {
-			console.error('Cuidado')
+			console.error('Cuidado');
 			const fetchedProducts = await productController.getAll();
 			inventory.products = fetchedProducts;
-			toast.success('Algo ha salido mal', {
-				description: 'Los productos han sido cargados de forma exitosa',
-				action: {
-					label: 'Aceptar',
-					onClick: () => console.info('Aceptar')
-				}
-			});
 		} catch (e: any) {
-			toast.error('Algo ha salido mal', {
+			console.log('Hola');
+			toast('Algo ha salido mal', {
 				description: e.message || 'No se han podido cargar los productos',
 				action: {
 					label: 'Aceptar',
@@ -119,6 +113,8 @@
 		}
 	});
 </script>
+
+<Toaster />
 
 <div class="mt-4 flex justify-end">
 	<Button

@@ -20,7 +20,7 @@ export const BASE_URL = PUBLIC_BACKEND_BASE_URL;
  * @throws Error si la respuesta no es OK.
  */
 async function get(path: string, options?: RequestInit): Promise<any> {
-	const response = await fetch(`${BASE_URL}${path}`, { ...options, method: 'GET' });
+	const response = await fetch(`${path}`, { ...options, method: 'GET', mode: 'cors' });
 	if (!response.ok) {
 		// Podrías añadir más lógica de manejo de errores aquí, como parsear un cuerpo de error JSON
 		// si tu backend envía errores detallados en el body.
@@ -36,17 +36,15 @@ async function get(path: string, options?: RequestInit): Promise<any> {
  * Realiza una petición POST.
  * @param path El path relativo al endpoint.
  * @param data Los datos a enviar en el cuerpo de la petición (se serializan a JSON).
- * @param options Opciones adicionales para la petición fetch.
  * @returns La respuesta parseada como JSON.
  * @throws Error si la respuesta no es OK.
  */
-async function post(path: string, data: any, options?: RequestInit): Promise<any> {
+async function post(path: string, data: any): Promise<any> {
 	const response = await fetch(`${BASE_URL}${path}`, {
-		...options,
 		method: 'POST',
+		mode: 'cors',
 		headers: {
-			'Content-Type': 'application/json',
-			...(options?.headers || {}) // Permite sobrescribir o añadir más headers
+			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify(data)
 	});

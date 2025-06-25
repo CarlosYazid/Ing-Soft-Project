@@ -8,11 +8,13 @@
 	import CheckIcon from '@lucide/svelte/icons/check';
 	import ChevronsUpDownIcon from '@lucide/svelte/icons/chevrons-up-down';
 	import { cn } from '$lib/utils';
-
-	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
+	import { toast, Toaster } from 'svelte-sonner';
 	import { goto } from '$app/navigation';
 
+	import SuccessOrFailDialog from '$lib/components/common/SuccessOrFailDialog.svelte';
+
 	import { inventory } from '$lib/store';
+	import { productController } from '$lib/controllers';
 	import { validateProduct } from '$lib/utils/product/validarProductForm';
 
 	// Tipado
@@ -104,7 +106,7 @@
 				showDialog = true;
 			} else {
 				// Lógica para añadir un nuevo producto
-				inventory.addProduct(newProductData);
+				productController.create(newProductData);
 				console.log('Producto añadido:', newProductData);
 				showDialog = true;
 			}

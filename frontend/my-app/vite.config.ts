@@ -6,6 +6,18 @@ import path from 'path';
 
 export default defineConfig({
 	plugins: [tailwindcss(), sveltekit()],
+	server: {
+		proxy: {
+			// Aquí “cazamos” todas las rutas que empiecen por /products
+			'/products': {
+				target: 'https://ing-soft-project.onrender.com',
+				changeOrigin: true,
+				secure: false
+				// no necesitas rewrite si mantienes el mismo path
+				// rewrite: path => path.replace(/^\/products/, '/products')
+			}
+		}
+	},
 	test: {
 		projects: [
 			{
