@@ -101,7 +101,7 @@ class ProductCrud:
 
         filename = f"products/{product_id}_{name.replace(' ', '_').lower()}.{ext}"
 
-        if bool(last_image):
+        if bool(last_image.data[0]["image_url"]):
             last_image = "products/" + last_image.data[0]["image_url"].split("/")[-1]
             await client.storage.from_(SETTINGS.bucket_name).remove([last_image, filename])
         else:
