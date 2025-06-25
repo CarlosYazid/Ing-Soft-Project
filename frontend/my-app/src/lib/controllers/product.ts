@@ -56,16 +56,16 @@ export const productController = {
 	 * @returns A promise that resolves to the updated ProductInterface from the backend.
 	 * @throws An Error if the update fails (e.g., product not found, invalid data).
 	 */
-	async updateById(id: number, productData: Partial<ProductInterface>): Promise<ProductInterface> {
+	async updateById(id: number, productData: ProductInterface): Promise<ProductInterface> {
 		const dataToSend = {
 			id: productData.id,
 			name: productData.name,
-			short_description: productData.description,
+			short_description: '',
 			price: productData.price,
 			category: productData.category,
 			stock: productData.stock,
-			image_url: typeof productData.img === 'string' ? productData.img : '', // Ensure it's a URL string
-			description: productData.description, // Assuming backend needs full description in update
+			image_url: productData.img,
+			description: productData.description,
 			cost: productData.cost,
 			type: '',
 			expiration_date:
@@ -75,18 +75,14 @@ export const productController = {
 		};
 
 		try {
-			// Assume api.put returns ApiResponse<BackendProduct>
-			const response: ApiResponse<BackendProduct> = await api.put(
-				`${PRODUCTS_BASE_PATH}/${id}`,
-				dataToSend
-			);
-
-			if (!response.success) {
-				throw new Error(response.message || `Failed to update product with ID ${id}.`);
+			if (typeof dataToSend.image_url !== 'string' && dataToSend.image_url) {
+				//dataToSend.image_url = await this.uploadProductImage(dataToSend.id, dataToSend.image_url);
 			}
+			const response: BackendProduct = await api.putJson(`${PRODUCTS_BASE_PATH}/${id}`, {
+				additionalProp1: dataToSend
+			});
 
-			// Map the updated backend product to the frontend ProductInterface
-			return mapBackendProductToProduct(response.data);
+			return mapBackendProductToProduct(response);
 		} catch (error: any) {
 			console.error(`Error updating product ${id}:`, error);
 			if (error.message.includes('Status: 404')) {
@@ -150,18 +146,22 @@ export const productController = {
 	 * @throws Un Error si la subida falla.
 	 */
 	async uploadProductImage(productId: number, imageFile: File): Promise<string> {
+		if (!(imageFile instanceof File)) {
+			throw new Error('El archivo de imagen no es válido');
+		}
+
 		const formData = new FormData();
-		formData.append('image', imageFile);
+		formData.append('image', imageFile); // "image" debe coincidir con lo que espera el backend
 
 		try {
-			const response: string = await api.post(
-				`${PRODUCTS_BASE_PATH}/products/image/${productId}`,
+			// No pasar Content-Type, el fetch lo maneja
+			const response: string = await api.putFormData(
+				`${PRODUCTS_BASE_PATH}/image/${productId}`,
 				formData
 			);
-
 			return response;
 		} catch (error: any) {
-			throw new Error(`Error al subir imagen para el producto ${productId}:`, error);
+			throw new Error(`Error al subir imagen para el producto ${productId}: ${error.message}`);
 		}
 	},
 
@@ -205,6 +205,12 @@ export const productController = {
 			);
 			console.log('Response: ', createResponse);
 			createdProductBackend = createResponse;
+
+			function delay(ms: number) {
+				return new Promise((res) => setTimeout(res, ms));
+			}
+
+			await delay(1000);
 
 			// 3. Si se proporcionó un archivo de imagen (productData.img es un objeto File), subirlo usando el ID del nuevo producto
 			if (productData.img instanceof File) {

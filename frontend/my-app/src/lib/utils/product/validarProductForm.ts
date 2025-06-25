@@ -1,6 +1,6 @@
 import type { ProductFormInput } from '$lib/types';
 
-export function validateProduct(formData: ProductFormInput) {
+export function validateProduct(formData: ProductFormInput, editMode: boolean) {
 	const errors: Record<string, string> = {};
 
 	// 1. Validar Name (string) con Regex
@@ -44,16 +44,19 @@ export function validateProduct(formData: ProductFormInput) {
 	}
 
 	// 7. Validar Image (File) - Lógica de programación
+	console.log(editMode);
 	if (!formData.img) {
-		errors.img = 'Se requiere una imagen.';
+		if (!editMode) errors.img = 'Se requiere una imagen.';
 	} else {
 		const allowedTypes = ['image/jpeg', 'image/png'];
 		const maxSizeMB = 5;
-		if (!allowedTypes.includes(formData.img.type)) {
-			errors.img = 'Tipo de archivo no permitido. Solo JPG o PNG.';
-		}
-		if (formData.img.size > maxSizeMB * 1024 * 1024) {
-			errors.img = `El tamaño de la imagen no debe exceder ${maxSizeMB} MB.`;
+		if (!editMode) {
+			if (!allowedTypes.includes(formData.img.type)) {
+				errors.img = 'Tipo de archivo no permitido. Solo JPG o PNG.';
+			}
+			if (formData.img.size > maxSizeMB * 1024 * 1024) {
+				errors.img = `El tamaño de la imagen no debe exceder ${maxSizeMB} MB.`;
+			}
 		}
 	}
 

@@ -66,7 +66,7 @@
 		console.log('Datos del formulario crudos:', formData);
 
 		// 1. Validar la información obtenida
-		const errors = validateProduct(formData);
+		const errors = validateProduct(formData, product?.img ? true : false);
 
 		if (Object.keys(errors).length > 0) {
 			console.error('Errores de validación:', errors);
@@ -98,19 +98,22 @@
 		// 3. Procesar el producto (añadir o editar)
 		try {
 			if (product) {
-				inventory.removeProductById(product.id);
-				inventory.addProduct(newProductData);
+				// Lógica para editar producto
+				productController.updateById(product.id, newProductData);
 				inventory.clearEditProduct();
 
 				console.log('Producto editado:', newProductData);
 				showDialog = true;
 			} else {
 				// Lógica para añadir un nuevo producto
-				inventory.addProduct(newProductData);
 				productController.create(newProductData);
+				inventory.addProduct(newProductData);
 				console.log('Producto añadido:', newProductData);
 				showDialog = true;
 			}
+
+			//Actualizamos el estado global
+			inventory.products = await productController.getAll();
 		} catch (error) {
 			console.error('Error al guardar el producto:', error);
 			alert('Hubo un error al guardar el producto. Por favor, intenta de nuevo.');
@@ -220,29 +223,25 @@
 
 		<div class="grid gap-2">
 			<Label for="stock">Cantidad a ingresar</Label>
-			<Input name="stock" type="text" placeholder="20" value={product?.stock} required />
+			<Input name="stock" type="text" placeholder="20" value={product?.stock} />
 		</div>
 
 		<div class="grid gap-2">
-			<Label for="picture">Imagen de Producto</Label>
-			<Input
-				name="picture"
-				type="file"
-				required
-				onchange={(e) => {
-					const input = e.target as HTMLInputElement;
-					if (product?.img) {
-						product.img = input.files?.[0] || null;
-					}
-				}}
-			/>
+			<Label for="picture">Imagen actual de Producto</Label
+			>{#if product?.img && typeof product.img === 'string'}
+				<img src={product.img} alt="Imagen actual del producto" class="h-32 w-32 object-cover" />
+				<Input name="picture" type="file" />
+			{:else}
+				<Input name="picture" type="file" required />
+			{/if}
 		</div>
 	</div>
 
 	<div class="mt-4 flex items-center justify-between">
 		<Button type="submit" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
-			>Añadir producto</Button
+			>Confirmar</Button
 		>
+
 		<Button
 			class="bg-red-700 hover:bg-red-500"
 			href="/gestionar-productos"

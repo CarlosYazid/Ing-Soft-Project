@@ -58,29 +58,59 @@ async function post(path: string, data: any): Promise<any> {
 }
 
 /**
- * Realiza una petición PUT.
- * @param path El path relativo al endpoint.
- * @param data Los datos a enviar en el cuerpo de la petición (se serializan a JSON).
- * @param options Opciones adicionales para la petición fetch.
+ * Realiza una petición PUT con datos en formato JSON.
+ *
+ * @param path Ruta relativa del recurso en el backend.
+ * @param data Objeto que será serializado como JSON.
  * @returns La respuesta parseada como JSON.
- * @throws Error si la respuesta no es OK.
+ * @throws Error si la petición falla.
  */
-async function put(path: string, data: any, options?: RequestInit): Promise<any> {
+export async function putJson<T = any>(path: string, data: any): Promise<T> {
 	const response = await fetch(`${BASE_URL}${path}`, {
-		...options,
 		method: 'PUT',
+		mode: 'cors',
 		headers: {
-			'Content-Type': 'application/json',
-			...(options?.headers || {})
+			'Content-Type': 'application/json'
 		},
 		body: JSON.stringify(data)
 	});
+
 	if (!response.ok) {
-		const errorData = await response.json().catch(() => ({ message: response.statusText }));
+		const errorData = await response.json().catch(() => ({
+			message: response.statusText
+		}));
 		throw new Error(
 			`HTTP error! Status: ${response.status}, Details: ${JSON.stringify(errorData)}`
 		);
 	}
+
+	return response.json();
+}
+
+/**
+ * Realiza una petición PUT con datos en formato FormData (por ejemplo, para subir archivos).
+ *
+ * @param path Ruta relativa del recurso en el backend.
+ * @param formData Objeto FormData con archivos u otros datos.
+ * @returns La respuesta parseada como JSON.
+ * @throws Error si la petición falla.
+ */
+export async function putFormData<T = any>(path: string, formData: FormData): Promise<T> {
+	const response = await fetch(`${BASE_URL}${path}`, {
+		method: 'PUT',
+		mode: 'cors',
+		body: formData // ¡NO añadas headers!
+	});
+
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({
+			message: response.statusText
+		}));
+		throw new Error(
+			`HTTP error! Status: ${response.status}, Details: ${JSON.stringify(errorData)}`
+		);
+	}
+
 	return response.json();
 }
 
@@ -110,7 +140,8 @@ async function del(path: string, options?: RequestInit): Promise<any> {
 export const api = {
 	get,
 	post,
-	put,
+	putJson,
+	putFormData,
 	delete: del // 'delete' es una palabra reservada en JS, por eso usamos 'del' como nombre de función y lo mapeamos.
 };
 

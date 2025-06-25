@@ -52,6 +52,7 @@
 		//Lógica delete
 		if (inventory.deleteProduct) {
 			productController.deleteById(inventory.deleteProduct.id);
+			inventory.removeProductById(inventory.deleteProduct.id);
 			inventory.clearDeleteProduct();
 		}
 	}
