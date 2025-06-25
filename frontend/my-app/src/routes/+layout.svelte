@@ -25,6 +25,7 @@
 			<div class="flex items-center gap-2 px-4">
 				<Sidebar.Trigger class="-ml-1" />
 				<Separator orientation="vertical" class="mr-2 data-[orientation=vertical]:h-4" />
+				<!--
 				<Breadcrumb.Root>
 					<Breadcrumb.List>
 						<Breadcrumb.Item class="hidden md:block">
@@ -35,7 +36,7 @@
 							<Breadcrumb.Page>Data Fetching</Breadcrumb.Page>
 						</Breadcrumb.Item>
 					</Breadcrumb.List>
-				</Breadcrumb.Root>
+				</Breadcrumb.Root>-->
 			</div>
 			<div class="flex justify-end p-8">
 				<Button onclick={toggleMode} variant="outline" size="icon">

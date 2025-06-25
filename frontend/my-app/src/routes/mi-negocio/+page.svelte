@@ -18,6 +18,7 @@
 			class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Gestionar Servicios</Button
 		>
 	</div>
+	<!--
 	<div class="mt-4 flex justify-center">
 		<Button href="#" size="lg" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 			>Registrar Reabastecimiento</Button
@@ -37,5 +38,5 @@
 		<Button href="#" size="lg" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 			>Consultar Reportes</Button
 		>
-	</div>
+	</div>-->
 </div>

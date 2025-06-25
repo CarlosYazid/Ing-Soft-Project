@@ -32,21 +32,21 @@
 		navMain: [
 			{
 				title: 'Realizar Nueva Venta',
-				url: '#',
+				url: '/new-sale',
 				icon: ShoppingCart,
 				isActive: true,
 				items: [
 					{
 						title: 'Realizar Venta',
-						url: '#'
+						url: '/new-sale'
 					},
 					{
 						title: 'Seleccionar Productos',
-						url: '#'
+						url: '/new-sale/select-products'
 					},
 					{
 						title: 'Seleccionar Servicios',
-						url: '#'
+						url: '/new-sale/select-services'
 					}
 				]
 			},

@@ -1,1 +1,1 @@
-export * from './ProductCard.svelte';
+export * from './ProductCardOrdenSummary.svelte';
