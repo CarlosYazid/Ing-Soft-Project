@@ -3,13 +3,16 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Trash2, SquarePen } from '@lucide/svelte';
 	import { toast, Toaster } from 'svelte-sonner';
+	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
 
 	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
 	import { serviceStore } from '$lib';
 	import { serviceController } from '$lib';
 
 	let services = $derived(serviceStore.services);
+	$inspect(services);
 
 	onMount(async () => {
 		try {
@@ -24,6 +27,45 @@
 			});
 		}
 	});
+
+	//Lógica modal de editar producto
+	let editar = $state(false);
+	function onEdit(row: any) {
+		editar = true;
+		serviceStore.editService = row;
+	}
+
+	function confirmedEdit() {
+		editar = false;
+		goto('/gestionar-servicios/add-service');
+	}
+
+	function canceledEdit() {
+		editar = false;
+		serviceStore.clearEditService();
+	}
+
+	//Lógica modal de eliminar producto
+	let eliminar = $state(false);
+	function onDelete(row: any) {
+		eliminar = true;
+		serviceStore.deleteService = serviceStore.findServiceById(row.id)!;
+	}
+
+	function confirmedDelete() {
+		eliminar = false;
+		//Lógica delete
+		if (serviceStore.deleteService) {
+			serviceController.deleteServiceById(serviceStore.deleteService.id);
+			serviceStore.removeServiceById(serviceStore.deleteService.id);
+			serviceStore.clearDeleteService();
+		}
+	}
+
+	function canceledDelete() {
+		eliminar = false;
+		serviceStore.clearDeleteService();
+	}
 </script>
 
 <Toaster />
@@ -45,9 +87,17 @@
 					<div class="flex items-center justify-between">
 						<h3 class="text-2xl">{service.name}</h3>
 						<div class="flex gap-2">
-							<Button class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
-								><SquarePen /></Button
-							><Button class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button>
+							<Button
+								class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+								onclick={() => {
+									onEdit(service);
+								}}><SquarePen /></Button
+							><Button
+								class="bg-red-700 hover:bg-red-300 hover:text-red-700"
+								onclick={() => {
+									onDelete(service);
+								}}><Trash2 /></Button
+							>
 						</div>
 					</div>
 				</Card.Title>
@@ -62,3 +112,25 @@
 		</Card.Root>
 	{/each}
 </div>
+
+{#if eliminar}
+	<ConfirmDialog
+		callbackOnTrue={confirmedDelete}
+		callbackOnFalse={canceledDelete}
+		title={'¿Está seguro que desea eliminar el Servicio?'}
+		description={'Esta acción no se puede deshacer. El servicio será eliminado permanentemente.'}
+		btnClass={'bg-red-700 hover:bg-red-300 hover:text-red-700'}
+		action={'Eliminar'}
+	/>
+{/if}
+
+{#if editar}
+	<ConfirmDialog
+		callbackOnTrue={confirmedEdit}
+		callbackOnFalse={canceledEdit}
+		title={'¿Está seguro que desea editar el Servicio?'}
+		description={''}
+		btnClass={'bg-blue-700 hover:bg-blue-300 hover:text-blue-700'}
+		action={'Editar'}
+	/>
+{/if}

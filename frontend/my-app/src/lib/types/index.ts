@@ -1,3 +1,3 @@
 export * from './productTypes';
-export * from './responses';
+export * from './ProductResponses';
 export * from './serviceTypes';

@@ -9,9 +9,7 @@ import type {
 	BackendBaseProduct,
 	BackendProduct,
 	BaseProductInterface,
-	ProductInterface,
-	ApiResponse,
-	ApiErrorResponse
+	ProductInterface
 } from '$lib/types';
 
 const PRODUCTS_BASE_PATH = '/products';
@@ -90,9 +88,8 @@ export const productController = {
 			}
 			if (error instanceof Error && error.message.includes('Details: ')) {
 				try {
-					const errorDetails: ApiErrorResponse = JSON.parse(error.message.split('Details: ')[1]);
 					throw new Error(
-						`Failed to update product: ${errorDetails.message || 'Unknown server error'}`
+						`Failed to update product: ${error.message.split('Details: ')[1] || 'Unknown server error'}`
 					);
 				} catch {
 					throw new Error(`Failed to update product: ${error.message}`);
@@ -121,9 +118,8 @@ export const productController = {
 			}
 			if (error instanceof Error && error.message.includes('Details: ')) {
 				try {
-					const errorDetails: ApiErrorResponse = JSON.parse(error.message.split('Details: ')[1]);
 					throw new Error(
-						`Failed to delete product: ${errorDetails.message || 'Unknown server error'}`
+						`Failed to delete product: ${error.message.split('Details: ')[1] || 'Unknown server error'}`
 					);
 				} catch {
 					throw new Error(`Failed to delete product: ${error.message}`);

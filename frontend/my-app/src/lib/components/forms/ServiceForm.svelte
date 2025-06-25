@@ -7,7 +7,7 @@
 
 	import type { service, serviceFormInput } from '$lib/types';
 	import { serviceStore } from '$lib/store';
-	import * as serviceController from '$lib/controllers';
+	import { serviceController } from '$lib/controllers';
 	import { validateServiceForm } from '$lib/utils/servicios';
 
 	// --- Estados locales ---
@@ -40,7 +40,6 @@
 			let saved: service;
 			if (current) {
 				saved = await serviceController.updateService(current.id, payload);
-				serviceStore.services = await serviceController.getAllServices();
 				serviceStore.clearEditService();
 				toast.success('Servicio actualizado correctamente');
 			} else {
@@ -48,6 +47,7 @@
 				serviceStore.addService(saved);
 				toast.success('Servicio creado correctamente');
 			}
+			serviceStore.services = await serviceController.getAllServices();
 			goto('/gestionar-servicios');
 		} catch (err) {
 			console.error(err);
