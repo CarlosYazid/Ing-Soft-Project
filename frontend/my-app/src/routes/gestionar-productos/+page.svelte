@@ -6,12 +6,15 @@
 	import { Trash2, SquarePen } from '@lucide/svelte';
 	import { inventory } from '$lib/store/index';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { toast } from 'svelte-sonner';
+	import { productController } from '$lib/controllers';
 
-	let productMocks: ProductInterface[] = $derived(inventory.products);
-	$inspect(productMocks);
+	let productsInventory: ProductInterface[] = $derived(inventory.products);
+	$inspect(productsInventory);
 
 	let products: ProductRow[] = $derived(
-		productMocks.map((p) => ({
+		productsInventory.map((p) => ({
 			id: p.id,
 			name: p.name,
 			category: p.category,
@@ -92,6 +95,29 @@
 			return 0;
 		});
 	}
+
+	onMount(async () => {
+		try {
+			console.error('Cuidado')
+			const fetchedProducts = await productController.getAll();
+			inventory.products = fetchedProducts;
+			toast.success('Algo ha salido mal', {
+				description: 'Los productos han sido cargados de forma exitosa',
+				action: {
+					label: 'Aceptar',
+					onClick: () => console.info('Aceptar')
+				}
+			});
+		} catch (e: any) {
+			toast.error('Algo ha salido mal', {
+				description: e.message || 'No se han podido cargar los productos',
+				action: {
+					label: 'Aceptar',
+					onClick: () => console.info('Aceptar')
+				}
+			});
+		}
+	});
 </script>
 
 <div class="mt-4 flex justify-end">
@@ -105,7 +131,7 @@
 
 <div class="px-8">
 	<h3 class="font-semiboldc mt-8 bg-zinc-500/15 p-4 text-lg">Lista de Productos Actuales</h3>
-	{#key productMocks}
+	{#key productsInventory}
 		<Table.Root>
 			<Table.Caption>Productos Actuales en la Base de Datos</Table.Caption>
 			<Table.Header class="bg-zinc-500/10">

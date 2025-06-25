@@ -1,13 +1,10 @@
+import { productController } from '$lib/controllers';
 import type { ProductInterface } from '$lib/types';
 
 class Inventory {
 	#products: ProductInterface[] = $state([]);
 	#editProduct: ProductInterface | null = $state(null);
 	#deleteProduct: ProductInterface | null = $state(null);
-
-	constructor(initialData: ProductInterface[]) {
-		this.#products = initialData;
-	}
 
 	addProduct(product: ProductInterface) {
 		this.#products.push(product);
@@ -55,7 +52,9 @@ class Inventory {
 }
 
 // Llamar el DB controller dentro de inventory
-export const inventory = new Inventory([
+export const inventory = new Inventory();
+
+/*[
 	{
 		id: 1,
 		name: 'Cuaderno Argollado Pasta Dura',
@@ -111,4 +110,4 @@ export const inventory = new Inventory([
 		img: null,
 		expirationDate: Date.now().toString()
 	}
-]);
+] */
