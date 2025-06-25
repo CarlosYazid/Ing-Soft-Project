@@ -1,13 +1,10 @@
-import type { ProductInterface } from '$lib/types/';
+import { productController } from '$lib/controllers';
+import type { ProductInterface } from '$lib/types';
 
 class Inventory {
 	#products: ProductInterface[] = $state([]);
 	#editProduct: ProductInterface | null = $state(null);
 	#deleteProduct: ProductInterface | null = $state(null);
-
-	constructor(initialData: ProductInterface[]) {
-		this.#products = initialData;
-	}
 
 	addProduct(product: ProductInterface) {
 		this.#products.push(product);
@@ -55,7 +52,9 @@ class Inventory {
 }
 
 // Llamar el DB controller dentro de inventory
-export const inventory = new Inventory([
+export const inventory = new Inventory();
+
+/*[
 	{
 		id: 1,
 		name: 'Cuaderno Argollado Pasta Dura',
@@ -65,7 +64,7 @@ export const inventory = new Inventory([
 		category: 'Cuadernos',
 		stock: 200,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 2,
@@ -76,7 +75,7 @@ export const inventory = new Inventory([
 		category: 'Esferos y Lápices',
 		stock: 150,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 3,
@@ -87,7 +86,7 @@ export const inventory = new Inventory([
 		category: 'Marcadores y Resaltadores',
 		stock: 90,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 4,
@@ -98,7 +97,7 @@ export const inventory = new Inventory([
 		category: 'Papelería Creativa',
 		stock: 180,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	},
 	{
 		id: 5,
@@ -109,6 +108,6 @@ export const inventory = new Inventory([
 		category: 'Organización',
 		stock: 100,
 		img: null,
-		expirationDate: Date.now()
+		expirationDate: Date.now().toString()
 	}
-]);
+] */

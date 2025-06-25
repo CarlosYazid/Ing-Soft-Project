@@ -1,8 +1,7 @@
 <script>
-	import AddProductForm from '$lib/components/product/AddProductForm.svelte';
-	import { inventory } from '$lib/store/index';
+	import ProductForm from '$lib/components/product/ProductForm.svelte';
 </script>
 
 <div class="flex justify-center">
-	<AddProductForm />
-</div>
+	<ProductForm />
+</div>	
