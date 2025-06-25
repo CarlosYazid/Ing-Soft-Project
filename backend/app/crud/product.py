@@ -99,11 +99,15 @@ class ProductCrud:
         if not bool(last_image.data):
             raise HTTPException(status_code=404, detail="Product not found")
 
-        last_image = "products/" + last_image.data[0]["image_url"].split("/")[-1]
         filename = f"products/{product_id}_{name.replace(' ', '_').lower()}.{ext}"
-        file_content = await image.read()
 
-        await client.storage.from_(SETTINGS.bucket_name).remove([last_image, filename])
+        if bool(last_image):
+            last_image = "products/" + last_image.data[0]["image_url"].split("/")[-1]
+            await client.storage.from_(SETTINGS.bucket_name).remove([last_image, filename])
+        else:
+            await client.storage.from_(SETTINGS.bucket_name).remove([filename])
+
+        file_content = await image.read()
 
         response = await client.storage.from_(SETTINGS.bucket_name).upload(
             path=filename,
