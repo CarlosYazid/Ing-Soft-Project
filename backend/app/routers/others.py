@@ -53,7 +53,7 @@ async def create_payment(request: Request, payment: PaymentCreate):
     """
     return await PaymentCrud.create_payment(payment)
 
-@router.post("/{_id}")
+@router.put("/{_id}")
 async def update_payment_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing payment by ID.
@@ -129,7 +129,6 @@ async def delete_payment_by_id_2(request: Request, id: int):
     Delete a payment by ID.
     """
     return await PaymentCrud.delete_payment(id)
-
 
 @router.get("/status/")
 async def get_payments_by_status_2(request: Request, status: PaymentStatus):

@@ -54,7 +54,7 @@ async def create_service(request: Request, service: ServiceCreate):
     """
     return await ServiceCrud.create_service(service)
 
-@router.post("/{_id}")
+@router.put("/{_id}")
 async def update_service_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing service by ID.

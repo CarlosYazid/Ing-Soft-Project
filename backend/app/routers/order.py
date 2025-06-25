@@ -53,13 +53,12 @@ async def create_order(request: Request, order: OrderCreate):
     """
     return await OrderCrud.create_order(order)
 
-@router.post("/{_id}")
+@router.put("/{_id}")
 async def update_order_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing order by ID.
     """
     return await OrderCrud.update_order(_id, fields)
-
 
 @router.delete("/{_id}")
 async def delete_order_by_id(request: Request, _id: int):
@@ -166,7 +165,7 @@ async def create_order_service(request: Request, order_service: OrderServiceCrea
     """
     return await OrderCrud.add_service_to_order(order_service)
 
-@router.post("/services/{_id}")
+@router.put("/services/{_id}")
 async def update_order_service_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing order service by ID.
@@ -239,7 +238,7 @@ async def create_order_product(request: Request, order_product: OrderProductCrea
     """
     return await OrderCrud.add_product_to_order(order_product)
 
-@router.post("/products/{_id}")
+@router.put("/products/{_id}")
 async def update_order_product_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing order product by ID.
