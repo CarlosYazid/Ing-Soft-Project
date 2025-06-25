@@ -4,8 +4,9 @@ from db import get_db_client
 from models import Product, ProductCategory, ProductTypes, ProductCreate
 from core import SETTINGS
 
-
 class ProductCrud:
+
+    ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
     
     @classmethod
     async def get_all_products(cls) -> list[Product]:
@@ -73,6 +74,10 @@ class ProductCrud:
                 raise HTTPException(status_code=404, detail="The product already exists")
         
         product.image_url = None  # Initialize image_url to None
+
+        from services.gen_ai import GenAIService
+
+        product.short_description = await GenAIService.gen_short_description(product.description)
             
         response = await client.table(SETTINGS.product_table).insert(product.model_dump(mode="json")).execute()
         
@@ -85,6 +90,12 @@ class ProductCrud:
     @classmethod
     async def upload_image(cls, product_id: int, image: UploadFile) -> str:
         """Upload an image for a product and return the URL."""
+
+        if image.content_type not in cls.ALLOWED_IMAGE_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Tipo de archivo no permitido: {image.content_type}. Debe ser PNG, JPEG o WEBP.",
+            )
         
         client = await get_db_client()
         

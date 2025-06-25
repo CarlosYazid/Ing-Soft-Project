@@ -61,12 +61,12 @@ async def update_product_by_id(request: Request, _id: int, fields: dict):
     return await ProductCrud.update_product(_id, fields)
 
 @router.put("/image/{_id}")
-async def update_product_image(request: Request, _id: int, image: UploadFile = File(...)):
+async def update_product_image(request: Request, _id: int, image: UploadFile = File(..., title="photo_product")):
     """ Update the image of a product by ID."""
     return await ProductCrud.upload_image(_id, image)
 
 @router.put("/image/")
-async def update_product_image_2(request: Request, id: int, image: UploadFile = File(...)):
+async def update_product_image_2(request: Request, id: int, image: UploadFile = File(..., title="photo_product")):
     """ Update the image of a product by ID."""
     return await ProductCrud.upload_image(id, image)
 

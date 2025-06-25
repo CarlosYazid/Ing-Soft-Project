@@ -3,9 +3,9 @@ from fastapi import HTTPException
 from db import get_db_client
 from models import Order, OrderStatus, OrderService, OrderProduct, OrderCreate, OrderServiceCreate, OrderProductCreate
 from core import SETTINGS
-from crud import ServiceCrud, ProductCrud
+
 class OrderCrud:
-    
+
     @classmethod
     async def get_all_orders(cls) -> list[Order]:
         """Retrieve all orders."""
@@ -17,7 +17,7 @@ class OrderCrud:
             raise HTTPException(detail="No orders found", status_code=404)
 
         return [Order.model_validate(order) for order in response.data]
-    
+
     @classmethod
     async def create_order(cls, order: OrderCreate) -> Order:
         """Create a new order."""
@@ -41,7 +41,7 @@ class OrderCrud:
             raise HTTPException(detail="Order not found", status_code=404)
 
         return Order.model_validate(response.data[0])
-    
+
     @classmethod
     async def update_order(cls, order_id: int, fields: dict) -> Order:
         """Update an existing order."""
@@ -53,7 +53,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to update order", status_code=500)
 
         return Order.model_validate(response.data[0])
-    
+
     @classmethod
     async def delete_order(cls, order_id: int) -> None:
         """Delete an order by ID."""
@@ -63,9 +63,9 @@ class OrderCrud:
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to delete order", status_code=500)
-        
+
         return bool(response.data)
-        
+
     @classmethod
     async def get_orders_by_status(cls, status: OrderStatus) -> list[Order]:
         """Retrieve orders by status."""
@@ -77,11 +77,14 @@ class OrderCrud:
             raise HTTPException(detail="No orders found with this status", status_code=404)
 
         return [Order.model_validate(order) for order in response.data]
-    
+
     @classmethod
     async def add_service_to_order(cls, order_service: OrderServiceCreate) -> OrderService:
         """Add a service to an order."""
         client = await get_db_client()
+
+        # Import ServiceCrud directly from its file path
+        from crud.service import ServiceCrud
 
         # Ensure the order_id exists before adding the service
         if not await cls.exist_order_by_id(order_service.order_id):
@@ -97,16 +100,19 @@ class OrderCrud:
             raise HTTPException(detail="Failed to add service to order", status_code=500)
 
         return OrderService.model_validate(response.data[0])
-    
+
     @classmethod
     async def add_product_to_order(cls, order_product: OrderProductCreate) -> OrderProduct:
         """Add a product to an order."""
         client = await get_db_client()
-        
+
+        # Import ProductCrud directly from its file path
+        from crud.product import ProductCrud
+
         # Ensure the order_id exists before adding the product
         if not await cls.exist_order_by_id(order_product.order_id):
             raise HTTPException(detail="Order not found", status_code=404)
-        
+
         # Ensure the product_id exists before adding the product
         if not await ProductCrud.exist_product_by_id(order_product.product_id):
             raise HTTPException(detail="Product not found", status_code=404)
@@ -117,7 +123,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to add product to order", status_code=500)
 
         return OrderProduct.model_validate(response.data[0])
-    
+
     @classmethod
     async def get_order_services(cls, order_id: int) -> list[OrderService]:
         """Retrieve services associated with an order."""
@@ -129,7 +135,7 @@ class OrderCrud:
             raise HTTPException(detail="No services found for this order", status_code=404)
 
         return [OrderService.model_validate(service) for service in response.data]
-    
+
     @classmethod
     async def get_order_products(cls, order_id: int) -> list[OrderProduct]:
         """Retrieve products associated with an order."""
@@ -141,8 +147,8 @@ class OrderCrud:
             raise HTTPException(detail="No products found for this order", status_code=404)
 
         return [OrderProduct.model_validate(product) for product in response.data]
-    
-    
+
+
     @classmethod
     async def get_order_service_by_id(cls, order_service_id: int) -> OrderService:
         """Retrieve an order service by ID."""
@@ -154,20 +160,20 @@ class OrderCrud:
             raise HTTPException(detail="Order service not found", status_code=404)
 
         return OrderService.model_validate(response.data[0])
-    
-    
+
+
     @classmethod
     async def get_order_product_by_id(cls, order_product_id: int) -> OrderProduct:
         """Retrieve an order product by ID."""
         client = await get_db_client()
         response = await client.table(SETTINGS.order_product_table).select("*").eq("id", order_product_id).execute()
-        
+
         if not(bool(response.data)):
             raise HTTPException(detail="Order product not found", status_code=404)
-        
+
         return OrderProduct.model_validate(response.data[0])
-    
-    
+
+
     @classmethod
     async def update_order_service(cls, order_service_id: int, fields: dict) -> OrderService:
         """Update an existing order service."""
@@ -179,12 +185,15 @@ class OrderCrud:
             raise HTTPException(detail="Failed to update order service", status_code=500)
 
         return OrderService.model_validate(response.data[0])
-    
+
     @classmethod
     async def update_order_product(cls, order_product_id: int, fields: dict) -> OrderProduct:
         """Update an existing order product."""
         client = await get_db_client()
-        
+
+        # Import ProductCrud directly from its file path
+        from crud.product import ProductCrud
+
         if not await cls.exist_order_product_by_id(order_product_id):
             raise HTTPException(detail="Order product not found", status_code=404)
         if "order_id" in fields and not await cls.exist_order_by_id(fields["order_id"]):
@@ -198,12 +207,12 @@ class OrderCrud:
             raise HTTPException(detail="Failed to update order product", status_code=500)
 
         return OrderProduct.model_validate(response.data[0])
-    
+
     @classmethod
     async def delete_order_service(cls, order_service_id: int) -> None:
         """Delete an order service by ID."""
         client = await get_db_client()
-        
+
         # Check if the order service exists before attempting to delete
         if not await cls.exist_order_service_by_id(order_service_id):
             raise HTTPException(detail="Order service not found", status_code=404)
@@ -212,14 +221,14 @@ class OrderCrud:
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to delete order service", status_code=500)
-        
+
         return bool(response.data)
 
     @classmethod
     async def delete_order_product(cls, order_product_id: int) -> None:
         """Delete an order product by ID."""
         client = await get_db_client()
-        
+
         # Check if the order product exists before attempting to delete
         if not await cls.exist_order_product_by_id(order_product_id):
             raise HTTPException(detail="Order product not found", status_code=404)
@@ -228,9 +237,9 @@ class OrderCrud:
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to delete order product", status_code=500)
-        
+
         return bool(response.data)
-        
+
     @classmethod
     async def exist_order_by_id(cls, order_id: int) -> bool:
         """Check if an order exists by ID."""
@@ -239,7 +248,7 @@ class OrderCrud:
         response = await client.table(SETTINGS.order_table).select("id").eq("id", order_id).execute()
 
         return bool(response.data)
-    
+
     @classmethod
     async def exist_order_service_by_id(cls, order_service_id: int) -> bool:
         """Check if an order service exists by ID."""
@@ -248,7 +257,7 @@ class OrderCrud:
         response = await client.table(SETTINGS.order_service_table).select("id").eq("id", order_service_id).execute()
 
         return bool(response.data)
-    
+
     @classmethod
     async def exist_order_product_by_id(cls, order_product_id: int) -> bool:
         """Check if an order product exists by ID."""
@@ -257,7 +266,7 @@ class OrderCrud:
         response = await client.table(SETTINGS.order_product_table).select("id").eq("id", order_product_id).execute()
 
         return bool(response.data)
-    
+
     @classmethod
     async def get_orders_by_client_id(cls, client_id: int) -> list[Order]:
         """Retrieve all orders for a specific client."""
@@ -269,8 +278,8 @@ class OrderCrud:
             raise HTTPException(detail="No orders found for this client", status_code=404)
 
         return [Order.model_validate(order) for order in response.data]
-    
-    
+
+
     @classmethod
     async def get_orders_service_by_order_id(cls, order_id: int) -> list[OrderService]:
         """Retrieve all services for a specific order."""
@@ -282,7 +291,7 @@ class OrderCrud:
             raise HTTPException(detail="No services found for this order", status_code=404)
 
         return [OrderService.model_validate(service) for service in response.data]
-    
+
     @classmethod
     async def get_orders_product_by_order_id(cls, order_id: int) -> list[OrderProduct]:
         """Retrieve all products for a specific order."""
@@ -294,7 +303,7 @@ class OrderCrud:
             raise HTTPException(detail="No products found for this order", status_code=404)
 
         return [OrderProduct.model_validate(product) for product in response.data]
-    
+
     @classmethod
     async def get_orders_service_by_service_id(cls, service_id: int) -> list[OrderService]:
         """Retrieve all orders for a specific service."""
@@ -306,7 +315,7 @@ class OrderCrud:
             raise HTTPException(detail="No orders found for this service", status_code=404)
 
         return [OrderService.model_validate(service) for service in response.data]
-    
+
     @classmethod
     async def get_orders_product_by_product_id(cls, product_id: int) -> list[OrderProduct]:
         """Retrieve all orders for a specific product."""
