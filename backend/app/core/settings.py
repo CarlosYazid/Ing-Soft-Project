@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     order_product_table: str = Field(..., alias="order_product_table")
     payment_table: str = Field(..., alias="payment_table")
 
+    #Groq
+    groq_api_key: SecretStr = Field(..., alias="groq_api_key")
+    groq_model: str = Field(..., alias="groq_model")
+
     # SMTP (Gmail)
     smtp_host: str = "smtp.gmail.com"
     smtp_port: int = 587
