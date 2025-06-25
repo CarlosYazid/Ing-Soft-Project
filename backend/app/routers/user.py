@@ -29,21 +29,21 @@ async def create_employee(request: Request,
     # Here you would typically call a service to handle the creation logic
     return await UserCrud.create_employee(employee)
 
-@router.post("/employee/{_id}")
+@router.put("/employee/{_id}")
 async def update_employee_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing employee by ID.
     """
     return await UserCrud.update_employee_by_id(_id, fields)
 
-@router.post("/employee/update/")
+@router.put("/employee/update/")
 async def update_employee_by_id_2(request: Request, id: int, fields: dict):
     """
     Update an existing employee by ID.
     """
     return await UserCrud.update_employee_by_id(id, fields)
 
-@router.post("/employee/email/{email}")
+@router.put("/employee/email/{email}")
 async def update_employee_by_email(request: Request, email: str, fields: dict):
     """
     Update an existing employee by email.
@@ -251,28 +251,28 @@ async def get_client_base_by_email_2(request: Request, email: str):
     return await UserService.get_client_base_by_email(email)
 
 
-@router.post("/client/{_id}")
+@router.put("/client/{_id}")
 async def update_client_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing client by ID.
     """
     return await UserCrud.update_client_by_id(_id, fields)
 
-@router.post("/client/update/")
+@router.put("/client/update/")
 async def update_client_by_id_2(request: Request, id: int, fields: dict):
     """
     Update an existing client by ID.
     """
     return await UserCrud.update_client_by_id(id, fields)
 
-@router.post("/client/update/email/{email}")
+@router.put("/client/update/email/{email}")
 async def update_client_by_email(request: Request, email: str, fields: dict):
     """
     Update an existing client by email.
     """
     return await UserCrud.update_client_by_email(email, fields)
 
-@router.post("/client/update/email/")
+@router.put("/client/update/email/")
 async def update_client_by_email_2(request: Request, email: str, fields: dict):
     """
     Update an existing client by email.

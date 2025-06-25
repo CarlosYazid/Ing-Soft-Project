@@ -53,20 +53,19 @@ async def create_product(request: Request, product: ProductCreate):
     return await ProductCrud.create_product(product)
 
 
-@router.post("/{_id}")
+@router.put("/{_id}")
 async def update_product_by_id(request: Request, _id: int, fields: dict):
     """
     Update an existing product by ID.
     """
     return await ProductCrud.update_product(_id, fields)
 
-
-@router.post("/image/{_id}")
+@router.put("/image/{_id}")
 async def update_product_image(request: Request, _id: int, image: UploadFile = File(...)):
     """ Update the image of a product by ID."""
     return await ProductCrud.upload_image(_id, image)
 
-@router.post("/image/")
+@router.put("/image/")
 async def update_product_image_2(request: Request, id: int, image: UploadFile = File(...)):
     """ Update the image of a product by ID."""
     return await ProductCrud.upload_image(id, image)

@@ -41,7 +41,7 @@ class Settings(BaseSettings):
     jwt_secret: SecretStr = Field(..., alias="jwt_secret")
     
     # Otros (opcional: CORS, JWT, etc.)
-    allowed_origins: list[str] = []
+    allowed_origins: list[str] = ["*"]
     allow_credentials: bool = True
     allow_methods: list[str] = ["*"]
     allow_headers: list[str] = ["*"]

@@ -65,6 +65,12 @@ class ProductCrud:
         """Create a new product."""
         
         client = await get_db_client()
+
+        names = await client.table(SETTINGS.product_table).select("name").execute()
+
+        if bool(names.data):
+            if product.name.lower() in names.data:
+                raise HTTPException(status_code=404, detail="The product already exists")
         
         product.image_url = None  # Initialize image_url to None
             
