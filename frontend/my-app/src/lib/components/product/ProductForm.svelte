@@ -63,7 +63,6 @@
 		event.preventDefault();
 
 		const formData = getFormData(event);
-		console.log('Datos del formulario crudos:', formData);
 
 		// 1. Validar la información obtenida
 		const errors = validateProduct(formData, product?.img ? true : false);
@@ -77,7 +76,6 @@
 			return; // Detiene el envío si hay errores
 		}
 
-		console.log('¡Datos del formulario válidos!');
 		isFormValid = true;
 
 		// 2. Convertir a ProductInterface (con tipos correctos)
@@ -93,22 +91,17 @@
 			expirationDate: formData.expirationDate
 		};
 
-		console.log('Producto listo para procesar:', newProductData);
-
 		// 3. Procesar el producto (añadir o editar)
 		try {
 			if (product) {
 				// Lógica para editar producto
 				productController.updateById(product.id, newProductData);
 				inventory.clearEditProduct();
-
-				console.log('Producto editado:', newProductData);
 				showDialog = true;
 			} else {
 				// Lógica para añadir un nuevo producto
 				productController.create(newProductData);
 				inventory.addProduct(newProductData);
-				console.log('Producto añadido:', newProductData);
 				showDialog = true;
 			}
 
@@ -122,7 +115,6 @@
 
 	// Lógica para controlar la modal
 	let showDialog = $state();
-	$inspect(showDialog);
 	let isFormValid = $state(false);
 	let formErrors = $state('');
 </script>

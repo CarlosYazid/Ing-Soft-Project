@@ -11,7 +11,6 @@
 	import { productController } from '$lib/controllers';
 
 	let productsInventory: ProductInterface[] = $derived(inventory.products);
-	$inspect(productsInventory);
 
 	let products: ProductRow[] = $derived(
 		productsInventory.map((p) => ({
@@ -99,11 +98,9 @@
 
 	onMount(async () => {
 		try {
-			console.error('Cuidado');
 			const fetchedProducts = await productController.getAll();
 			inventory.products = fetchedProducts;
 		} catch (e: any) {
-			console.log('Hola');
 			toast('Algo ha salido mal', {
 				description: e.message || 'No se han podido cargar los productos',
 				action: {
