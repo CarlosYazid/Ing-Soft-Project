@@ -2,3 +2,4 @@
 export * from './types';
 export * from './components/product';
 export * from './controllers';
+export * from './store';

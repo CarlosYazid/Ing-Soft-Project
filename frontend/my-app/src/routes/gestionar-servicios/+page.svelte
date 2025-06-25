@@ -71,7 +71,10 @@
 </script>
 
 <div class="mt-4 flex justify-end">
-	<Button href="#" size="lg" class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+	<Button
+		href="/gestionar-servicios/add-service"
+		size="lg"
+		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 		>Añadir nuevo servicio</Button
 	>
 </div>

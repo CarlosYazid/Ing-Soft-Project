@@ -3,3 +3,8 @@ export interface service {
 	name: string;
 	price: number;
 }
+
+export interface serviceFormInput {
+	name: string;
+	price: string;
+}
