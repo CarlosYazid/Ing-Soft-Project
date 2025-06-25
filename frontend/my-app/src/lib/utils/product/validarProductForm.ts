@@ -1,4 +1,4 @@
-import type { ProductFormInput } from '$lib/types/product';
+import type { ProductFormInput } from '$lib/types';
 
 export function validateProduct(formData: ProductFormInput) {
 	const errors: Record<string, string> = {};
@@ -47,10 +47,10 @@ export function validateProduct(formData: ProductFormInput) {
 	if (!formData.img) {
 		errors.img = 'Se requiere una imagen.';
 	} else {
-		const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+		const allowedTypes = ['image/jpeg', 'image/png'];
 		const maxSizeMB = 5;
 		if (!allowedTypes.includes(formData.img.type)) {
-			errors.img = 'Tipo de archivo no permitido. Solo JPG, PNG o GIF.';
+			errors.img = 'Tipo de archivo no permitido. Solo JPG o PNG.';
 		}
 		if (formData.img.size > maxSizeMB * 1024 * 1024) {
 			errors.img = `El tamaño de la imagen no debe exceder ${maxSizeMB} MB.`;

@@ -206,7 +206,7 @@ export const productController = {
 			console.log('Response: ', createResponse);
 			createdProductBackend = createResponse;
 
-			/* // 3. Si se proporcionó un archivo de imagen (productData.img es un objeto File), subirlo usando el ID del nuevo producto
+			// 3. Si se proporcionó un archivo de imagen (productData.img es un objeto File), subirlo usando el ID del nuevo producto
 			if (productData.img instanceof File) {
 				const updatedImageUrl = await this.uploadProductImage(
 					createdProductBackend.id,
@@ -214,7 +214,7 @@ export const productController = {
 				);
 				// Actualiza la image_url en el objeto del producto creado (en memoria)
 				createdProductBackend.image_url = updatedImageUrl;
-			} */
+			}
 
 			return mapBackendProductToProduct(createdProductBackend);
 		} catch (error: any) {

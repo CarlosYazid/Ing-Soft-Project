@@ -20,7 +20,7 @@ export const BASE_URL = PUBLIC_BACKEND_BASE_URL;
  * @throws Error si la respuesta no es OK.
  */
 async function get(path: string, options?: RequestInit): Promise<any> {
-	const response = await fetch(`${path}`, { ...options, method: 'GET', mode: 'cors' });
+	const response = await fetch(`${BASE_URL}${path}`, { ...options, method: 'GET', mode: 'cors' });
 	if (!response.ok) {
 		// Podrías añadir más lógica de manejo de errores aquí, como parsear un cuerpo de error JSON
 		// si tu backend envía errores detallados en el body.

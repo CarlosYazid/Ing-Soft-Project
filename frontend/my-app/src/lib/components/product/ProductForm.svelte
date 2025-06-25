@@ -106,6 +106,7 @@
 				showDialog = true;
 			} else {
 				// Lógica para añadir un nuevo producto
+				inventory.addProduct(newProductData);
 				productController.create(newProductData);
 				console.log('Producto añadido:', newProductData);
 				showDialog = true;
