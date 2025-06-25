@@ -1,4 +1,3 @@
-import { productController } from '$lib/controllers';
 import type { ProductInterface } from '$lib/types';
 
 class Inventory {
