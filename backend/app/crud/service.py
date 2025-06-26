@@ -112,7 +112,7 @@ class ServiceCrud:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_inputs_table).insert(service_input_data.model_dump(mode="json")).execute()
+        response = await client.table(SETTINGS.service_inputs_table).insert(service_input_data.model_dump()).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed to create service input", status_code=500)
@@ -218,8 +218,12 @@ class ServiceCrud:
         """Check if a service input exists by service ID and product ID."""
 
         client = await get_db_client()
+        
+        print(service_id, product_id)
 
-        response = await client.table(SETTINGS.service_inputs_table).select("id").eq("service_id", service_id).eq("product_id", product_id).execute()
+        response = await client.table(SETTINGS.service_inputs_table).select("*").eq("service_id", service_id).eq("product_id", product_id).execute()
+
+        print(response.data)
 
         return bool(response.data)
 

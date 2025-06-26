@@ -90,14 +90,14 @@ async def exist_service_by_id_2(request: Request, id: int):
     """
     return await ServiceCrud.exist_service_by_id(id)
 
-@router.get("/input_services/service/{service_id}")
+@router.get("/input_services/products/{service_id}")
 async def get_input_services_by_service_id(request: Request, service_id: int):
     """
     Retrieve input services by service ID.
     """
     return await ServiceCrud.get_input_services_by_service(service_id)
 
-@router.get("/input_services/service/")
+@router.get("/input_services/products/")
 async def get_input_services_by_service_id_2(request: Request, service_id: int):
     """
     Retrieve input services by service ID.
@@ -134,7 +134,7 @@ async def update_input_service(request: Request, _id: int, fields: dict):
     """
     return await ServiceCrud.update_service_input_by_id(_id, fields)
 
-@router.put("/input_services/service&product/{service_id}{product_id}")
+@router.put("/input_services/service&product/{service_id}/{product_id}")
 async def update_input_service_2(request: Request, service_id: int, product_id: int, fields: dict):
     """
     Update an existing input service.
@@ -148,7 +148,7 @@ async def delete_input_service(request: Request, _id: int):
     """
     return await ServiceCrud.delete_service_input_by_id(_id)
 
-@router.delete("/input_service/service&product/{service_id}{product_id}")
+@router.delete("/input_service/service&product/{service_id}/{product_id}")
 async def delete_input_service_2(request: Request, service_id: int, product_id: int):
     """
     Delete an existing input service.
