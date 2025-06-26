@@ -37,6 +37,9 @@ class PaymentCrud:
         # check if payment exists
         if not await cls.exist_payment_by_id(payment_id):
             raise HTTPException(detail="Payment not found", status_code=404)
+        
+        if not(set(fields.keys()) < set(PaymentCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of payment", status_code=400)
 
         response = await client.table(SETTINGS.payment_table).update(fields).eq("id", payment_id).execute()
 
