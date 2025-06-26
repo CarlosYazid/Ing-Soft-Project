@@ -4,7 +4,9 @@ class Cart {
 	products: ProductInterface[] = $state([]);
 	services: service[] = $state([]);
 	client: string | null = $state(null); // Usar client interface en un futuro
-	total: number = $state(0);
+	/* total: number = $state(0); */ // Se podría activar para manejar como micro optimización
+	productSelected: ProductInterface | null = $state(null);
+	serviceSelected: service | null = $state(null);
 
 	addProduct(product: ProductInterface) {
 		this.products.push(product);
@@ -34,9 +36,9 @@ class Cart {
 	}
 
 	recalculateTotal() {
-		const totalProductos = this.products.reduce((acc, p) => acc + p.price, 0);
+		const totalProductos = this.products.reduce((acc, p) => acc + p.price * p.quantity!, 0);
 		const totalServicios = this.services.reduce((acc, s) => acc + s.price, 0);
-		this.total = totalProductos + totalServicios;
+		return (totalProductos + totalServicios.toFixed(2));
 	}
 
 	findProductById(id: number): ProductInterface | null {

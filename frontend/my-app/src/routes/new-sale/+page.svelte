@@ -36,6 +36,7 @@
 
 	let orderProducts: ProductInterface[] = $derived(cartStore.products);
 	let orderServices: service[] = $derived(cartStore.services);
+	let store: number = $derived.by(() => cartStore.recalulate())
 </script>
 
 <div class="mt-4 flex justify-end">
@@ -79,7 +80,7 @@
 				<div class="flex flex-col gap-4">
 					<p class="text-lg font-semibold">Productos Seleccionados: {orderProducts.length}</p>
 					<p class="text-lg font-semibold">Servicios Seleccionados: {orderServices.length}</p>
-					<p class="text-lg font-semibold">Total Venta: $0.00</p>
+					<p class="text-lg font-semibold">Total Venta: ${cartStore.total}.00</p>
 					<Button
 						onclick={() => {
 							confirm();

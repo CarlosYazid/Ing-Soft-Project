@@ -2,10 +2,14 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { ArrowRight } from '@lucide/svelte';
 
-	import { serviceStore } from '$lib/store';
+	import { serviceStore, cartStore } from '$lib/store';
 	import type { ProductInterface, service } from '$lib/types';
+	import { goto } from '$app/navigation';
 
-	let product = $props();
+	let { product, quantity = $bindable(0) } = $props<{
+		product: ProductInterface;
+		quantity?: number;
+	}>();
 
 	let isAdded = $state(
 		(serviceStore.editService?.products?.find((p) => p.id === product.id) ? true : false) || false
@@ -20,25 +24,30 @@
 			isAdded = true;
 		}
 	}
+
+	async function handleClick(product: ProductInterface) {
+		cartStore.productSelected = product;
+		goto('/new-sale/select-products/product-overview');
+	}
 </script>
 
 <div
 	class="max-w-sm rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
 >
 	{#if !serviceStore.editService}
-		<img class="w-full rounded-t-lg" src={product.product.img as string} alt="" />
+		<img class="w-full rounded-t-lg" src={product.img as string} alt="" />
 	{/if}
 
 	<div class="flex flex-col items-center p-5 text-center">
 		<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
-			{product.product.name}
+			{product.name}
 		</h5>
 
 		<p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-			{product.product.description}
+			{product.description}
 		</p>
 		<p class="mb-3 font-semibold text-gray-900 dark:text-white">
-			Precio: ${product.product.price}
+			Precio: ${product.price}
 		</p>
 
 		{#if serviceStore.editService}
@@ -56,8 +65,10 @@
 				>
 			{/if}
 		{:else}
-			<Button href="#" size="sm" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
-				>Ver Detalles<ArrowRight /></Button
+			<Button
+				onclick={() => handleClick(product)}
+				size="sm"
+				class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Ver Detalles<ArrowRight /></Button
 			>
 		{/if}
 	</div>
