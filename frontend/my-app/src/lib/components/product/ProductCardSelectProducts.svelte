@@ -32,10 +32,14 @@
 </script>
 
 <div
-	class="max-w-sm rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+	class="flex max-w-sm flex-col items-center justify-center rounded-lg border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-700 dark:bg-gray-800"
 >
 	{#if !serviceStore.editService}
-		<img class="w-full rounded-t-lg" src={product.img as string} alt="" />
+		<img
+			src={product.img as string}
+			alt={product.name}
+			class="h-48 w-48 rounded-t-lg object-cover md:h-64 md:w-64"
+		/>
 	{/if}
 
 	<div class="flex flex-col items-center p-5 text-center">
