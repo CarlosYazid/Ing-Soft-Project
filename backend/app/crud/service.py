@@ -53,6 +53,9 @@ class ServiceCrud:
         # check if service exists
         if not await cls.exist_service_by_id(service_id):
             raise HTTPException(detail="Service not found", status_code=404)
+        
+        if not(set(fields.keys()) < set(ServiceCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of service", status_code=400)
 
         response = await client.table(SETTINGS.service_table).update(fields).eq("id", service_id).execute()
 
@@ -128,6 +131,9 @@ class ServiceCrud:
         # check if service input exists
         if not await cls.exist_service_input_by_service_id_and_product_id(service_id, product_id):
             raise HTTPException(detail="Service input not found", status_code=404)
+        
+        if not(set(fields.keys()) < set(ServiceInputCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of input service", status_code=400)
 
         response = await client.table(SETTINGS.service_inputs_table).update(fields).eq("service_id", service_id).eq("product_id", product_id).execute()
 
@@ -158,6 +164,9 @@ class ServiceCrud:
         # check if service input exists
         if not await cls.exist_service_input_by_id(service_input_id):
             raise HTTPException(detail="Service input not found", status_code=404)
+        
+        if not(set(fields.keys()) < set(ServiceInputCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of input service", status_code=400)
 
         response = await client.table(SETTINGS.service_inputs_table).update(fields).eq("id", service_input_id).execute()
 

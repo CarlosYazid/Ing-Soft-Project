@@ -46,6 +46,9 @@ class OrderCrud:
     async def update_order(cls, order_id: int, fields: dict) -> Order:
         """Update an existing order."""
         client = await get_db_client()
+        
+        if not(set(fields.keys()) < set(OrderCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of order", status_code=400)
 
         response = await client.table(SETTINGS.order_table).update(fields).eq("id", order_id).execute()
 
@@ -178,6 +181,9 @@ class OrderCrud:
     async def update_order_service(cls, order_service_id: int, fields: dict) -> OrderService:
         """Update an existing order service."""
         client = await get_db_client()
+        
+        if not(set(fields.keys()) < set(OrderServiceCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of order service", status_code=400)
 
         response = await client.table(SETTINGS.order_service_table).update(fields).eq("id", order_service_id).execute()
 
@@ -190,6 +196,9 @@ class OrderCrud:
     async def update_order_product(cls, order_product_id: int, fields: dict) -> OrderProduct:
         """Update an existing order product."""
         client = await get_db_client()
+        
+        if not(set(fields.keys()) < set(OrderServiceCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of order product", status_code=400)
 
         # Import ProductCrud directly from its file path
         from crud.product import ProductCrud
