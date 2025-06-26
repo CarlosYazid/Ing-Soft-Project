@@ -8,6 +8,7 @@ const CLIENT_BASE_PATH = '/user/client';
  */
 function toClient(data: any): client {
 	return {
+		id: data.id,
 		documentid: data.documentid,
 		name: data.name,
 		email: data.email,
