@@ -66,6 +66,26 @@ class UserCrud:
             raise HTTPException(detail="Employee update failed", status_code=400)
 
         return Employee.model_validate(response.data[0])
+    
+    @classmethod
+    async def update_employee_by_documentid(cls, document_id: int, fields: dict) -> Employee:
+        """Update an existing employee by document ID."""
+
+        client = await get_db_client()
+
+        if not(set(fields.keys()) < set(EmployeeCreate.__fields__.keys())):
+            raise HTTPException(detail="Update fields are invalid", status_code=400)
+
+        response = await client.table(SETTINGS.employee_table).update(fields).eq("documentid", document_id).execute()
+
+        if not(bool(response.data)):
+
+            if not cls.exist_employee_by_documentid(document_id):
+                raise HTTPException(detail="Employee not found", status_code=404)
+
+            raise HTTPException(detail="Employee update failed", status_code=400)
+
+        return Employee.model_validate(response.data[0])
 
     @classmethod
     async def read_employee_by_id(cls, employee_id: int) -> Employee:
@@ -94,6 +114,20 @@ class UserCrud:
 
         return Employee.model_validate(response.data[0])
     
+    
+    @classmethod
+    async def read_employee_by_documentid(cls, document_id: int) -> Employee:
+        """Retrieve an employee by document ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.employee_table).select("*").eq("documentid", document_id).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="Employee not found", status_code=404)
+
+        return Employee.model_validate(response.data[0])
+
     @classmethod
     async def exist_employee_by_email(cls, email: str) -> bool:
         """Check if an employee exists by email."""
@@ -111,6 +145,16 @@ class UserCrud:
         client = await get_db_client()
 
         response = await client.table(SETTINGS.employee_table).select("id").eq("id", employee_id).execute()
+
+        return bool(response.data)
+    
+    @classmethod
+    async def exist_employee_by_documentid(cls, document_id: int) -> bool:
+        """Check if an employee exists by document ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.employee_table).select("documentid").eq("documentid", document_id).execute()
 
         return bool(response.data)
 
@@ -133,6 +177,19 @@ class UserCrud:
         client = await get_db_client()
 
         response = await client.table(SETTINGS.employee_table).delete().eq("email", email).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="Employee not found", status_code=404)
+
+        return True
+    
+    @classmethod
+    async def delete_employee_by_documentid(cls, document_id : int):
+        """Delete an employee by document ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.employee_table).delete().eq("documentid", document_id).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Employee not found", status_code=404)
@@ -199,6 +256,26 @@ class UserCrud:
         return Client.model_validate(response.data[0])
     
     @classmethod
+    async def update_client_by_documentid(cls, document_id: int, fields: dict) -> Client:
+        """Update an existing client by document ID."""
+
+        client = await get_db_client()
+
+        if not(set(fields.keys()) < set(ClientCreate.__fields__.keys())):
+            raise HTTPException(detail="Update fields are invalid", status_code=400)
+
+        response = await client.table(SETTINGS.client_table).update(fields).eq("documentid", document_id).execute()
+
+        if not(bool(response.data)):
+
+            if not cls.exist_client_by_documentid(document_id):
+                raise HTTPException(detail="Client not found", status_code=404)
+
+            raise HTTPException(detail="Client update failed", status_code=500)
+
+        return Client.model_validate(response.data[0])
+    
+    @classmethod
     async def exist_client_by_email(cls, email: str) -> bool:
         """Check if a client exists by email."""
 
@@ -215,6 +292,16 @@ class UserCrud:
         client = await get_db_client()
 
         response = await client.table(SETTINGS.client_table).select("id").eq("id", _id).execute()
+
+        return bool(response.data)
+    
+    @classmethod
+    async def exist_client_by_documentid(cls, document_id: int) -> bool:
+        """Check if a client exists by document ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.client_table).select("documentid").eq("documentid", document_id).execute()
 
         return bool(response.data)
     
@@ -238,6 +325,20 @@ class UserCrud:
         client = await get_db_client()
 
         response = await client.table(SETTINGS.client_table).select("*").eq("email", email).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="Client not found", status_code=404)
+
+        return Client.model_validate(response.data[0])
+    
+    
+    @classmethod
+    async def read_client_by_documentid(cls, document_id: int) -> Client:   
+        """Retrieve a client by document ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.client_table).select("*").eq("documentid", document_id).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Client not found", status_code=404)
@@ -272,6 +373,23 @@ class UserCrud:
             raise HTTPException(detail="Client not found", status_code=404)
 
         response = await client.table(SETTINGS.client_table).delete().eq("email", email).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="Failed delete client", status_code=500)
+
+        return True
+    
+    @classmethod
+    async def delete_client_by_documentid(cls, document_id: int) -> bool:
+        """Delete a client by document ID."""
+
+        client = await get_db_client()
+        
+        # check if the client exists
+        if not await cls.exist_client_by_documentid(document_id):
+            raise HTTPException(detail="Client not found", status_code=404)
+
+        response = await client.table(SETTINGS.client_table).delete().eq("documentid", document_id).execute()
 
         if not(bool(response.data)):
             raise HTTPException(detail="Failed delete client", status_code=500)
