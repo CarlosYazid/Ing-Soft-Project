@@ -38,6 +38,10 @@ class UserCrud:
         """Update an existing employee."""
 
         client = await get_db_client()
+        
+        
+        if not(set(fields.keys()) < set(EmployeeCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of employee", status_code=400)
 
         response = await client.table(SETTINGS.employee_table).update(fields).eq("id", _id).execute()
 
@@ -55,6 +59,9 @@ class UserCrud:
         """Update an existing employee by email."""
 
         client = await get_db_client()
+        
+        if not(set(fields.keys()) < set(EmployeeCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of employee", status_code=400)
 
         response = await client.table(SETTINGS.employee_table).update(fields).eq("email", email).execute()
 
@@ -169,6 +176,9 @@ class UserCrud:
         """Update an existing client."""
 
         client = await get_db_client()
+        
+        if not(set(fields.keys()) < set(ClientCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of client", status_code=400)
 
         response = await client.table(SETTINGS.client_table).update(fields).eq("id", _id).execute()
 
@@ -186,6 +196,9 @@ class UserCrud:
         """Update an existing client by email."""
 
         client = await get_db_client()
+        
+        if not(set(fields.keys()) < set(ClientCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of client", status_code=400)
 
         response = await client.table(SETTINGS.client_table).update(fields).eq("email", email).execute()
 
