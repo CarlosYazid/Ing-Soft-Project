@@ -1,10 +1,10 @@
-import type { ProductInterface, service } from '$lib/types';
+import type { ProductInterface, service, client } from '$lib/types';
 
 class Cart {
 	products: ProductInterface[] = $state([]);
 	services: service[] = $state([]);
-	client: string | null = $state(null); // Usar client interface en un futuro
-	/* total: number = $state(0); */ // Se podría activar para manejar como micro optimización
+	client: client | null = $state(null);
+	/* total: number = $state(0); */ // Se podría activar para manejar como micro optimización o mejorar la reactividad, de momento estoy de afán, pailas
 	productSelected: ProductInterface | null = $state(null);
 	serviceSelected: service | null = $state(null);
 
