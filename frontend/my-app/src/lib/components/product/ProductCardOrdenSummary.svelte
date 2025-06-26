@@ -4,6 +4,7 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Trash2, ArrowUp, ArrowDown } from '@lucide/svelte';
 	import Input from '../ui/input/input.svelte';
+	import SuccessOrFailDialog from '../common/SuccessOrFailDialog.svelte';
 
 	import { cartStore } from '$lib';
 
@@ -38,3 +39,11 @@
 		<p class="flex justify-end text-sm text-gray-500">Stock: {product.stock - product.quantity!}</p>
 	</Card.Content>
 </Card.Root>
+
+{#if product?.quantity! > product?.stock!}
+	<SuccessOrFailDialog
+		infoDialog={false}
+		contentDialog={'La cantidad ingresada excede la cantidad disponible'}
+		callback={() => (product!.quantity = product?.stock)}
+	/>
+{/if}
