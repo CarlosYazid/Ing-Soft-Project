@@ -9,6 +9,9 @@
 	import { cartStore } from '$lib';
 
 	let product = $state(cartStore.productSelected);
+	if (product) {
+		product.quantity = product?.quantity! | 0;
+	}
 </script>
 
 <div class="flex h-full flex-col items-center justify-center px-8">
@@ -36,7 +39,7 @@
 						<Input
 							type="number"
 							bind:value={product.quantity}
-							class="w-15"
+							class="w-18"
 							min="1"
 							max={product.stock}
 						/>
