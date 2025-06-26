@@ -32,7 +32,7 @@
 	function confirmedSale2() {
 		confirmar = false;
 		cartStore.clearCart();
-		goto('/');
+		goto('/gracias');
 	}
 
 	function canceledSale2() {
