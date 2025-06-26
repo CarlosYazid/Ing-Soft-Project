@@ -56,7 +56,6 @@ export const productController = {
 	 */
 	async updateById(id: number, productData: ProductInterface): Promise<ProductInterface> {
 		const dataToSend = {
-			id: productData.id,
 			name: productData.name,
 			short_description: '',
 			price: productData.price,
