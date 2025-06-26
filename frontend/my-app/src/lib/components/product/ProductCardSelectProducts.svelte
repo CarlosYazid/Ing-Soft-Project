@@ -53,7 +53,9 @@
 		<p class="mb-3 font-semibold text-gray-900 dark:text-white">
 			Precio: ${product.price}
 		</p>
+	</div>
 
+	<div class="flex items-end justify-center">
 		{#if serviceStore.editService}
 			{#if isAdded}
 				<Button

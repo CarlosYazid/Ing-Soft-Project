@@ -208,3 +208,13 @@
 		</Dialog.Content>
 	</Dialog.Root>
 {/if}
+
+<div class="flex justify-center">
+	<Button
+		onclick={() => {
+			goto('/gestionar-clientes/add-client');
+		}}
+		size="lg"
+		class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Registrar Cliente</Button
+	>
+</div>

@@ -40,10 +40,10 @@
 	</Card.Content>
 </Card.Root>
 
-{#if product?.quantity! > product?.stock!}
+{#if product?.quantity! > product?.stock! || product?.quantity! < 0}
 	<SuccessOrFailDialog
 		infoDialog={false}
-		contentDialog={'La cantidad ingresada excede la cantidad disponible'}
+		contentDialog={'La cantidad ingresada no puede ser procesada'}
 		callback={() => (product!.quantity = product?.stock)}
 	/>
 {/if}
