@@ -50,6 +50,26 @@ async def update_employee_by_email(request: Request, email: str, fields: dict):
     """
     return await UserCrud.update_employee_by_email(email, fields)
 
+@router.put("/employee/email/")
+async def update_employee_by_email_2(request: Request, email: str, fields: dict):
+    """
+    Update an existing employee by email.
+    """
+    return await UserCrud.update_employee_by_email(email, fields)
+
+
+@router.put("/employee/documentid/{document_id}")
+async def update_employee_by_document_id(request: Request, document_id: int, fields: dict):
+    """ Update an existing employee by document ID.
+    """
+    return await UserCrud.update_employee_by_documentid(document_id, fields)
+
+@router.put("/employee/documentid/")
+async def update_employee_by_document_id_2(request: Request, document_id: int, fields: dict):
+    """ Update an existing employee by document ID.
+    """
+    return await UserCrud.update_employee_by_documentid(document_id, fields)
+
 
 @router.get("/employee/{_id}")
 async def get_employee_by_id(request: Request, _id: int):
@@ -110,6 +130,36 @@ async def get_employee_base_by_email_2(request: Request, email: str):
     return await UserService.get_employee_base_by_email(email)
 
 
+@router.get("/employee/documentid/{document_id}")
+async def get_employee_by_document_id(request: Request, document_id: int):
+    """
+    Get an employee by document ID.
+    """
+    return await UserCrud.read_employee_by_documentid(document_id)
+
+@router.get("/employee/documentid/")
+async def get_employee_by_document_id_2(request: Request, document_id: int):
+    """
+    Get an employee by document ID.
+    """
+    return await UserCrud.read_employee_by_documentid(document_id)
+
+
+@router.get("/employee/base/documentid/{document_id}")
+async def get_employee_base_by_document_id(request: Request, document_id: int):
+    """
+    Get an employee base by document ID.
+    """
+    return await UserService.get_employee_base_by_documentid(document_id)
+
+@router.get("/employee/base/documentid/")
+async def get_employee_base_by_document_id_2(request: Request, document_id: int):
+    """
+    Get an employee base by document ID.
+    """
+    return await UserService.get_employee_base_by_documentid(document_id)
+
+
 @router.get("/employee/exists/{_id}")
 async def exist_employee_by_id(request: Request, _id: int):
     """
@@ -137,6 +187,13 @@ async def exist_employee_by_email_2(request: Request, email: str):
     Check if an employee exists by email.
     """
     return await UserCrud.exist_employee_by_email(email)
+
+@router.get("/employee/exists/documentid/{document_id}")
+async def exist_employee_by_document_id(request: Request, document_id: int):
+    """
+    Check if an employee exists by document ID.
+    """
+    return await UserCrud.exist_employee_by_documentid(document_id)
 
 @router.delete("/employee/{_id}")
 async def delete_employee_by_id(request: Request, _id: int):
@@ -166,6 +223,20 @@ async def delete_employee_by_email_2(request: Request, email: str):
     Delete an employee by email.
     """
     return await UserCrud.delete_employee_by_email(email)
+
+@router.delete("/employee/documentid/{document_id}")
+async def delete_employee_by_document_id(request: Request, document_id: int):
+    """
+    Delete an employee by document ID.
+    """
+    return await UserCrud.delete_employee_by_documentid(document_id)
+
+@router.delete("/employee/documentid/")
+async def delete_employee_by_document_id_2(request: Request, document_id: int):
+    """
+    Delete an employee by document ID.
+    """
+    return await UserCrud.delete_employee_by_documentid(document_id)
 
 @router.get("/client/all")
 async def get_clients(request: Request):
@@ -250,6 +321,20 @@ async def get_client_base_by_email_2(request: Request, email: str):
     """
     return await UserService.get_client_base_by_email(email)
 
+@router.get("/client/documentid/{document_id}")
+async def get_client_by_document_id(request: Request, document_id: int):
+    """
+    Retrieve a client by document ID.
+    """
+    return await UserCrud.read_client_by_documentid(document_id)
+
+@router.get("/client/documentid/")
+async def get_client_by_document_id_2(request: Request, document_id: int):
+    """
+    Retrieve a client by document ID.
+    """
+    return await UserCrud.read_client_by_documentid(document_id)
+
 
 @router.put("/client/{_id}")
 async def update_client_by_id(request: Request, _id: int, fields: dict):
@@ -279,6 +364,19 @@ async def update_client_by_email_2(request: Request, email: str, fields: dict):
     """
     return await UserCrud.update_client_by_email(email, fields)
 
+@router.put("/client/update/documentid/{document_id}")
+async def update_client_by_document_id(request: Request, document_id: int, fields: dict):
+    """ Update an existing client by document ID.
+    """
+    return await UserCrud.update_client_by_documentid(document_id, fields)
+
+@router.put("/client/update/documentid/")
+async def update_client_by_document_id_2(request: Request, document_id: int, fields: dict):
+    """ Update an existing client by document ID.
+    """
+    return await UserCrud.update_client_by_documentid(document_id, fields)
+
+
 @router.delete("/client/{_id}")
 async def delete_client_by_id(request: Request, _id: int):
     """
@@ -307,6 +405,20 @@ async def delete_client_by_email_2(request: Request, email: str):
     """
     return await UserCrud.delete_client_by_email(email)
 
+@router.delete("/client/documentid/{document_id}")
+async def delete_client_by_document_id(request: Request, document_id: int):
+    """
+    Delete a client by document ID.
+    """
+    return await UserCrud.delete_client_by_documentid(document_id)
+
+@router.delete("/client/documentid/")
+async def delete_client_by_document_id_2(request: Request, document_id: int):
+    """
+    Delete a client by document ID.
+    """
+    return await UserCrud.delete_client_by_documentid(document_id)
+
 @router.get("/client/exists/{_id}")
 async def exist_client_by_id(request: Request, _id: int):
     """
@@ -334,3 +446,17 @@ async def exist_client_by_email_2(request: Request, email: str):
     Check if a client exists by email.
     """
     return await UserCrud.exist_client_by_email(email)
+
+@router.get("/client/exists/documentid/{document_id}")
+async def exist_client_by_document_id(request: Request, document_id: int):
+    """
+    Check if a client exists by document ID.
+    """
+    return await UserCrud.exist_client_by_documentid(document_id)
+
+@router.get("/client/exists/documentid/")
+async def exist_client_by_document_id_2(request: Request, document_id: int):
+    """
+    Check if a client exists by document ID.
+    """
+    return await UserCrud.exist_client_by_documentid(document_id)

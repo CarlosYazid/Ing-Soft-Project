@@ -50,6 +50,22 @@ class UserService:
         )
         
     @classmethod
+    async def get_employee_base_by_documentid(cls, documentid: str) -> UserBase:
+        """Retrieve a user by document ID."""
+        user = await UserCrud.read_employee_by_documentid(documentid)
+        return UserBase.model_validate(
+            {"id": user.id,
+             "name": user.name,
+             "email": user.email,
+             "phone": user.phone,
+             "created_at": user.created_at,
+             "updated_at": user.updated_at,
+             "state": user.state,
+             "documentid": user.documentid,
+            }
+        )
+        
+    @classmethod
     async def get_all_clients_base(cls) -> list[UserBase]:
         """Retrieve all clients."""
         users = await UserCrud.get_all_clients()
@@ -84,6 +100,22 @@ class UserService:
     async def get_client_base_by_email(cls, email: str) -> UserBase:
         """Retrieve a client by email."""
         user = await UserCrud.read_client_by_email(email)
+        return UserBase.model_validate(
+            {"id": user.id,
+             "name": user.name,
+             "email": user.email,
+             "phone": user.phone,
+             "created_at": user.created_at,
+             "updated_at": user.updated_at,
+             "state": user.state,
+             "documentid": user.documentid,
+            }
+        )
+    
+    @classmethod
+    async def get_client_base_by_documentid(cls, documentid: str) -> UserBase:
+        """Retrieve a client by document ID."""
+        user = await UserCrud.read_client_by_documentid(documentid)
         return UserBase.model_validate(
             {"id": user.id,
              "name": user.name,
