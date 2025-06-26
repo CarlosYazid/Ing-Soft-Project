@@ -37,8 +37,7 @@ class Service {
 	}
 
 	deleteProductFromService(product: ProductInterface) {
-		serviceStore.productsToAdd.pop();
-		//Llamar a la base de datos
+		this.productsToAdd = this.productsToAdd.filter((p) => p.id !== product.id);
 	}
 }
 

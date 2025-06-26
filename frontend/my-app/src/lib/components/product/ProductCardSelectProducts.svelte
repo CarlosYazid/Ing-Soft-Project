@@ -2,15 +2,32 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { ArrowRight } from '@lucide/svelte';
 
-	import type { ProductInterface, service } from '$lib/types';
-	let product = $props();
 	import { serviceStore } from '$lib/store';
+	import type { ProductInterface, service } from '$lib/types';
+
+	let product = $props();
+
+	let isAdded = $state(
+		(serviceStore.editService?.products?.find((p) => p.id === product.id) ? true : false) || false
+	);
+
+	function toggleProduct() {
+		if (isAdded) {
+			serviceStore.deleteProductFromService(product);
+			isAdded = false;
+		} else {
+			serviceStore.addProductToService(product);
+			isAdded = true;
+		}
+	}
 </script>
 
 <div
 	class="max-w-sm rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
 >
-	<img class="w-full rounded-t-lg" src={product.product.img as string} alt="" />
+	{#if !serviceStore.editService}
+		<img class="w-full rounded-t-lg" src={product.product.img as string} alt="" />
+	{/if}
 
 	<div class="flex flex-col items-center p-5 text-center">
 		<h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
@@ -25,25 +42,17 @@
 		</p>
 
 		{#if serviceStore.editService}
-			<!-- Usar acá truquini para selección-->
-			{#if serviceStore.productsToAdd.find((p) => p.id === product.id)}
+			{#if isAdded}
 				<Button
-					onclick={() => {
-						serviceStore.deleteProductFromService(product);
-					}}
+					onclick={toggleProduct}
 					size="sm"
-					class="bg-red-700 hover:bg-red-300 hover:text-red-700"
-					>Eliminar producto<ArrowRight /></Button
+					class="bg-red-700 hover:bg-red-300 hover:text-red-700">Eliminar producto</Button
 				>
 			{:else}
 				<Button
-					onclick={() => {
-						serviceStore.addProductToService(product);
-						console.log(serviceStore.productsToAdd);
-					}}
+					onclick={toggleProduct}
 					size="sm"
-					class="bg-green-700 hover:bg-green-300 hover:text-green-700"
-					>Añadir producto<ArrowRight /></Button
+					class="bg-green-700 hover:bg-green-300 hover:text-green-700">Añadir producto</Button
 				>
 			{/if}
 		{:else}

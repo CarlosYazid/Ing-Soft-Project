@@ -55,29 +55,36 @@ export const productController = {
 	 * @throws An Error if the update fails (e.g., product not found, invalid data).
 	 */
 	async updateById(id: number, productData: ProductInterface): Promise<ProductInterface> {
-		const dataToSend = {
+		const dataToSend: Record<string, any> = {
 			name: productData.name,
-			short_description: '',
 			price: productData.price,
 			category: productData.category,
 			stock: productData.stock,
-			image_url: productData.img,
 			description: productData.description,
-			cost: productData.cost,
-			type: '',
-			expiration_date:
-				productData.expirationDate instanceof Date
-					? productData.expirationDate.toISOString()
-					: productData.expirationDate // Convert Date to ISO string if needed
+			cost: productData.cost
 		};
 
+		/* Definir en prox entrega 
+		if (productData.expirationDate instanceof Date) {
+			dataToSend.expiration_date = productData.expirationDate.toISOString();
+		} else if (productData.expirationDate) {
+			dataToSend.expiration_date = productData.expirationDate;
+		} */
 		try {
-			if (typeof dataToSend.image_url !== 'string' && dataToSend.image_url) {
-				//dataToSend.image_url = await this.uploadProductImage(dataToSend.id, dataToSend.image_url);
+			if (
+				productData.img &&
+				typeof productData.img !== 'string' &&
+				productData.img.size > 0 &&
+				productData.img.name.trim()
+			) {
+				// Archivo válido, subir
+				dataToSend.image_url = await this.uploadProductImage(productData.id, productData.img);
+			} else if (typeof productData.img === 'string') {
+				// Ya es una URL, solo asignar
+				dataToSend.image_url = productData.img;
 			}
-			const response: BackendProduct = await api.putJson(`${PRODUCTS_BASE_PATH}/${id}`, {
-				additionalProp1: dataToSend
-			});
+
+			const response: BackendProduct = await api.putJson(`${PRODUCTS_BASE_PATH}/${id}`, dataToSend);
 
 			return mapBackendProductToProduct(response);
 		} catch (error: any) {

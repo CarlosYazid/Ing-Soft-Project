@@ -12,7 +12,6 @@
 	import { serviceController } from '$lib';
 
 	let services = $derived(serviceStore.services);
-	/* 	$inspect(services); */
 
 	onMount(async () => {
 		try {
@@ -66,7 +65,6 @@
 		eliminar = false;
 		serviceStore.clearDeleteService();
 	}
-	$inspect(serviceStore);
 </script>
 
 <Toaster />

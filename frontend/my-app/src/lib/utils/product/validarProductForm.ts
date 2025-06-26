@@ -19,10 +19,8 @@ export function validateProduct(formData: ProductFormInput, editMode: boolean) {
 
 	// 3. Validar Category (string) con Regex
 	const categoryRegex = /^[\p{L}\s]{3,50}$/u;
-	console.log(`${formData.category}`);
 	if (!categoryRegex.test(formData.category)) {
 		errors.category = 'La categoría debe tener entre 3 y 50 letras o espacios.';
-		console.log(`${formData.category}`);
 	}
 
 	// 4. Validar Price (number/Float) - Lógica de programación
@@ -44,7 +42,6 @@ export function validateProduct(formData: ProductFormInput, editMode: boolean) {
 	}
 
 	// 7. Validar Image (File) - Lógica de programación
-	console.log(editMode);
 	if (!formData.img) {
 		if (!editMode) errors.img = 'Se requiere una imagen.';
 	} else {

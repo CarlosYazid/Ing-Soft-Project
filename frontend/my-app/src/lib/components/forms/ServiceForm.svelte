@@ -33,7 +33,8 @@
 		const payload: service = {
 			id: current?.id || 0,
 			name: serviceFormData.name.trim(),
-			price: parseFloat(serviceFormData.price)
+			price: parseFloat(serviceFormData.price),
+			products: serviceStore.productsToAdd
 		};
 
 		try {

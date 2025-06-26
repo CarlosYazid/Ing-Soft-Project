@@ -9,7 +9,6 @@
 	import { onMount } from 'svelte';
 
 	let productsInventory: ProductInterface[] = $derived(inventory.products);
-	$inspect(productsInventory);
 
 	onMount(async () => {
 		try {
