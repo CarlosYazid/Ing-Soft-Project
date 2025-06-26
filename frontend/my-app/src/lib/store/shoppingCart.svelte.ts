@@ -32,13 +32,12 @@ class Cart {
 		this.products = [];
 		this.services = [];
 		this.client = null;
-		this.total = 0;
 	}
 
 	recalculateTotal() {
 		const totalProductos = this.products.reduce((acc, p) => acc + p.price * p.quantity!, 0);
 		const totalServicios = this.services.reduce((acc, s) => acc + s.price, 0);
-		return (totalProductos + totalServicios.toFixed(2));
+		return (totalProductos + totalServicios).toFixed(2);
 	}
 
 	findProductById(id: number): ProductInterface | null {
