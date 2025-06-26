@@ -27,6 +27,9 @@ export interface BaseProductInterface {
 	 * Para la URL de la imagen obtenida del backend, usa 'string'.
 	 */
 	img: File | string | null;
+
+	/* Un atributo para el manejo del producto en el carrito */
+	quantity?: number;
 }
 
 /**
@@ -52,7 +55,6 @@ export interface ConsumibleProduct extends BaseProductInterface {
 export interface ProductInterface extends ConsumibleProduct {
 	/** El costo de adquisición del producto. Se tipa como number para consistencia. */
 	cost: number;
-	cantidad?: number;
 }
 
 /**
