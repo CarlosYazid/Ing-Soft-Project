@@ -1,7 +1,6 @@
 // src/lib/controllers/serviceController.ts
 import type { service } from '$lib/types';
 import { api } from '$lib/http/api';
-import { products } from '$lib/data/products';
 
 const SERVICE_BASE_PATH = '/service';
 
