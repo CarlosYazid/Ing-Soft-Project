@@ -29,8 +29,9 @@
 <Toaster />
 <ServiceForm />
 
-<div class="grid grid-cols-[repeat(auto-fit,minmax(300px,375px))] justify-center gap-4 px-10">
+<!-- LEGALMENTE NO HACE PARTE DE LA ENTREGA
+ <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,375px))] justify-center gap-4 px-10">
 	{#each productsInventory as product (product.id)}
 		<ProductCardSelectProducts product={{ ...product }} />
 	{/each}
-</div>
+</div> -->

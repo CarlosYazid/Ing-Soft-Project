@@ -205,7 +205,6 @@ export const productController = {
 				`${PRODUCTS_BASE_PATH}/`,
 				initialProductDataToSend
 			);
-			console.log('Response: ', createResponse);
 			createdProductBackend = createResponse;
 
 			function delay(ms: number) {

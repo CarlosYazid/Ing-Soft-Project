@@ -65,7 +65,7 @@
 	// Gestionar lógica sort
 	const columns = [
 		{ title: 'ID', key: 'id' },
-		{ title: 'Nombre', key: 'productName' },
+		{ title: 'Nombre', key: 'name' },
 		{ title: 'Categoría', key: 'category' },
 		{ title: 'Precio', key: 'price' },
 		{ title: 'Stock', key: 'stock' }
