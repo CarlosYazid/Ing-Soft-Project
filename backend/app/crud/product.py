@@ -148,6 +148,9 @@ class ProductCrud:
         if not(cls.exist_product_by_id(product_id)):
             raise HTTPException(detail="Product not found", status_code=404)
         
+        if not(set(fields.keys()) < set(ProductCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of product", status_code=400)
+        
         if "image_url" in fields:
             fields.pop("image_url")
             

@@ -1,77 +1,79 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
-	import * as Carousel from '$lib/components/ui/carousel/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Trash2, SquarePen } from '@lucide/svelte';
+	import { toast, Toaster } from 'svelte-sonner';
+	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
 
-	let products = [
-		{
-			id: 1,
-			name: 'Producto A',
-			description: 'Descripción del Producto A',
-			price: 10000,
-			category: 'Categoría 1',
-			stock: 50
-		},
-		{
-			id: 2,
-			name: 'Producto B',
-			description: 'Descripción del Producto B',
-			price: 20000,
-			category: 'Categoría 2',
-			stock: 30
-		},
-		{
-			id: 3,
-			name: 'Producto C',
-			description: 'Descripción del Producto C',
-			price: 30000,
-			category: 'Categoría 1',
-			stock: 20
-		},
-		{
-			id: 4,
-			name: 'Producto D',
-			description: 'Descripción del Producto D',
-			price: 40000,
-			category: 'Categoría 3',
-			stock: 10
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+
+	import { serviceStore } from '$lib';
+	import { serviceController } from '$lib';
+
+	let services = $derived(serviceStore.services);
+
+	onMount(async () => {
+		try {
+			services = await serviceController.getAllServices();
+		} catch (e: any) {
+			toast('Algo ha salido mal', {
+				description: e.message || 'No se han podido cargar los productos',
+				action: {
+					label: 'Aceptar',
+					onClick: () => console.info('Aceptar')
+				}
+			});
 		}
-	];
-	let services = [
-		{
-			id: 1,
-			name: 'Impresión',
-			shortDescription: '',
-			price: '$10.000',
-			listProducts: [products[0], products[2]]
-		},
-		{
-			id: 2,
-			name: 'Fotocopia',
-			shortDescription: '',
-			price: '$20.000',
-			listProducts: [products[1], products[3]]
-		},
-		{
-			id: 3,
-			name: 'Plastificado',
-			shortDescription: '',
-			price: '$30.000',
-			listProducts: [products[0], products[1]]
-		},
-		{
-			id: 4,
-			name: 'Envolver Regalo',
-			shortDescription: '',
-			price: '$40.000',
-			listProducts: [products[3], products[2], products[1]]
+	});
+
+	//Lógica modal de editar producto
+	let editar = $state(false);
+	function onEdit(row: any) {
+		editar = true;
+		serviceStore.editService = row;
+	}
+
+	function confirmedEdit() {
+		editar = false;
+		goto('/gestionar-servicios/edit-service');
+	}
+
+	function canceledEdit() {
+		editar = false;
+		serviceStore.clearEditService();
+	}
+
+	//Lógica modal de eliminar producto
+	let eliminar = $state(false);
+	function onDelete(row: any) {
+		eliminar = true;
+		serviceStore.deleteService = serviceStore.findServiceById(row.id)!;
+	}
+
+	function confirmedDelete() {
+		eliminar = false;
+		//Lógica delete
+		if (serviceStore.deleteService) {
+			serviceController.deleteServiceById(serviceStore.deleteService.id);
+			serviceStore.removeServiceById(serviceStore.deleteService.id);
+			serviceStore.clearDeleteService();
 		}
-	];
+	}
+
+	function canceledDelete() {
+		eliminar = false;
+		serviceStore.clearDeleteService();
+	}
 </script>
 
+<Toaster />
+
 <div class="mt-4 flex justify-end">
-	<Button href="#" size="lg" class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+	<Button
+		href="/gestionar-servicios/add-service"
+		size="lg"
+		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 		>Añadir nuevo servicio</Button
 	>
 </div>
@@ -84,20 +86,50 @@
 					<div class="flex items-center justify-between">
 						<h3 class="text-2xl">{service.name}</h3>
 						<div class="flex gap-2">
-							<Button class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
-								><SquarePen /></Button
-							><Button class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button>
+							<Button
+								class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+								onclick={() => {
+									onEdit(service);
+								}}><SquarePen /></Button
+							><Button
+								class="bg-red-700 hover:bg-red-300 hover:text-red-700"
+								onclick={() => {
+									onDelete(service);
+								}}><Trash2 /></Button
+							>
 						</div>
 					</div>
 				</Card.Title>
 				<Card.Description>Costo fijo: {service.price}</Card.Description>
 			</Card.Header>
 			<Card.Content>
-				<h1>Productos Asociados:</h1>
+				<!-- <h1>Productos Asociados:</h1>
 				{#each service.listProducts as product (product.id)}
 					<p class="text-sm">{product.name}</p>
-				{/each}
+				{/each} -->
 			</Card.Content>
 		</Card.Root>
 	{/each}
 </div>
+
+{#if eliminar}
+	<ConfirmDialog
+		callbackOnTrue={confirmedDelete}
+		callbackOnFalse={canceledDelete}
+		title={'¿Está seguro que desea eliminar el Servicio?'}
+		description={'Esta acción no se puede deshacer. El servicio será eliminado permanentemente.'}
+		btnClass={'bg-red-700 hover:bg-red-300 hover:text-red-700'}
+		action={'Eliminar'}
+	/>
+{/if}
+
+{#if editar}
+	<ConfirmDialog
+		callbackOnTrue={confirmedEdit}
+		callbackOnFalse={canceledEdit}
+		title={'¿Está seguro que desea editar el Servicio?'}
+		description={''}
+		btnClass={'bg-blue-700 hover:bg-blue-300 hover:text-blue-700'}
+		action={'Editar'}
+	/>
+{/if}

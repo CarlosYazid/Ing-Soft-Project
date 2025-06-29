@@ -1,18 +1,7 @@
 <script>
-	import AddProductForm from '$lib/components/product/AddProductForm.svelte';
+	import ProductForm from '$lib/components/product/ProductForm.svelte';
 </script>
 
 <div class="flex justify-center">
-	<AddProductForm
-		form={{
-			id: 0,
-			productName: '',
-			description: '',
-			cost: 0,
-			price: 0,
-			category: '',
-			stock: 0,
-			picture: null
-		}}
-	/>
+	<ProductForm />
 </div>

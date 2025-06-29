@@ -14,7 +14,6 @@ class Settings(BaseSettings):
     db_url: str = Field(..., alias="database_url")
     db_key: SecretStr = Field(..., alias="database_key")
     employee_table: str = Field(..., alias="employee_table")
-    admin_table: str = Field(..., alias="admin_table")
     client_table: str = Field(..., alias="client_table")
     bucket_name: str = Field(..., alias="bucket_name")
     service_table: str = Field(..., alias="service_table")
