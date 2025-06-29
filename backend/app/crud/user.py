@@ -190,9 +190,9 @@ class UserCrud:
             raise HTTPException(detail="Employee not found", status_code=404)
 
         return True
-      
-      @classmethod
-      async def delete_employee_by_documentid(cls, document_id : int):
+
+    @classmethod
+    async def delete_employee_by_documentid(cls, document_id: int) -> bool:
         """Delete an employee by document ID."""
 
         client = await get_db_client()
