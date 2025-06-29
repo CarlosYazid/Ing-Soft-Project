@@ -6,12 +6,14 @@
 	import { Trash2, SquarePen } from '@lucide/svelte';
 	import { inventory } from '$lib/store/index';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { toast, Toaster } from 'svelte-sonner';
+	import { productController } from '$lib/controllers';
 
-	let productMocks: ProductInterface[] = $derived(inventory.products);
-	$inspect(productMocks);
+	let productsInventory: ProductInterface[] = $derived(inventory.products);
 
 	let products: ProductRow[] = $derived(
-		productMocks.map((p) => ({
+		productsInventory.map((p) => ({
 			id: p.id,
 			name: p.name,
 			category: p.category,
@@ -22,6 +24,7 @@
 
 	//Lógica modal de editar producto
 	let editar = $state(false);
+
 	function onEdit(row: any) {
 		editar = true;
 		inventory.editProduct = inventory.findProductById(row.id)!;
@@ -48,6 +51,7 @@
 		eliminar = false;
 		//Lógica delete
 		if (inventory.deleteProduct) {
+			productController.deleteById(inventory.deleteProduct.id);
 			inventory.removeProductById(inventory.deleteProduct.id);
 			inventory.clearDeleteProduct();
 		}
@@ -61,7 +65,7 @@
 	// Gestionar lógica sort
 	const columns = [
 		{ title: 'ID', key: 'id' },
-		{ title: 'Nombre', key: 'productName' },
+		{ title: 'Nombre', key: 'name' },
 		{ title: 'Categoría', key: 'category' },
 		{ title: 'Precio', key: 'price' },
 		{ title: 'Stock', key: 'stock' }
@@ -92,7 +96,24 @@
 			return 0;
 		});
 	}
+
+	onMount(async () => {
+		try {
+			const fetchedProducts = await productController.getAll();
+			inventory.products = fetchedProducts;
+		} catch (e: any) {
+			toast('Algo ha salido mal', {
+				description: e.message || 'No se han podido cargar los productos',
+				action: {
+					label: 'Aceptar',
+					onClick: () => console.info('Aceptar')
+				}
+			});
+		}
+	});
 </script>
+
+<Toaster />
 
 <div class="mt-4 flex justify-end">
 	<Button
@@ -105,7 +126,7 @@
 
 <div class="px-8">
 	<h3 class="font-semiboldc mt-8 bg-zinc-500/15 p-4 text-lg">Lista de Productos Actuales</h3>
-	{#key productMocks}
+	{#key productsInventory}
 		<Table.Root>
 			<Table.Caption>Productos Actuales en la Base de Datos</Table.Caption>
 			<Table.Header class="bg-zinc-500/10">

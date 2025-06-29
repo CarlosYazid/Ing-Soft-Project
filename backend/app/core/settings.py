@@ -21,7 +21,6 @@ class Settings(BaseSettings):
     db_url: str = Field(..., alias="database_url")
     db_key: SecretStr = Field(..., alias="database_key")
     employee_table: str = Field(..., alias="employee_table")
-    admin_table: str = Field(..., alias="admin_table")
     client_table: str = Field(..., alias="client_table")
     bucket_name: str = Field(..., alias="bucket_name")
     service_table: str = Field(..., alias="service_table")
@@ -35,6 +34,9 @@ class Settings(BaseSettings):
     # Invoices
     INVOICES_PATH: Path = STATIC_DIR / "invoices"
 
+    #Groq
+    groq_api_key: SecretStr = Field(..., alias="groq_api_key")
+    groq_model: str = Field(..., alias="groq_model")
 
     # Email
     smtp_host: str = Field(..., alias="smtp_host")

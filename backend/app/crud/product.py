@@ -1,11 +1,13 @@
 from fastapi import HTTPException, UploadFile
+from datetime import date
 
 from db import get_db_client
 from models import Product, ProductCategory, ProductTypes, ProductCreate
 from core import SETTINGS
 
-
 class ProductCrud:
+
+    ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
     
     @classmethod
     async def get_all_products(cls) -> list[Product]:
@@ -73,6 +75,10 @@ class ProductCrud:
                 raise HTTPException(status_code=404, detail="The product already exists")
         
         product.image_url = None  # Initialize image_url to None
+
+        from services.gen_ai import GenAIService
+
+        product.short_description = await GenAIService.gen_short_description(product.description)
             
         response = await client.table(SETTINGS.product_table).insert(product.model_dump(mode="json")).execute()
         
@@ -85,6 +91,12 @@ class ProductCrud:
     @classmethod
     async def upload_image(cls, product_id: int, image: UploadFile) -> str:
         """Upload an image for a product and return the URL."""
+
+        if image.content_type not in cls.ALLOWED_IMAGE_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Tipo de archivo no permitido: {image.content_type}. Debe ser PNG, JPEG o WEBP.",
+            )
         
         client = await get_db_client()
         
@@ -99,11 +111,15 @@ class ProductCrud:
         if not bool(last_image.data):
             raise HTTPException(status_code=404, detail="Product not found")
 
-        last_image = "products/" + last_image.data[0]["image_url"].split("/")[-1]
         filename = f"products/{product_id}_{name.replace(' ', '_').lower()}.{ext}"
-        file_content = await image.read()
 
-        await client.storage.from_(SETTINGS.bucket_name).remove([last_image, filename])
+        if bool(last_image.data[0]["image_url"]):
+            last_image = "products/" + last_image.data[0]["image_url"].split("/")[-1]
+            await client.storage.from_(SETTINGS.bucket_name).remove([last_image, filename])
+        else:
+            await client.storage.from_(SETTINGS.bucket_name).remove([filename])
+
+        file_content = await image.read()
 
         response = await client.storage.from_(SETTINGS.bucket_name).upload(
             path=filename,
@@ -131,6 +147,9 @@ class ProductCrud:
         # Check if the product exists before attempting to update
         if not(cls.exist_product_by_id(product_id)):
             raise HTTPException(detail="Product not found", status_code=404)
+        
+        if not(set(fields.keys()) < set(ProductCreate.__fields__.keys())):
+            raise HTTPException(detail="Update attribute of product", status_code=400)
         
         if "image_url" in fields:
             fields.pop("image_url")
@@ -170,3 +189,69 @@ class ProductCrud:
         response = await client.table(SETTINGS.product_table).select("id").eq("id", product_id).execute()
 
         return bool(response.data)
+
+    @classmethod
+    async def search_product_by_name(cls, name: str) -> list[Product]:
+        """Search products by name."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").ilike("name", f"%{name}%").execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found with this name", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    
+    @classmethod
+    async def search_product_by_price_range(cls, min_price: float, max_price: float) -> list[Product]:
+        """Search products by price range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").gte("price", min_price).lte("price", max_price).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found in this price range", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_product_by_stock_range(cls, min_stock: int, max_stock: int) -> list[Product]:
+        """Search products by stock range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").gte("stock", min_stock).lte("stock", max_stock).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found in this stock range", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_product_by_expiration_date(cls, expiration_date: date) -> list[Product]:
+        """Search products by expiration date."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").eq("expiration_date", expiration_date).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found with this expiration date", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_product_by_cost_range(cls, min_cost: float, max_cost: float) -> list[Product]:
+        """Search products by cost range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").gte("cost", min_cost).lte("cost", max_cost).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found in this cost range", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]

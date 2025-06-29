@@ -1,5 +1,5 @@
 <script>
-	const { infoDialog, contentDialog } = $props();
+	const { infoDialog, contentDialog, callback } = $props();
 	import * as AlertDialog from '$lib/components/ui/alert-dialog/index.js';
 </script>
 
@@ -10,7 +10,9 @@
 				<AlertDialog.Title>Operación Realizada Exitosamente</AlertDialog.Title>
 			</AlertDialog.Header>
 			<AlertDialog.Footer>
-				<AlertDialog.Cancel class="bg-green-400">Aceptar</AlertDialog.Cancel>
+				<AlertDialog.Action class="bg-green-700 hover:bg-green-500" onclick={callback}
+					>Aceptar</AlertDialog.Action
+				>
 			</AlertDialog.Footer>
 		{:else}
 			<AlertDialog.Header>
@@ -20,7 +22,9 @@
 				</AlertDialog.Description>
 			</AlertDialog.Header>
 			<AlertDialog.Footer>
-				<AlertDialog.Cancel class="bg-red-400">Aceptar</AlertDialog.Cancel>
+				<AlertDialog.Action class="bg-red-700 hover:bg-red-500" onclick={callback}
+					>Aceptar</AlertDialog.Action
+				>
 			</AlertDialog.Footer>
 		{/if}
 	</AlertDialog.Content>

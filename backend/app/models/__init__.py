@@ -1,4 +1,4 @@
-from models.user import AbstractUser,UserBase, Client, Employee, ClientCreate, EmployeeCreate
+from models.user import AbstractUser,UserBase, Client, Employee, ClientCreate, EmployeeCreate, EmployeeRole
 from models.product import ProductBase, Product, ProductCategory, ProductTypes, ProductBasePlusID, ProductCreate
 from models.service import ServiceBase, Service, ServiceInput, ServiceInputCreate, ServiceBasePlusID, ServiceCreate
 from models.order import OrderBase, Order, OrderProduct, OrderService, OrderStatus, OrderProductCreate, OrderServiceCreate, OrderBasePlusID, OrderCreate

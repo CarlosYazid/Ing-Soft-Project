@@ -41,3 +41,36 @@ class ServiceService:
              "stock": product.stock,
              "image_url": product.image_url,
             }) for product in products]
+        
+    @classmethod
+    async def search_service_by_name(cls, name: str) -> list[ServiceBasePlusID]:
+        """Search for services by name."""
+        services = await ServiceCrud.search_service_by_name(name)
+        return [ServiceBasePlusID.model_validate(
+            {"id": service.id,
+             "name": service.name,
+             "short_description": service.short_description,
+             "price": service.price,
+            }) for service in services]
+        
+    @classmethod
+    async def search_service_by_price_range(cls, min_price: float, max_price: float) -> list[ServiceBasePlusID]:
+        """Search for services by price range."""
+        services = await ServiceCrud.search_service_by_price_range(min_price, max_price)
+        return [ServiceBasePlusID.model_validate(
+            {"id": service.id,
+             "name": service.name,
+             "short_description": service.short_description,
+             "price": service.price,
+            }) for service in services]
+        
+    @classmethod
+    async def search_service_by_cost_range(cls, min_cost: float, max_cost: float) -> list[ServiceBasePlusID]:
+        """Search for services by cost range."""
+        services = await ServiceCrud.search_service_by_cost_range(min_cost, max_cost)
+        return [ServiceBasePlusID.model_validate(
+            {"id": service.id,
+             "name": service.name,
+             "short_description": service.short_description,
+             "price": service.price,
+            }) for service in services]
