@@ -1,4 +1,5 @@
 from fastapi import HTTPException, UploadFile
+from datetime import date
 
 from db import get_db_client
 from models import Product, ProductCategory, ProductTypes, ProductCreate
@@ -188,3 +189,69 @@ class ProductCrud:
         response = await client.table(SETTINGS.product_table).select("id").eq("id", product_id).execute()
 
         return bool(response.data)
+
+    @classmethod
+    async def search_product_by_name(cls, name: str) -> list[Product]:
+        """Search products by name."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").ilike("name", f"%{name}%").execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found with this name", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    
+    @classmethod
+    async def search_product_by_price_range(cls, min_price: float, max_price: float) -> list[Product]:
+        """Search products by price range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").gte("price", min_price).lte("price", max_price).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found in this price range", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_product_by_stock_range(cls, min_stock: int, max_stock: int) -> list[Product]:
+        """Search products by stock range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").gte("stock", min_stock).lte("stock", max_stock).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found in this stock range", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_product_by_expiration_date(cls, expiration_date: date) -> list[Product]:
+        """Search products by expiration date."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").eq("expiration_date", expiration_date).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found with this expiration date", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_product_by_cost_range(cls, min_cost: float, max_cost: float) -> list[Product]:
+        """Search products by cost range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").gte("cost", min_cost).lte("cost", max_cost).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No products found in this cost range", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]

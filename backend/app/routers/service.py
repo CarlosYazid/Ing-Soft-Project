@@ -118,14 +118,12 @@ async def get_input_service2(request: Request, id : int):
     """
     return await ServiceCrud.get_service_input_by_id(id)
 
-
 @router.post("/input_services/")
 async def create_input_service(request: Request, input_service: ServiceInputCreate):
     """
     Create a new input service for a specific service ID.
     """
     return await ServiceCrud.create_service_input(input_service)
-
 
 @router.put("/input_services/{_id}")
 async def update_input_service(request: Request, _id: int, fields: dict):
@@ -154,3 +152,46 @@ async def delete_input_service_2(request: Request, service_id: int, product_id: 
     Delete an existing input service.
     """
     return await ServiceCrud.delete_service_input_by_service_id_and_product_id(service_id, product_id)
+
+@router.get("/search/name/{name}")
+async def search_service_by_name(request: Request, name: str):
+    """
+    Search for services by name.
+    """
+    return await ServiceService.search_service_by_name(name)
+
+@router.get("/search/name/")
+async def search_service_by_name_2(request: Request, name: str):
+    """
+    Search for services by name.
+    """
+    return await ServiceService.search_service_by_name(name)
+
+
+@router.get("/search/price_range/{min_price}/{max_price}")
+async def search_service_by_price_range(request: Request, min_price: float, max_price: float):
+    """
+    Search for services by price range.
+    """
+    return await ServiceService.search_service_by_price_range(min_price, max_price)
+
+@router.get("/search/price_range/")
+async def search_service_by_price_range_2(request: Request, min_price: float, max_price: float):
+    """
+    Search for services by price range.
+    """
+    return await ServiceService.search_service_by_price_range(min_price, max_price)
+
+@router.get("/search/cost_range/{min_cost}/{max_cost}")
+async def search_service_by_cost_range(request: Request, min_cost: float, max_cost: float):
+    """
+    Search for services by cost range.
+    """
+    return await ServiceService.search_service_by_cost_range(min_cost, max_cost)
+
+@router.get("/search/cost_range/")
+async def search_service_by_cost_range_2(request: Request, min_cost: float, max_cost: float):
+    """
+    Search for services by cost range.
+    """
+    return await ServiceService.search_service_by_cost_range(min_cost, max_cost)
