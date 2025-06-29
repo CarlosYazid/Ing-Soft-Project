@@ -126,3 +126,39 @@ async def get_products_base_by_type_2(request: Request, product_type: ProductTyp
     Get products by type in base format.
     """
     return await ProductService.get_products_base_by_type(product_type)
+
+@router.get("/search/name/{name}")
+async def search_products_by_name(request: Request, name: str):
+    """
+    Search products by name.
+    """
+    return await ProductService.search_products_by_name(name)
+
+@router.get("/search/price/{min_price}/{max_price}")
+async def search_products_by_price_range(request: Request, min_price: float, max_price: float):
+    """
+    Search products by price range.
+    """
+    return await ProductService.search_products_by_price_range(min_price, max_price)
+
+@router.get("/search/stock/{min_stock}/{max_stock}")
+async def search_products_by_stock_range(request: Request, min_stock: int, max_stock: int):
+    """
+    Search products by stock range.
+    """
+    return await ProductService.search_products_by_stock_range(min_stock, max_stock)
+
+
+@router.get("/search/expiration/{expiration_date}")
+async def search_products_by_expiration_date(request: Request, expiration_date: datetime):
+    """
+    Search products by expiration date.
+    """
+    return await ProductService.search_products_by_expiration_date(expiration_date)
+
+@router.get("/search/cost/{min_cost}/{max_cost}")
+async def search_products_by_cost_range(request: Request, min_cost: float, max_cost: float):
+    """
+    Search products by cost range.
+    """
+    return await ProductService.search_product_by_cost_range(min_cost, max_cost)

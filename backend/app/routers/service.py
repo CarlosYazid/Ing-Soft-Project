@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Request, Depends
 
+
 from models import ServiceCreate
 from crud import ServiceCrud
 from services import AuthService, ServiceService
@@ -118,3 +119,46 @@ async def get_input_services_base_by_service_id_2(request: Request, service_id: 
     Retrieve input services by service ID in base format.
     """
     return await ServiceService.get_input_services_by_service_id(service_id)
+
+@router.get("/search/name/{name}")
+async def search_service_by_name(request: Request, name: str):
+    """
+    Search for services by name.
+    """
+    return await ServiceService.search_service_by_name(name)
+
+@router.get("/search/name/")
+async def search_service_by_name_2(request: Request, name: str):
+    """
+    Search for services by name.
+    """
+    return await ServiceService.search_service_by_name(name)
+
+
+@router.get("/search/price_range/{min_price}/{max_price}")
+async def search_service_by_price_range(request: Request, min_price: float, max_price: float):
+    """
+    Search for services by price range.
+    """
+    return await ServiceService.search_service_by_price_range(min_price, max_price)
+
+@router.get("/search/price_range/")
+async def search_service_by_price_range_2(request: Request, min_price: float, max_price: float):
+    """
+    Search for services by price range.
+    """
+    return await ServiceService.search_service_by_price_range(min_price, max_price)
+
+@router.get("/search/cost_range/{min_cost}/{max_cost}")
+async def search_service_by_cost_range(request: Request, min_cost: float, max_cost: float):
+    """
+    Search for services by cost range.
+    """
+    return await ServiceService.search_service_by_cost_range(min_cost, max_cost)
+
+@router.get("/search/cost_range/")
+async def search_service_by_cost_range_2(request: Request, min_cost: float, max_cost: float):
+    """
+    Search for services by cost range.
+    """
+    return await ServiceService.search_service_by_cost_range(min_cost, max_cost)

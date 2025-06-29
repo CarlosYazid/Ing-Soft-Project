@@ -231,5 +231,44 @@ class ServiceCrud:
 
         response = await client.table(SETTINGS.service_inputs_table).select("id").eq("id", service_input_id).execute()
 
-
         return bool(response.data)
+
+
+    @classmethod
+    async def search_service_by_name(cls, name: str) -> list[Service]:
+        """Search services by name."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.service_table).select("*").ilike("name", f"%{name}%").execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No services found with this name", status_code=404)
+
+        return [Service.model_validate(service) for service in response.data]
+    
+    @classmethod
+    async def search_service_by_price_range(cls, min_price: float, max_price: float) -> list[Service]:
+        """Search services by price range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.service_table).select("*").gte("price", min_price).lte("price", max_price).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No services found in this price range", status_code=404)
+
+        return [Service.model_validate(service) for service in response.data]
+    
+    @classmethod
+    async def search_service_by_cost_range(cls, min_cost: float, max_cost: float) -> list[Service]:
+        """Search services by cost range."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.service_table).select("*").gte("cost", min_cost).lte("cost", max_cost).execute()
+
+        if not(bool(response.data)):
+            raise HTTPException(detail="No services found in this cost range", status_code=404)
+
+        return [Service.model_validate(service) for service in response.data]
