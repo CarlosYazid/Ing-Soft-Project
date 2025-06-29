@@ -71,8 +71,7 @@ class ProductBasePlusID(ProductBase):
     """
     id: int = Field(..., description="Product's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -98,8 +97,7 @@ class ProductCreate(ProductBase):
     expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
     type: Optional[ProductTypes] = Field(None, description="Type of the product")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -126,8 +124,7 @@ class Product(ProductCreate):
     """
     id: int = Field(..., description="Product's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {

@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from core import SETTINGS
-from routers import UserRouter, AuthRouter, OrderRouter, ProductRouter, ServiceRouter, PaymentRouter
+from routers import UserRouter, AuthRouter, OrderRouter, ProductRouter, ServiceRouter, PaymentRouter, InvoiceRouter
 
 
 app = FastAPI()
@@ -26,6 +26,7 @@ app.include_router(OrderRouter)
 app.include_router(ProductRouter)
 app.include_router(ServiceRouter)
 app.include_router(PaymentRouter)
+app.include_router(InvoiceRouter)
 
 # Static files configuration
 app.mount("/static", StaticFiles(directory="../frontend/my-app/static", html=True), name="frontend")

@@ -1,6 +1,9 @@
 from pydantic import EmailStr, SecretStr, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
+from pathlib import Path
+from typing import Optional
 
 
 class Settings(BaseSettings):
@@ -9,6 +12,10 @@ class Settings(BaseSettings):
     environment: str = "development"  # development | production | staging
     debug: bool = True
     model_config = SettingsConfigDict(env_file=os.path.join(os.path.dirname(__file__), "../../.env"), env_file_encoding='utf-8', extra='allow')
+    BACKEND_DIR: Path = Path(__file__).resolve().parent.parent.parent
+    FRONTEND_DIR: Path = BACKEND_DIR.parent / "frontend"
+    STATIC_DIR: Path = FRONTEND_DIR / "my-app" / "static"
+
 
     # Supabase
     db_url: str = Field(..., alias="database_url")
@@ -24,15 +31,30 @@ class Settings(BaseSettings):
     order_service_table: str = Field(..., alias="order_service_table")
     order_product_table: str = Field(..., alias="order_product_table")
     payment_table: str = Field(..., alias="payment_table")
+    
+    # Invoices
+    INVOICES_PATH: Path = STATIC_DIR / "invoices"
 
-    # SMTP (Gmail)
-    smtp_host: str = "smtp.gmail.com"
-    smtp_port: int = 587
-    smtp_corp_email: EmailStr = Field(..., alias="corp_user")
-    smtp_corp_password: SecretStr = Field(..., alias="corp_password")
 
+    # Email
+    smtp_host: str = Field(..., alias="smtp_host")
+    smtp_port: int = Field(..., alias="smtp_port")
+    smtp_comp_email: EmailStr = Field(..., alias="comp_user")
+    smtp_comp_password: SecretStr = Field(..., alias="comp_password")
+    
+    # Templates
+    templates_dir: str = Field(os.path.join(os.path.dirname(__file__), "../templates"), alias="templates_dir")
+    jinja_env : Optional[Environment] = Field(default=None, alias="jinja_env")
+
+    # Company
+    company_name: str = Field(..., alias="company_name")
+    company_email: EmailStr = Field(..., alias="company_email")
+    company_phone: str = Field(..., alias="company_phone")
+    company_address: str = Field(..., alias="company_address")
     frontend_url: str = Field(..., alias="frontend_url")
     home_url: str = Field(..., alias="home_url")
+    logo_url: str = Field(..., alias="logo_url")
+    footer_message: str = Field(..., alias="footer_message")
 
     # Auth
     sign_in_redirect_url: str = Field(..., alias="sign_in_redirect_url")
@@ -50,6 +72,11 @@ class Settings(BaseSettings):
         # Solo agrega si no está ya en la lista
         if self.frontend_url not in self.allowed_origins:
             self.allowed_origins.append(self.frontend_url)
+        # Configura Jinja2 environment
+        self.jinja_env = Environment(
+            loader=FileSystemLoader(self.templates_dir),
+            autoescape=select_autoescape(["html", "xml"])
+        )
 
 
 SETTINGS = Settings()

@@ -2,7 +2,7 @@ from models.user import AbstractUser,UserBase, Client, Employee, ClientCreate, E
 from models.product import ProductBase, Product, ProductCategory, ProductTypes, ProductBasePlusID, ProductCreate
 from models.service import ServiceBase, Service, ServiceInput, ServiceInputCreate, ServiceBasePlusID, ServiceCreate
 from models.order import OrderBase, Order, OrderProduct, OrderService, OrderStatus, OrderProductCreate, OrderServiceCreate, OrderBasePlusID, OrderCreate
-from models.others import PaymentBase, Payment, PaymentMethod, PaymentStatus, PaymentBasePlusID, PaymentCreate
+from models.others import PaymentBase, Payment, PaymentMethod, PaymentStatus, PaymentBasePlusID, PaymentCreate, Email, File, Invoice, InvoiceItem, InvoiceRequest
 
 __all__ = [
     "AbstractUser",

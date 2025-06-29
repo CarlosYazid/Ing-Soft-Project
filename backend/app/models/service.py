@@ -22,8 +22,7 @@ class ServiceCreate(ServiceBase):
     created_at: datetime = Field(..., description="Timestamp when the service was created")
     updated_at: datetime = Field(..., description="Timestamp when the service was last updated")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -47,8 +46,7 @@ class ServiceBasePlusID(ServiceBase):
     """
     id: int = Field(..., description="Service's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -63,8 +61,7 @@ class Service(ServiceCreate):
     
     id: int = Field(..., description="Service's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -89,8 +86,7 @@ class ServiceInputCreate(BaseModel):
     service_id: int = Field(..., description="ID of the service that requires the product")
     product_id: int = Field(..., description="ID of the product required for the service")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
                                               "example": {
                                                   "service_id": 1,
@@ -104,8 +100,7 @@ class ServiceInput(ServiceInputCreate):
     """
     id: int = Field(..., description="Service input's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
