@@ -35,6 +35,10 @@
                     <td align="right">{{ (item.quantity * item.unit_price) | round(2) }}</td>
                   </tr>
                   {% endfor %}
+                  <tr>
+                    <td>Impuestos ({{ invoice.tax_rate * 100 }} %)</td>
+                    <td align="right">{{ invoice.tax_amount }}</td>
+                  </tr>
                   <tr style="font-weight: bold; border-top: 2px solid #007bff;">
                     <td>Total</td>
                     <td align="right">{{ invoice.total }}</td>
