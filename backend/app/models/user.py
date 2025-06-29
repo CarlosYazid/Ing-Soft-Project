@@ -32,8 +32,7 @@ class ClientCreate(UserBase):
     """
          
 
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -55,9 +54,8 @@ class Client(ClientCreate):
     Client model for the API response.
     """
     id: int = Field(..., description="User's unique identifier")
-    
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -85,8 +83,7 @@ class EmployeeCreate(UserBase):
     last_name: str = Field(..., description="User's last name")
     role : EmployeeRole = Field(..., description="User's role in the system")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                            str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                             use_enum_values=True,
                                             json_schema_extra={
                                                 "example": {
@@ -114,8 +111,7 @@ class Employee(EmployeeCreate):
     """
     id: int = Field(..., description="User's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                            str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                             use_enum_values=True,
                                             json_schema_extra={
                                                 "example": {

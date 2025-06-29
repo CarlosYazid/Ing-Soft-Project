@@ -4,11 +4,13 @@ from routers.service import router as ServiceRouter
 from routers.product import router as ProductRouter
 from routers.order import router as OrderRouter
 from routers.others import router as PaymentRouter
+from routers.invoice import router as InvoiceRouter
 __all__ = [
     "UserRouter",
     "AuthRouter",
     "ServiceRouter",
     "ProductRouter",
     "OrderRouter",
-    "PaymentRouter"
+    "PaymentRouter",
+    "InvoiceRouter"
 ]

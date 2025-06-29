@@ -20,8 +20,7 @@ class OrderProductCreate(BaseModel):
     product_id: int = Field(..., description="ID of the product")
     quantity: int = Field(..., description="Quantity of the product")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
                                               "example": {
                                                   "order_id": 1,
@@ -36,8 +35,7 @@ class OrderProduct(OrderProductCreate):
     """
     id: int = Field(..., description="Order's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
@@ -56,8 +54,7 @@ class OrderServiceCreate(BaseModel):
     service_id: int = Field(..., description="ID of the service")
     quantity: int = Field(..., description="Quantity of the service")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
                                               "example": {
                                                   "order_id": 1,
@@ -72,8 +69,7 @@ class OrderService(OrderServiceCreate):
     """
     id: int = Field(..., description="Order's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
@@ -97,8 +93,7 @@ class OrderBasePlusID(OrderBase):
     """
     id: int = Field(..., description="Order's unique identifier")
 
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -118,8 +113,7 @@ class OrderCreate(OrderBase):
     created_at: datetime = Field(..., description="Timestamp when the order was created")
     updated_at: datetime = Field(..., description="Timestamp when the order was last updated")
 
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
@@ -142,8 +136,7 @@ class Order(OrderCreate):
     """
     id: int = Field(..., description="Order's unique identifier")
 
-    model_config: ConfigDict = ConfigDict(str_to_lower=True,
-                                          str_strip_whitespace=True,
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
