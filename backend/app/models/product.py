@@ -82,6 +82,7 @@ class ProductBasePlusID(ProductBase):
                                                   "price": 9.99,
                                                   "category": "Papelería",
                                                   "stock": 50,
+                                                  "minimum_stock" : 10,
                                                   "image_url": "https://example.com/image.jpg",
                                               }
                                           })
@@ -107,6 +108,7 @@ class ProductCreate(ProductBase):
                                                   "price": 9.99,
                                                   "category": "Papelería",
                                                   "stock": 50,
+                                                  "minimum_stock" : 7,
                                                   "description": "Descripción detallada del producto de papelería de ejemplo.",
                                                   "cost": 5.00,
                                                   "created_at": "2023-01-01T00:00:00Z",
@@ -135,6 +137,7 @@ class Product(ProductCreate):
                                                   "price": 9.99,
                                                   "category": "Papelería",
                                                   "stock": 50,
+                                                  "minimum_stock" : 20,
                                                   "description": "Descripción detallada del producto de papelería de ejemplo.",
                                                   "cost": 5.00,
                                                   "created_at": "2023-01-01T00:00:00Z",
