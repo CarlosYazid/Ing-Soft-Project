@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends, UploadFile, File, Form
-from datetime import datetime
+from datetime import date
 
 from models import ProductCreate, ProductCategory, ProductTypes
 from crud import ProductCrud
@@ -168,7 +168,7 @@ async def search_products_by_stock_range_2(request: Request, min_stock: int, max
     return await ProductService.search_products_by_stock_range(min_stock, max_stock)
 
 @router.get("/search/expiration/{expiration_date}")
-async def search_products_by_expiration_date(request: Request, expiration_date: datetime):
+async def search_products_by_expiration_date(request: Request, expiration_date: date):
     """
     Search products by expiration date.
     """
