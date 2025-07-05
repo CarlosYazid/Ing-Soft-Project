@@ -1,64 +1,44 @@
+from fastapi import HTTPException
+
 from models import PaymentBasePlusID, PaymentMethod, PaymentStatus
-from crud import PaymentCrud
+from core import SETTINGS
+from db import get_db_client
 
 class PaymentService:
     
     @classmethod
-    async def get_all_payments_base(cls) -> list[PaymentBasePlusID]:
-        """Retrieve all payments."""
-        payments = await PaymentCrud.get_all_payments()
-        return [PaymentBasePlusID.model_validate({
-            "id": payment.id,
-            "amount": payment.amount,
-            "method": payment.method,
-            "status": payment.status,
-            "user_id": payment.user_id,
-        }) for payment in payments]
-        
-    @classmethod
-    async def get_payment_base_by_id(cls, payment_id: int) -> PaymentBasePlusID:
-        """Retrieve a payment by ID."""
-        payment = await PaymentCrud.get_payment_by_id(payment_id)
-        return PaymentBasePlusID.model_validate({
-            "id": payment.id,
-            "amount": payment.amount,
-            "method": payment.method,
-            "status": payment.status,
-            "user_id": payment.user_id,
-        })
-        
-    @classmethod
-    async def get_payments_base_by_user(cls, user_id: int) -> list[PaymentBasePlusID]:
-        """Retrieve payments by user ID."""
-        payments = await PaymentCrud.get_payments_by_user(user_id)
-        return [PaymentBasePlusID.model_validate({
-            "id": payment.id,
-            "amount": payment.amount,
-            "method": payment.method,
-            "status": payment.status,
-            "user_id": payment.user_id,
-        }) for payment in payments]
-        
-    @classmethod
-    async def get_payments_base_by_status(cls, status: PaymentStatus) -> list[PaymentBasePlusID]:
+    async def search_payments_by_status(cls, status: PaymentStatus) -> list[PaymentBasePlusID]:
         """Retrieve payments by status."""
-        payments = await PaymentCrud.get_payments_by_status(status)
-        return [PaymentBasePlusID.model_validate({
-            "id": payment.id,
-            "amount": payment.amount,
-            "method": payment.method,
-            "status": payment.status,
-            "user_id": payment.user_id,
-        }) for payment in payments]
         
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.payment_table).select("id", "user_id", "amount", "method", "status").eq("status", status.capitalize()).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No payments found for this status", status_code=404)
+
+        return [PaymentBasePlusID.model_validate(payment) for payment in response.data]
+    
     @classmethod
-    async def get_payments_base_by_method(cls, method: PaymentMethod) -> list[PaymentBasePlusID]:
+    async def search_payments_by_method(cls, method: PaymentMethod) -> list[PaymentBasePlusID]:
         """Retrieve payments by method."""
-        payments = await PaymentCrud.get_payments_by_method(method)
-        return [PaymentBasePlusID.model_validate({
-            "id": payment.id,
-            "amount": payment.amount,
-            "method": payment.method,
-            "status": payment.status,
-            "user_id": payment.user_id,
-        }) for payment in payments]
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.payment_table).select("id", "user_id", "amount", "method", "status").eq("method", method.capitalize()).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No payments found for this method", status_code=404)
+
+        return [PaymentBasePlusID.model_validate(payment) for payment in response.data]
+    
+    @classmethod
+    async def search_payments_by_user_id(cls, user_id: int) -> list[PaymentBasePlusID]:
+        """Retrieve payments by user ID."""
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.payment_table).select("id", "user_id", "amount", "method", "status").eq("user_id", user_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No payments found for this user", status_code=404)
+
+        return [PaymentBasePlusID.model_validate(payment) for payment in response.data]

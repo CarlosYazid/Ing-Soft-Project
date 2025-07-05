@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 from core import SETTINGS
-from routers import UserRouter, AuthRouter, OrderRouter, ProductRouter, ServiceRouter, PaymentRouter, InvoiceRouter
+from routes import UserRouter, AuthRouter, OrderRouter, ProductRouter, ServiceRouter, PaymentRouter, InvoiceRouter
 
 
 app = FastAPI()

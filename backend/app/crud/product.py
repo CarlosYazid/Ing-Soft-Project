@@ -1,66 +1,15 @@
 from fastapi import HTTPException, UploadFile
-from datetime import date
 
 from db import get_db_client
-from models import Product, ProductCategory, ProductTypes, ProductCreate
+from models import Product, ProductCreate, ProductBasePlusID
 from core import SETTINGS
+from utils import ProductUtils
 
 class ProductCrud:
 
     ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
-    
-    @classmethod
-    async def get_all_products(cls) -> list[Product]:
-        """Retrieve all products."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
-    
-    @classmethod
-    async def get_product_by_id(cls, product_id: int) -> Product:
-        """Retrieve a product by ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").eq("id", product_id).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="Product not found", status_code=404)
-
-        return Product.model_validate(response.data[0])
-    
-    @classmethod
-    async def get_products_by_category(cls, category: ProductCategory) -> list[Product]:
-        """Retrieve products by category."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").eq("category", category.capitalize()).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found in this category", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
-    
-    
-    @classmethod
-    async def get_products_by_type(cls, product_type: ProductTypes) -> list[Product]:
-        """Retrieve products by type."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").eq("type", product_type.capitalize()).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found of this type", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
+    EXCLUDED_FIELDS_FOR_UPDATE = {"id", "image_url", "created_at", "stock"}
+    ALLOWED_FIELDS_FOR_UPDATE = set(ProductCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     
     @classmethod
     async def create_product(cls, product: ProductCreate) -> Product:
@@ -70,8 +19,12 @@ class ProductCrud:
 
         names = await client.table(SETTINGS.product_table).select("name").execute()
 
+
         if bool(names.data):
-            if product.name.lower() in names.data:
+
+            names = [n['name'].lower() for n in names.data]
+
+            if product.name.lower() in names:
                 raise HTTPException(status_code=404, detail="The product already exists")
         
         product.image_url = None  # Initialize image_url to None
@@ -86,7 +39,81 @@ class ProductCrud:
             raise HTTPException(status_code=500, detail="Failed to create product")
         
         return Product.model_validate(response.data[0])
+    
+    @classmethod
+    async def read_all_products(cls) -> list[Product]:
+        """Retrieve all products."""
 
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No products found", status_code=404)
+
+        return [Product.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def read_all_products_base(cls) -> list[ProductBasePlusID]:
+        """Retrieve all products."""
+        
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "minimum_stock", "image_url").execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No products found", status_code=404)
+        
+        return [ProductBasePlusID.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def read_product(cls, product_id: int) -> Product:
+        """Retrieve a product by ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("*").eq("id", product_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Product not found", status_code=404)
+
+        return Product.model_validate(response.data[0])
+    
+    @classmethod
+    async def read_product_base(cls, product_id: int) -> ProductBasePlusID:
+        """Retrieve a product by ID."""
+        
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "minimum_stock", "image_url").eq("id", product_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Product not found", status_code=404)
+
+        return ProductBasePlusID.model_validate(response.data[0])
+    
+    @classmethod
+    async def update_product(cls, product_id: int, fields: dict) -> Product:
+        """Update an existing product."""
+        
+        # Check if the product exists before attempting to update
+        if not await ProductUtils.exist_product(product_id):
+            raise HTTPException(detail="Product not found", status_code=404)
+        
+        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
+            raise HTTPException(detail=f"Cannot update fields: {', '.join(cls.EXCLUDED_FIELDS_FOR_UPDATE)}", status_code=400)
+
+        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE):
+            raise HTTPException(detail="Update attribute of product", status_code=400)
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_table).update(fields).eq("id", product_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to update product", status_code=500)
+
+        return Product.model_validate(response.data[0])
     
     @classmethod
     async def upload_image(cls, product_id: int, image: UploadFile) -> str:
@@ -95,25 +122,22 @@ class ProductCrud:
         if image.content_type not in cls.ALLOWED_IMAGE_TYPES:
             raise HTTPException(
                 status_code=400,
-                detail=f"Tipo de archivo no permitido: {image.content_type}. Debe ser PNG, JPEG o WEBP.",
+                detail=f"Invalid image type: {image.content_type}. Allowed types are: {', '.join(cls.ALLOWED_IMAGE_TYPES)}",
             )
         
-        client = await get_db_client()
-        
         # Check if the product exists before attempting to upload an image
-        if not(cls.exist_product_by_id(product_id)):
+        if not await ProductUtils.exist_product(product_id):
             raise HTTPException(status_code=404, detail="Product not found")
 
         name, ext = image.filename.split(".")[-2:]
         
-        last_image = await client.table(SETTINGS.product_table).select("image_url").eq("id", product_id).execute()
+        client = await get_db_client()
         
-        if not bool(last_image.data):
-            raise HTTPException(status_code=404, detail="Product not found")
+        last_image = await client.table(SETTINGS.product_table).select("image_url").eq("id", product_id).execute()
 
         filename = f"products/{product_id}_{name.replace(' ', '_').lower()}.{ext}"
 
-        if bool(last_image.data[0]["image_url"]):
+        if bool(last_image.data) and bool(last_image.data[0]["image_url"]):
             last_image = "products/" + last_image.data[0]["image_url"].split("/")[-1]
             await client.storage.from_(SETTINGS.bucket_name).remove([last_image, filename])
         else:
@@ -137,28 +161,33 @@ class ProductCrud:
             raise HTTPException(status_code=500, detail="Failed to update product with image URL")
 
         return image_url
-
+    
     @classmethod
-    async def update_product(cls, product_id: int, fields: dict) -> Product:
-        """Update an existing product."""
+    async def update_stock(cls, product_id: int, new_stock: int, replace: bool = True) -> Product:
+        """Update the stock of a product by ID."""
 
-        client = await get_db_client()
-        
-        # Check if the product exists before attempting to update
-        if not(cls.exist_product_by_id(product_id)):
+        # Check if the product exists before attempting to update stock
+        if not await ProductUtils.exist_product(product_id):
             raise HTTPException(detail="Product not found", status_code=404)
         
-        if not(set(fields.keys()) < set(ProductCreate.__fields__.keys())):
-            raise HTTPException(detail="Update attribute of product", status_code=400)
-        
-        if "image_url" in fields:
-            fields.pop("image_url")
+        client = await get_db_client()
+
+        if not replace:
             
+            current_stock_response = await client.table(SETTINGS.product_table).select("stock").eq("id", product_id).execute()
 
-        response = await client.table(SETTINGS.product_table).update(fields).eq("id", product_id).execute()
+            if not bool(current_stock_response.data):
+                raise HTTPException(detail="The product has no stock, better replace it.", status_code=404)
 
-        if not(bool(response.data)):
-            raise HTTPException(detail="Failed to update product", status_code=500)
+            new_stock += int(current_stock_response.data[0]["stock"])
+        
+        if new_stock < 0:
+            new_stock = 0
+
+        response = await client.table(SETTINGS.product_table).update({"stock": new_stock}).eq("id", product_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to update product stock", status_code=500)
 
         return Product.model_validate(response.data[0])
     
@@ -166,92 +195,21 @@ class ProductCrud:
     async def delete_product(cls, product_id: int) -> None:
         """Delete a product by ID."""
 
-        client = await get_db_client()
-
         # Check if the product exists before attempting to delete
-        if not await cls.exist_product_by_id(product_id):
+        if not await ProductUtils.exist_product(product_id):
             raise HTTPException(detail="Product not found", status_code=404)
-
+        
+        from utils import OrderUtils
+        
+        # Check if the product is associated with any orders
+        if await OrderUtils.exist_product_in_orders(product_id):
+            raise HTTPException(detail="Cannot delete product associated with orders", status_code=400)
+        
+        client = await get_db_client()
 
         response = await client.table(SETTINGS.product_table).delete().eq("id", product_id).execute()
 
-        if not(bool(response.data)):
+        if not bool(response.data):
             raise HTTPException(detail="Failed to delete product", status_code=500)
         
         return bool(response.data)
-    
-    @classmethod
-    async def exist_product_by_id(cls, product_id: int) -> bool:
-        """Check if a product exists by ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("id").eq("id", product_id).execute()
-
-        return bool(response.data)
-
-    @classmethod
-    async def search_product_by_name(cls, name: str) -> list[Product]:
-        """Search products by name."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").ilike("name", f"%{name}%").execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found with this name", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
-    
-    
-    @classmethod
-    async def search_product_by_price_range(cls, min_price: float, max_price: float) -> list[Product]:
-        """Search products by price range."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").gte("price", min_price).lte("price", max_price).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found in this price range", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
-    
-    @classmethod
-    async def search_product_by_stock_range(cls, min_stock: int, max_stock: int) -> list[Product]:
-        """Search products by stock range."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").gte("stock", min_stock).lte("stock", max_stock).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found in this stock range", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
-    
-    @classmethod
-    async def search_product_by_expiration_date(cls, expiration_date: date) -> list[Product]:
-        """Search products by expiration date."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").eq("expiration_date", expiration_date).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found with this expiration date", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
-    
-    @classmethod
-    async def search_product_by_cost_range(cls, min_cost: float, max_cost: float) -> list[Product]:
-        """Search products by cost range."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").gte("cost", min_cost).lte("cost", max_cost).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No products found in this cost range", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]

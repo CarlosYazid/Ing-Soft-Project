@@ -1,4 +1,3 @@
-# db.py
 from supabase import acreate_client, AsyncClient
 from core import SETTINGS
 

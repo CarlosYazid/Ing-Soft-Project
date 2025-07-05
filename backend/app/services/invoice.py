@@ -13,23 +13,23 @@ class InvoiceService:
     async def workflow(cls, order_id: int, tax_rate: float):
         """Generate an invoice and send it via email."""
         invoice = await cls.generate_invoice(order_id, tax_rate)
-        pdf_path = await cls.generate_invoice_pdf(invoice)
+        await cls.generate_invoice_pdf(invoice)
         return invoice
     
     
     @classmethod
     async def generate_invoice(cls, order_id: int, tax_rate : float) -> Invoice:
         """Generate an invoice for a client."""
-        order = await OrderCrud.get_order_by_id(order_id)
-        client = await UserCrud.read_client_by_id(order.client_id)
-        order_products = await OrderCrud.get_orders_product_by_order_id(order_id)
-        order_services = await OrderCrud.get_orders_service_by_order_id(order_id)
+        order = await OrderCrud.read_order(order_id)
+        client = await UserCrud.read_client_base(order.client_id)
+        order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
+        order_services = await OrderCrud.read_orders_services_by_order_id(order_id)
 
         invoice_items = []
         
         for order_product in order_products:
 
-            product = await ProductCrud.get_product_by_id(order_product.product_id)
+            product = await ProductCrud.read_product_base(order_product.product_id)
 
             invoice_items.append(InvoiceItem(
                 name=product.name,
@@ -39,7 +39,7 @@ class InvoiceService:
             
         for order_service in order_services:
 
-            service = await ServiceCrud.get_service_by_id(order_service.service_id)
+            service = await ServiceCrud.read_service_base(order_service.service_id)
 
             invoice_items.append(InvoiceItem(
                 name=service.name,
