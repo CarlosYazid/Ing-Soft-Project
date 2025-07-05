@@ -1,8 +1,7 @@
 import smtplib
-from datetime import date
 from fastapi import HTTPException
 
-from models import Email, File
+from models import Email
 from core import SETTINGS
 
 

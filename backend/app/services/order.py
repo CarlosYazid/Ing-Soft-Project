@@ -1,47 +1,59 @@
-from models import OrderBasePlusID
-from crud import OrderCrud
+from fastapi import HTTPException
+
+from models import OrderBasePlusID, OrderStatus
+from core import SETTINGS
+from db import get_db_client
 
 class OrderService:
+    
     @classmethod
-    async def get_all_orders_base(cls) -> list[OrderBasePlusID]:
-        """Retrieve all orders."""
-        orders = await OrderCrud.get_all_orders()
-        return [OrderBasePlusID.model_validate({
-            "id": order.id,
-            "client_id": order.client_id,
-            "total_price": order.total_price,
-            "status": order.status,
-        }) for order in orders]
+    async def search_orders_by_status(cls, status: OrderStatus) -> list[OrderBasePlusID]:
+        """Retrieve orders by status."""
+        
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.order_table).select("id", "client_id", "total_price", "status").eq("status", status.capitalize()).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No orders found with this status", status_code=404)
+
+        return [OrderBasePlusID.model_validate(order) for order in response.data]
 
     @classmethod
-    async def get_order_base_by_id(cls, order_id: int) -> OrderBasePlusID:
-        """Retrieve an order by ID."""
-        order = await OrderCrud.get_order_by_id(order_id)
-        return OrderBasePlusID.model_validate({
-            "id": order.id,
-            "client_id": order.client_id,
-            "total_price": order.total_price,
-            "status": order.status,
-        })
+    async def search_orders_by_client_id(cls, client_id: int) -> list[OrderBasePlusID]:
+        """Retrieve all orders for a specific client."""
         
-    @classmethod
-    async def get_orders_base_by_client_id(cls, client_id: int) -> list[OrderBasePlusID]:
-        """Retrieve orders by client ID."""
-        orders = await OrderCrud.get_orders_by_client_id(client_id)
-        return [OrderBasePlusID.model_validate({
-            "id": order.id,
-            "client_id": order.client_id,
-            "total_price": order.total_price,
-            "status": order.status,
-        }) for order in orders]
+        from utils import UserUtils
         
+        # Ensure the client_id exists before retrieving orders
+        if not await UserUtils.exist_client(client_id):
+            raise HTTPException(detail="Client not found", status_code=404)
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.order_table).select("id", "client_id", "total_price", "status").eq("client_id", client_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No orders found for this client", status_code=404)
+
+        return [OrderBasePlusID.model_validate(order) for order in response.data]
+    
     @classmethod
-    async def get_orders_base_by_status(cls, status: str) -> list[OrderBasePlusID]:
-        """Retrieve orders by status."""
-        orders = await OrderCrud.get_orders_by_status(status)
-        return [OrderBasePlusID.model_validate({
-            "id": order.id,
-            "client_id": order.client_id,
-            "total_price": order.total_price,
-            "status": order.status,
-        }) for order in orders]
+    async def update_inventory(cls, order_id: int) -> bool:
+        """Update inventory after an order is placed."""
+        
+        from crud import OrderCrud, ProductCrud, ServiceCrud
+        
+        order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
+        order_services_ids = await OrderCrud.read_orders_services_ids_by_order_id(order_id)
+
+        for order_product in order_products:
+            await ProductCrud.update_stock(order_product.product_id, -order_product.quantity, False)
+
+        for order_service_id in order_services_ids:
+            products_ids = await ServiceCrud.read_services_inputs_ids_by_service(order_service_id)
+            for product_id in products_ids:
+                await ProductCrud.update_stock(product_id, -1, False)
+        
+        return True
+

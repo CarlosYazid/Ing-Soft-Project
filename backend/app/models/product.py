@@ -60,6 +60,7 @@ class ProductBase(BaseModel):
     price: float = Field(..., description="Product's price")
     category: ProductCategory = Field(..., description="Category of the product")
     stock: int = Field(..., description="Available stock of the product")
+    minimum_stock: int = Field(..., description="Minimum stock level of the product")
     image_url: Optional[str] = Field(None, description="URL of the product image")
     
 

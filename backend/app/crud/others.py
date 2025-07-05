@@ -1,10 +1,15 @@
 from fastapi import HTTPException
 
 from db import get_db_client
-from models import Payment,PaymentCreate, PaymentStatus, PaymentMethod
+from models import Payment, PaymentCreate, PaymentBasePlusID
 from core import SETTINGS
+from utils import PaymentUtils
 
 class PaymentCrud:
+    
+    EXCLUDED_FIELDS_FOR_UPDATE = {"user_id", "created_at"}
+    ALLOWED_FIELDS_FOR_UPDATE = set(PaymentCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
+    
     @classmethod
     async def create_payment(cls, payment: PaymentCreate) -> Payment:
         """Create a new payment."""
@@ -12,38 +17,80 @@ class PaymentCrud:
 
         response = await client.table(SETTINGS.payment_table).insert(payment.model_dump(mode="json")).execute()
 
-        if not(bool(response.data)):
+        if not bool(response.data):
             raise HTTPException(detail="Failed to create payment", status_code=500)
 
         return Payment.model_validate(response.data[0])
+    
+    @classmethod
+    async def read_all_payments(cls) -> list[Payment]:
+        """Retrieve all payments."""
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.payment_table).select("*").execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No payments found", status_code=404)
+
+        return [Payment.model_validate(payment) for payment in response.data]
 
     @classmethod
-    async def get_payment_by_id(cls, payment_id: int) -> Payment:
+    async def read_all_payments_base(cls) -> list[PaymentBasePlusID]:
+        """Retrieve all payments."""
+        
+        client = await get_db_client()
+        
+        response = await client.table(SETTINGS.payment_table).select("id", "user_id", "amount", "method", "status").execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No payments found", status_code=404)
+
+        return [PaymentBasePlusID.model_validate(payment) for payment in response.data]
+
+    @classmethod
+    async def read_payment(cls, payment_id: int) -> Payment:
         """Retrieve a payment by ID."""
         client = await get_db_client()
 
         response = await client.table(SETTINGS.payment_table).select("*").eq("id", payment_id).execute()
 
-        if not(bool(response.data)):
+        if not bool(response.data):
             raise HTTPException(detail="Payment not found", status_code=404)
 
         return Payment.model_validate(response.data[0])
     
     @classmethod
+    async def read_payment_base(cls, payment_id: int) -> PaymentBasePlusID:
+        """Retrieve a payment by ID."""
+        
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.payment_table).select("id", "user_id", "amount", "method", "status").eq("id", payment_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Payment not found", status_code=404)
+
+        return PaymentBasePlusID.model_validate(response.data[0])
+    
+    @classmethod
     async def update_payment(cls, payment_id: int, fields: dict) -> Payment:
         """Update an existing payment."""
-        client = await get_db_client()
-        
+
         # check if payment exists
-        if not await cls.exist_payment_by_id(payment_id):
+        if not await PaymentUtils.exist_payment(payment_id):
             raise HTTPException(detail="Payment not found", status_code=404)
         
-        if not(set(fields.keys()) < set(PaymentCreate.__fields__.keys())):
+        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
+            raise HTTPException(detail=f"Cannot update: {', '.join(cls.EXCLUDED_FIELDS_FOR_UPDATE)}", status_code=400)
+
+        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Update attribute of payment", status_code=400)
+        
+        client = await get_db_client()
 
         response = await client.table(SETTINGS.payment_table).update(fields).eq("id", payment_id).execute()
 
-        if not(bool(response.data)):
+        if not bool(response.data):
             raise HTTPException(detail="Failed to update payment", status_code=500)
 
         return Payment.model_validate(response.data[0])
@@ -51,73 +98,15 @@ class PaymentCrud:
     @classmethod
     async def delete_payment(cls, payment_id: int) -> None:
         """Delete a payment by ID."""
-        client = await get_db_client()
         
-        # check if payment exists
-        if not await cls.exist_payment_by_id(payment_id):
+        if not await PaymentUtils.exist_payment(payment_id):
             raise HTTPException(detail="Payment not found", status_code=404)
+        
+        client = await get_db_client()
 
         response = await client.table(SETTINGS.payment_table).delete().eq("id", payment_id).execute()
 
-        if not(bool(response.data)):
+        if not bool(response.data):
             raise HTTPException(detail="Failed to delete payment", status_code=500)
         
-        return bool(response.data)
-        
-    @classmethod
-    async def get_payments_by_status(cls, status: PaymentStatus) -> list[Payment]:
-        """Retrieve payments by status."""
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.payment_table).select("*").eq("status", status.capitalize()).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No payments found for this status", status_code=404)
-
-        return [Payment.model_validate(payment) for payment in response.data]
-    
-    @classmethod
-    async def get_payments_by_method(cls, method: PaymentMethod) -> list[Payment]:
-        """Retrieve payments by method."""
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.payment_table).select("*").eq("method", method.capitalize()).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No payments found for this method", status_code=404)
-
-        return [Payment.model_validate(payment) for payment in response.data]
-    
-    @classmethod
-    async def get_payments_by_user(cls, user_id: int) -> list[Payment]:
-        """Retrieve payments by user ID."""
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.payment_table).select("*").eq("user_id", user_id).execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No payments found for this user", status_code=404)
-
-        return [Payment.model_validate(payment) for payment in response.data]
-    
-    @classmethod
-    async def get_all_payments(cls) -> list[Payment]:
-        """Retrieve all payments."""
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.payment_table).select("*").execute()
-
-        if not(bool(response.data)):
-            raise HTTPException(detail="No payments found", status_code=404)
-
-        return [Payment.model_validate(payment) for payment in response.data]
-    
-    
-    @classmethod
-    async def exist_payment_by_id(cls, payment_id: int) -> bool:
-        """Check if a payment exists by ID."""
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.payment_table).select("id").eq("id", payment_id).execute()
-
         return bool(response.data)
