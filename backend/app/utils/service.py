@@ -32,7 +32,7 @@ class ServiceUtils:
         if not await cls.exist_service(service_id):
             raise HTTPException(detail="Service not found", status_code=404)
         
-        from utils import ProductUtils
+        from .product import ProductUtils
 
         if not await ProductUtils.exist_product(product_id):
             raise HTTPException(detail="Product not found", status_code=404)

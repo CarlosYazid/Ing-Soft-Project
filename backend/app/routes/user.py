@@ -39,11 +39,11 @@ async def read_employee(request: Request, _id: int):
     return await UserCrud.read_employee(_id)   
 
 @router.get("/employee/")
-async def read_employee_2(request: Request, id: int):
+async def read_employee_2(request: Request, _id: int):
     """
     Get an employee by email.
     """
-    return await UserCrud.read_employee(id)
+    return await UserCrud.read_employee(_id)
 
 @router.get("/employee/base/{_id}")
 async def read_employee_base(request: Request, _id: int):

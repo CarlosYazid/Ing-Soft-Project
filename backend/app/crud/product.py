@@ -19,8 +19,12 @@ class ProductCrud:
 
         names = await client.table(SETTINGS.product_table).select("name").execute()
 
+
         if bool(names.data):
-            if product.name.lower() in names.data:
+
+            names = [n['name'].lower() for n in names.data]
+
+            if product.name.lower() in names:
                 raise HTTPException(status_code=404, detail="The product already exists")
         
         product.image_url = None  # Initialize image_url to None
