@@ -4,7 +4,7 @@ class Cart {
 	products: ProductInterface[] = $state([]);
 	services: service[] = $state([]);
 	client: client | null = $state(null);
-	/* total: number = $state(0); */ // Se podría activar para manejar como micro optimización o mejorar la reactividad, de momento estoy de afán, pailas
+	/* total: number = $derived-by(...)); */ // Se podría activar para manejar como micro optimización o mejorar la reactividad, de momento estoy de afán, pailas
 	productSelected: ProductInterface | null = $state(null);
 	serviceSelected: service | null = $state(null);
 

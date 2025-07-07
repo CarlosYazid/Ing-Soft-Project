@@ -61,7 +61,8 @@
 		<h3 class="font-semiboldc mt-8 bg-zinc-500/5 text-lg">Lista de Productos Seleccionados</h3>
 		<div class="mt-4 grid grid-cols-1 gap-4">
 			{#each orderProducts as orderProduct (orderProduct.id)}
-				<ProductCardOrdenSummary product={orderProduct} />
+				{@const i = orderProducts.indexOf(orderProduct)}
+				<ProductCardOrdenSummary bind:product={orderProducts[i]} />
 			{:else}
 				<p>Aún no se ha registrado ningún producto</p>
 			{/each}

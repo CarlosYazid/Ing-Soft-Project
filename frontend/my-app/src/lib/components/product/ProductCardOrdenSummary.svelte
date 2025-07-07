@@ -2,13 +2,13 @@
 	import * as Card from '$lib/components/ui/card/index.js';
 	import type { ProductInterface } from '$lib/types';
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { Trash2, ArrowUp, ArrowDown } from '@lucide/svelte';
+	import { Trash2 } from '@lucide/svelte';
 	import Input from '../ui/input/input.svelte';
 	import SuccessOrFailDialog from '../common/SuccessOrFailDialog.svelte';
 
 	import { cartStore } from '$lib';
 
-	let { product } = $props<{
+	let { product = $bindable() } = $props<{
 		product: ProductInterface;
 	}>();
 </script>
