@@ -11,17 +11,15 @@
 		quantity?: number;
 	}>();
 
-	let isAdded = $state(
-		(serviceStore.editService?.products?.find((p) => p.id === product.id) ? true : false) || false
+	let isAdded = $derived.by(() =>
+		serviceStore.productsToAdd.find((p) => p.id === product.id) ? true : false
 	);
 
 	function toggleProduct() {
 		if (isAdded) {
 			serviceStore.deleteProductFromService(product);
-			isAdded = false;
 		} else {
 			serviceStore.addProductToService(product);
-			isAdded = true;
 		}
 	}
 
@@ -56,7 +54,7 @@
 	</div>
 
 	<div class="flex items-end justify-center">
-		{#if serviceStore.editService}
+		{#if serviceStore.editService || serviceStore.addingService}
 			{#if isAdded}
 				<Button
 					onclick={toggleProduct}

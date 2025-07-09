@@ -15,7 +15,7 @@
 
 	onMount(async () => {
 		try {
-			services = await serviceController.getAllServices();
+			serviceStore.services = await serviceController.getAllServices();
 		} catch (e: any) {
 			toast('Algo ha salido mal', {
 				description: e.message || 'No se han podido cargar los productos',
@@ -48,7 +48,7 @@
 	let eliminar = $state(false);
 	function onDelete(row: any) {
 		eliminar = true;
-		serviceStore.deleteService = serviceStore.findServiceById(row.id)!;
+		serviceStore.deleteService = serviceStore.findServiceById(row.id);
 	}
 
 	function confirmedDelete() {

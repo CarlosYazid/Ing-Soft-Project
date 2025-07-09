@@ -34,13 +34,17 @@
 			id: current?.id || 0,
 			name: serviceFormData.name.trim(),
 			price: parseFloat(serviceFormData.price),
-			products: serviceStore.productsToAdd
+			products: [...serviceStore.productsToAdd]
 		};
 
 		try {
 			let saved: service;
 			if (current) {
-				saved = await serviceController.updateService(current.id, payload);
+				saved = await serviceController.updateService(
+					current.id,
+					payload,
+					serviceStore.editService?.products!
+				);
 				serviceStore.clearEditService();
 				toast.success('Servicio actualizado correctamente');
 			} else {
@@ -54,10 +58,16 @@
 			console.error(err);
 			toast.error('Error al guardar el servicio. Intenta de nuevo.');
 		}
+
+		serviceStore.addingService = false;
+		serviceStore.clearEditService();
+		serviceStore.clearProductsToAdd();
 	}
 
 	function handleCancel() {
+		serviceStore.addingService = false;
 		serviceStore.clearEditService();
+		serviceStore.clearProductsToAdd();
 		goto('/gestionar-servicios');
 	}
 </script>

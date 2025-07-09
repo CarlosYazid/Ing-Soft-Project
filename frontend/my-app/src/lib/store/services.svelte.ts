@@ -3,6 +3,7 @@ import type { service, ProductInterface } from '$lib/types';
 
 class Service {
 	services: service[] = $state([]);
+	addingService: boolean = $state(false);
 	editService: service | null = $state(null);
 	deleteService: service | null = $state(null);
 	productsToAdd: ProductInterface[] = $state([]);
@@ -32,8 +33,7 @@ class Service {
 	}
 
 	addProductToService(product: ProductInterface) {
-		serviceStore.productsToAdd.push(product);
-		//Llamar a la base de datos
+		this.productsToAdd.push(product);
 	}
 
 	deleteProductFromService(product: ProductInterface) {
