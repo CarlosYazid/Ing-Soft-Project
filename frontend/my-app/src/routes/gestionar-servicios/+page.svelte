@@ -32,6 +32,7 @@
 	function onEdit(row: any) {
 		editar = true;
 		serviceStore.editService = row;
+		serviceStore.addProductToService = row.products;
 	}
 
 	function confirmedEdit() {

@@ -68,6 +68,12 @@ async function updateService(id: number, updatedFields: service): Promise<servic
 		};
 
 		const updated = await api.putJson(`${SERVICE_BASE_PATH}/${id}`, payload);
+
+		/* updatedFields.products?.forEach((p) => {
+			deleteProductFromService(p, updatedFields); // Lo eliminamos de la BD en caso de existir
+			addProductToService(p, updatedFields); // Lo añadimos (Es algo machetero pero no hay tiempo)
+		}); */
+
 		return toService(updated);
 	} catch (error) {
 		console.error(`Error al actualizar el servicio con ID ${id}:`, error);
@@ -101,13 +107,21 @@ async function addProductToService(product: ProductInterface, service: service) 
 async function getProductsOfService(service: service) {
 	try {
 		const productsToGet = await api.get(`${SERVICE_BASE_PATH}/input_services/`);
-		productsToGet.forEach(async (product: { id: number; }) => {
-			const productGet = await productController.getById(product.id)
-			service.products?.push(productGet)
+		productsToGet.forEach(async (product: { id: number }) => {
+			const productGet = await productController.getById(product.id);
+			service.products?.push(productGet);
 		});
 	} catch (error) {
 		console.error(`Error al al obtener los productos del servicio`, error);
 		throw new Error('No se pudo obtener los productos del servicio');
+	}
+}
+
+async function deleteProductFromService(product: ProductInterface, service: service) {
+	try {
+		await api.delete(`${SERVICE_BASE_PATH}/input_services/${service.id}/${product.id}`);
+	} catch (error) {
+		// Parchado que si hay error es pq ese producto no estaba asociado
 	}
 }
 
