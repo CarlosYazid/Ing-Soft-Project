@@ -69,10 +69,7 @@ async function updateService(id: number, updatedFields: service): Promise<servic
 
 		const updated = await api.putJson(`${SERVICE_BASE_PATH}/${id}`, payload);
 
-		/* updatedFields.products?.forEach((p) => {
-			deleteProductFromService(p, updatedFields); // Lo eliminamos de la BD en caso de existir
-			addProductToService(p, updatedFields); // Lo añadimos (Es algo machetero pero no hay tiempo)
-		}); */
+		/* updateServiceProducts(updatedFields) */
 
 		return toService(updated);
 	} catch (error) {
@@ -90,39 +87,68 @@ async function deleteServiceById(id: number): Promise<void> {
 	}
 }
 
-async function addProductToService(product: ProductInterface, service: service) {
+async function addProductToService(productId: number, serviceId: number) {
 	const payload = {
-		product_id: product.id,
-		service_id: service.id
+		product_id: productId,
+		service_id: serviceId
 	};
 
 	try {
 		await api.post(`${SERVICE_BASE_PATH}/input_services/`, payload);
 	} catch (error) {
-		console.error(`Error al añadir producto con ID ${product.id}:`, error);
+		console.error(`Error al añadir producto con ID ${productId}:`, error);
 		throw new Error('No se pudo añadir el producto');
 	}
 }
 
 async function getProductsOfService(service: service) {
 	try {
-		const productsToGet = await api.get(`${SERVICE_BASE_PATH}/input_services/`);
-		productsToGet.forEach(async (product: { id: number }) => {
-			const productGet = await productController.getById(product.id);
-			service.products?.push(productGet);
-		});
+		const productsToGet = await api.get(`${SERVICE_BASE_PATH}/input_services/${service.id}`);
+		const fetched = await Promise.all(
+			productsToGet.map((input: any) => productController.getById(input.product_id))
+		);
+		service.products = fetched;
 	} catch (error) {
 		console.error(`Error al al obtener los productos del servicio`, error);
 		throw new Error('No se pudo obtener los productos del servicio');
 	}
 }
 
-async function deleteProductFromService(product: ProductInterface, service: service) {
+async function deleteProductFromService(productId: number, serviceId: number) {
 	try {
-		await api.delete(`${SERVICE_BASE_PATH}/input_services/${service.id}/${product.id}`);
+		await api.delete(`${SERVICE_BASE_PATH}/input_services/${serviceId}/${productId}`);
 	} catch (error) {
 		// Parchado que si hay error es pq ese producto no estaba asociado
 	}
+}
+
+/**
+ * Actualiza los productos asociados a un servicio:
+ *  - Elimina los que ya no están
+ *  - Añade los nuevos
+ *
+ */
+async function updateServiceProducts(service: service) {
+	// 1. Traer los IDs actuales de la BD
+	const DBservice: service = structuredClone(service);
+	await getProductsOfService(DBservice);
+	const originalIds = DBservice.products?.map((p) => p.id) || [];
+
+	// 2. Crear Sets para búsquedas O(1)
+	const originalSet = new Set(originalIds);
+	const newSet = new Set(service.products?.map((p) => p.id));
+
+	// 3. Calcular qué eliminar (estaba antes, ya no)
+	const toRemove = originalIds.filter((id) => !newSet.has(id));
+
+	// 4. Calcular qué añadir (es nuevo, no estaba antes)
+	const toAdd = service.products?.map((p) => p.id).filter((id) => !originalSet.has(id)) || [];
+
+	// 5. Ejecutar eliminaciones en paralelo
+	await Promise.all(toRemove.map((id) => deleteProductFromService(id, service.id)));
+
+	// 6. Ejecutar inserciones en paralelo
+	await Promise.all(toAdd.map((id) => addProductToService(id, service.id)));
 }
 
 // Exportamos los métodos en un solo objeto
