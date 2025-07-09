@@ -113,11 +113,11 @@ class ServiceCrud:
         if await OrderUtils.exist_service_in_orders(service_id):
             raise HTTPException(detail="Cannot delete service with active orders", status_code=400)
 
-        input_services = await cls.read_services_inputs_by_service(service_id)
+        #input_services = await cls.read_services_inputs_by_service(service_id)
 
         # Delete all inputs associated with the service
-        for input_service in input_services:
-            await cls.delete_service_input(input_service.id)
+        #for input_service in input_services:
+        #    await cls.delete_service_input(input_service.id)
 
         client = await get_db_client()
 
