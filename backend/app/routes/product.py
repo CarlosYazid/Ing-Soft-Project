@@ -175,7 +175,7 @@ async def search_products_by_expiration_date(request: Request, expiration_date: 
     return await ProductService.search_products_by_expiration_date(expiration_date)
 
 @router.get("/search/expiration/")
-async def search_products_by_expiration_date_2(request: Request, expiration_date: datetime):
+async def search_products_by_expiration_date_2(request: Request, expiration_date: date):
     """
     Search products by expiration date in base format.
     """
