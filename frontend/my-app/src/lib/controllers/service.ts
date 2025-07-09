@@ -1,5 +1,6 @@
 // src/lib/controllers/serviceController.ts
-import type { service } from '$lib/types';
+import type { ProductInterface, service } from '$lib/types';
+import { productController } from './product';
 import { api } from '$lib/http/api';
 
 const SERVICE_BASE_PATH = '/service';
@@ -19,7 +20,11 @@ function toService(data: any): service {
 async function getAllServices(): Promise<service[]> {
 	try {
 		const rawServices = await api.get(`${SERVICE_BASE_PATH}/all`);
-		return rawServices.map(toService);
+		const services: service[] = rawServices.map(toService);
+
+		/* services.forEach(s => getProductsOfService(s)) */
+
+		return services;
 	} catch (error) {
 		console.error('Error al obtener servicios:', error);
 		throw new Error('No se pudieron obtener los servicios');
@@ -39,6 +44,10 @@ async function createService(partialService: service): Promise<service> {
 		};
 
 		const created = await api.post(`${SERVICE_BASE_PATH}/`, payload);
+
+		//Añadimos los productos al servicio
+		/* partialService.products?.forEach((p) => addProductToService(p, partialService)); */
+
 		return toService(created);
 	} catch (error) {
 		console.error('Error al crear el servicio:', error);
@@ -72,6 +81,33 @@ async function deleteServiceById(id: number): Promise<void> {
 	} catch (error) {
 		console.error(`Error al eliminar el servicio con ID ${id}:`, error);
 		throw new Error('No se pudo eliminar el servicio');
+	}
+}
+
+async function addProductToService(product: ProductInterface, service: service) {
+	const payload = {
+		product_id: product.id,
+		service_id: service.id
+	};
+
+	try {
+		await api.post(`${SERVICE_BASE_PATH}/input_services/`, payload);
+	} catch (error) {
+		console.error(`Error al añadir producto con ID ${product.id}:`, error);
+		throw new Error('No se pudo añadir el producto');
+	}
+}
+
+async function getProductsOfService(service: service) {
+	try {
+		const productsToGet = await api.get(`${SERVICE_BASE_PATH}/input_services/`);
+		productsToGet.forEach(async (product: { id: number; }) => {
+			const productGet = await productController.getById(product.id)
+			service.products?.push(productGet)
+		});
+	} catch (error) {
+		console.error(`Error al al obtener los productos del servicio`, error);
+		throw new Error('No se pudo obtener los productos del servicio');
 	}
 }
 

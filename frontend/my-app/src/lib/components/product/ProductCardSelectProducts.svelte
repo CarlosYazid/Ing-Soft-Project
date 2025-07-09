@@ -25,6 +25,8 @@
 		}
 	}
 
+	$inspect(serviceStore.productsToAdd);
+
 	async function handleClick(product: ProductInterface) {
 		cartStore.productSelected = product;
 		goto('/new-sale/select-products/product-overview');
@@ -56,7 +58,7 @@
 	</div>
 
 	<div class="flex items-end justify-center">
-		{#if serviceStore.editService}
+		{#if serviceStore.editService || serviceStore.addingService}
 			{#if isAdded}
 				<Button
 					onclick={toggleProduct}

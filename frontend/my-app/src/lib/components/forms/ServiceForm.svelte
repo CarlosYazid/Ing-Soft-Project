@@ -34,7 +34,7 @@
 			id: current?.id || 0,
 			name: serviceFormData.name.trim(),
 			price: parseFloat(serviceFormData.price),
-			products: serviceStore.productsToAdd
+			products: [...serviceStore.productsToAdd]
 		};
 
 		try {
@@ -54,10 +54,16 @@
 			console.error(err);
 			toast.error('Error al guardar el servicio. Intenta de nuevo.');
 		}
+
+		serviceStore.addingService = false;
+		serviceStore.clearEditService();
+		serviceStore.clearProductsToAdd();
 	}
 
 	function handleCancel() {
+		serviceStore.addingService = false;
 		serviceStore.clearEditService();
+		serviceStore.clearProductsToAdd();
 		goto('/gestionar-servicios');
 	}
 </script>
