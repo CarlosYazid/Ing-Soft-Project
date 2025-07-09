@@ -32,7 +32,6 @@
 	function onEdit(row: any) {
 		editar = true;
 		serviceStore.editService = row;
-		serviceStore.addProductToService = row.products;
 	}
 
 	function confirmedEdit() {
@@ -51,9 +50,6 @@
 		eliminar = true;
 		serviceStore.deleteService = serviceStore.findServiceById(row.id);
 	}
-
-	$inspect(serviceStore.deleteService);
-	$inspect(serviceStore.services);
 
 	function confirmedDelete() {
 		eliminar = false;

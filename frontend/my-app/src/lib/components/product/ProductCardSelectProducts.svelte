@@ -11,21 +11,17 @@
 		quantity?: number;
 	}>();
 
-	let isAdded = $state(
-		(serviceStore.editService?.products?.find((p) => p.id === product.id) ? true : false) || false
+	let isAdded = $derived.by(() =>
+		serviceStore.productsToAdd.find((p) => p.id === product.id) ? true : false
 	);
 
 	function toggleProduct() {
 		if (isAdded) {
 			serviceStore.deleteProductFromService(product);
-			isAdded = false;
 		} else {
 			serviceStore.addProductToService(product);
-			isAdded = true;
 		}
 	}
-
-	$inspect(serviceStore.productsToAdd);
 
 	async function handleClick(product: ProductInterface) {
 		cartStore.productSelected = product;

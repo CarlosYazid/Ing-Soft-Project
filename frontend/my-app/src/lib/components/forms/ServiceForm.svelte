@@ -40,7 +40,11 @@
 		try {
 			let saved: service;
 			if (current) {
-				saved = await serviceController.updateService(current.id, payload);
+				saved = await serviceController.updateService(
+					current.id,
+					payload,
+					serviceStore.editService?.products!
+				);
 				serviceStore.clearEditService();
 				toast.success('Servicio actualizado correctamente');
 			} else {

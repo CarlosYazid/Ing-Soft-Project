@@ -33,7 +33,7 @@ class Service {
 	}
 
 	addProductToService(product: ProductInterface) {
-		serviceStore.productsToAdd.push(product);
+		this.productsToAdd.push(product);
 	}
 
 	deleteProductFromService(product: ProductInterface) {

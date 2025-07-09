@@ -22,13 +22,10 @@ async function getAllServices(): Promise<service[]> {
 		const rawServices = await api.get(`${SERVICE_BASE_PATH}/all`);
 		const services: service[] = rawServices.map(toService);
 
-		console.log(services);
-		/* services.forEach((s) => getProductsOfService(s)); */
-
 		return services;
-	} catch (error) {
+	} catch (error: any) {
 		console.error('Error al obtener servicios:', error);
-		throw new Error('No se pudieron obtener los servicios');
+		throw new Error(`No se pudieron obtener los servicios: ${error.message}`);
 	}
 }
 
@@ -57,22 +54,23 @@ async function createService(partialService: service): Promise<service> {
 	}
 }
 
-async function updateService(id: number, updatedFields: service): Promise<service> {
+async function updateService(
+	id: number,
+	updatedFields: service,
+	oldProducts: ProductInterface[]
+): Promise<service> {
 	try {
 		const payload = {
 			name: updatedFields.name ?? '',
 			price: updatedFields.price ?? 0,
 			cost: 0,
 			description: '',
-			short_description: '',
-			created_at: new Date().toISOString(),
-			updated_at: new Date().toISOString()
+			short_description: ''
 		};
 
 		const updated = await api.putJson(`${SERVICE_BASE_PATH}/${id}`, payload);
 
-		console.log(updatedFields);
-		/* updateServiceProducts(updatedFields); */
+		updateServiceProducts(updatedFields, oldProducts);
 
 		return toService(updated);
 	} catch (error) {
@@ -108,14 +106,16 @@ async function addProductToService(productId: number, serviceId: number) {
 
 async function getProductsOfService(service: service) {
 	try {
-		const productsToGet = await api.get(`${SERVICE_BASE_PATH}/input_services/${service.id}`);
+		const productsToGet = await api.get(
+			`${SERVICE_BASE_PATH}/input_services/products/${service.id}`
+		);
 		const fetched = await Promise.all(
 			productsToGet.map((input: any) => productController.getById(input.product_id))
 		);
-		service.products = fetched;
-	} catch (error) {
-		console.error(`Error al al obtener los productos del servicio`, error);
-		throw new Error('No se pudo obtener los productos del servicio');
+		return fetched;
+	} catch (error: any) {
+		console.error(`Error al obtener los productos del servicio ${service.id}:`, error);
+		throw new Error(`No se pudo obtener los productos del servicio: ${error.message}`);
 	}
 }
 
@@ -133,11 +133,9 @@ async function deleteProductFromService(productId: number, serviceId: number) {
  *  - Añade los nuevos
  *
  */
-async function updateServiceProducts(service: service) {
-	// 1. Traer los IDs actuales de la BD
-	const DBservice: service = structuredClone(service);
-	await getProductsOfService(DBservice);
-	const originalIds = DBservice.products?.map((p) => p.id) || [];
+async function updateServiceProducts(service: service, oldProducts: ProductInterface[]) {
+	// 1. Traer los IDs actuales
+	const originalIds = oldProducts.map((p) => p.id) || [];
 
 	// 2. Crear Sets para búsquedas O(1)
 	const originalSet = new Set(originalIds);
@@ -161,5 +159,6 @@ export const serviceController = {
 	getAllServices,
 	createService,
 	updateService,
-	deleteServiceById
+	deleteServiceById,
+	getProductsOfService
 };
