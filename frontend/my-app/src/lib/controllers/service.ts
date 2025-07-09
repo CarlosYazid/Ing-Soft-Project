@@ -22,7 +22,8 @@ async function getAllServices(): Promise<service[]> {
 		const rawServices = await api.get(`${SERVICE_BASE_PATH}/all`);
 		const services: service[] = rawServices.map(toService);
 
-		/* services.forEach(s => getProductsOfService(s)) */
+		console.log(services);
+		/* services.forEach((s) => getProductsOfService(s)); */
 
 		return services;
 	} catch (error) {
@@ -44,11 +45,12 @@ async function createService(partialService: service): Promise<service> {
 		};
 
 		const created = await api.post(`${SERVICE_BASE_PATH}/`, payload);
+		const newService = toService(created);
 
 		//Añadimos los productos al servicio
-		/* partialService.products?.forEach((p) => addProductToService(p, partialService)); */
+		partialService.products?.forEach((p) => addProductToService(p.id, newService.id));
 
-		return toService(created);
+		return newService;
 	} catch (error) {
 		console.error('Error al crear el servicio:', error);
 		throw new Error('No se pudo crear el servicio');
@@ -69,7 +71,8 @@ async function updateService(id: number, updatedFields: service): Promise<servic
 
 		const updated = await api.putJson(`${SERVICE_BASE_PATH}/${id}`, payload);
 
-		/* updateServiceProducts(updatedFields) */
+		console.log(updatedFields);
+		/* updateServiceProducts(updatedFields); */
 
 		return toService(updated);
 	} catch (error) {
@@ -92,6 +95,8 @@ async function addProductToService(productId: number, serviceId: number) {
 		product_id: productId,
 		service_id: serviceId
 	};
+
+	console.log('payload', payload);
 
 	try {
 		await api.post(`${SERVICE_BASE_PATH}/input_services/`, payload);
