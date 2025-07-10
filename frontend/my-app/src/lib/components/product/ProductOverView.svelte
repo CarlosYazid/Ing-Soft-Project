@@ -7,6 +7,7 @@
 	import SuccessOrFailDialog from '../common/SuccessOrFailDialog.svelte';
 
 	import { cartStore } from '$lib';
+	import { goto } from '$app/navigation';
 
 	let product = $state(cartStore.productSelected);
 	if (product) {
@@ -46,6 +47,7 @@
 						<Button
 							onclick={() => {
 								cartStore.addProduct(product);
+								goto('/new-sale');
 							}}
 							class=" bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 							>Agregar a la Lista de Venta Actual <ShoppingBasket /></Button

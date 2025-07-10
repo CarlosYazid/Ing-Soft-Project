@@ -10,7 +10,7 @@
 
 	let { product = $bindable(), deleteButton } = $props<{
 		product: ProductInterface;
-		deleteButton?: boolean;
+		deleteButton: boolean;
 	}>();
 
 	product.quantity = product?.quantity! | 0;
@@ -32,18 +32,27 @@
 				<h3 class="text-base font-semibold">Precio Total</h3>
 				<p class="text-sm font-semibold">${(product.price * product.quantity!).toFixed(2)}</p>
 			</div>
-			<Input
-				type="number"
-				bind:value={product.quantity}
-				class="w-18"
-				min={cartStore.serviceSelected ? 0 : 1}
-				max={product.stock}
-			/>
+
 			{#if deleteButton}
+				<Input
+					type="number"
+					bind:value={product.quantity}
+					class="w-18"
+					min="1"
+					max={product.stock}
+				/>
 				<Button
 					onclick={() => cartStore.removeProductById(product.id)}
 					class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
 				>
+			{:else}
+				<Input
+					type="number"
+					bind:value={product.quantity}
+					class="w-18"
+					min="0"
+					max={product.stock}
+				/>
 			{/if}
 		</div>
 		<p class="flex justify-end text-sm text-gray-500">Stock: {product.stock - product.quantity!}</p>

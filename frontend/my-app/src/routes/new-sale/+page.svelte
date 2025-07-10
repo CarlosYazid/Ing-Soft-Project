@@ -12,6 +12,7 @@
 	import { productController, serviceController } from '$lib';
 	import type { ProductInterface, service } from '$lib';
 	import ServiceOverView from '$lib/components/service/ServiceOverView.svelte';
+	import ServiceCardOrdenSummary from '$lib/components/service/ServiceCardOrdenSummary.svelte';
 
 	let confirmar = $state(false);
 
@@ -62,7 +63,7 @@
 		<h3 class="font-semiboldc mt-8 bg-zinc-500/5 text-lg">Lista de Productos Seleccionados</h3>
 		<div class="mt-4 grid grid-cols-1 gap-4">
 			{#each orderProducts as orderProduct, i (orderProduct.id)}
-				<ProductCardOrdenSummary bind:product={orderProducts[i]} />
+				<ProductCardOrdenSummary bind:product={orderProducts[i]} deleteButton={true} />
 			{:else}
 				<p>Aún no se ha registrado ningún producto</p>
 			{/each}
@@ -70,7 +71,7 @@
 		<h3 class="font-semiboldc mt-8 bg-zinc-500/5 text-lg">Lista de Servicios Seleccionados</h3>
 		<div class="mt-4 grid grid-cols-1 gap-4">
 			{#each orderServices as orderService (orderService.id)}
-				<!-- <ServiceOverView Service={orderService} /> -->
+				<ServiceCardOrdenSummary Service={orderService} />
 			{:else}
 				<p>Aún no se ha registrado ningún servicio</p>
 			{/each}
