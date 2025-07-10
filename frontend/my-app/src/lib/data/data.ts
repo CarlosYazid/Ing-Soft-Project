@@ -1,4 +1,5 @@
 import type { ProductInterface } from '$lib/types';
+import type { service } from '$lib/types/serviceTypes.js';
 
 export let products: ProductInterface[] = [
 	{
@@ -9,7 +10,8 @@ export let products: ProductInterface[] = [
 		cost: 500,
 		category: 'Categoría 1',
 		stock: 50,
-		img: '/1.jpg'
+		img: '/1.jpg',
+		expirationDate: '2024-12-31'
 	},
 	{
 		id: 2,
@@ -19,7 +21,8 @@ export let products: ProductInterface[] = [
 		cost: 1000,
 		category: 'Categoría 2',
 		stock: 30,
-		img: '/2.jpeg'
+		img: '/2.jpeg',
+		expirationDate: '2025-01-15'
 	},
 	{
 		id: 3,
@@ -29,7 +32,8 @@ export let products: ProductInterface[] = [
 		cost: 750,
 		category: 'Categoría 1',
 		stock: 20,
-		img: '/3.jpeg'
+		img: '/3.jpeg',
+		expirationDate: '2024-11-30'
 	},
 	{
 		id: 4,
@@ -39,38 +43,35 @@ export let products: ProductInterface[] = [
 		cost: 1500,
 		category: 'Categoría 3',
 		stock: 10,
-		img: '/1.jpg'
+		img: '/1.jpg',
+		expirationDate: '2025-02-28'
 	}
 ];
 
-export let services = [
+export let services: service[] = [
 	{
 		id: 1,
 		name: 'Impresión',
-		shortDescription: '',
-		price: '$10.000',
-		listProducts: [products[0], products[2]]
+		price: 100,
+		products: [products[0], products[2]]
 	},
 	{
 		id: 2,
 		name: 'Fotocopia',
-		shortDescription: '',
-		price: '$20.000',
-		listProducts: [products[1], products[3]]
+		price: 200,
+		products: [products[1], products[3]]
 	},
 	{
 		id: 3,
 		name: 'Plastificado',
-		shortDescription: '',
-		price: '$30.000',
-		listProducts: [products[0], products[1]]
+		price: 300,
+		products: [products[0], products[1]]
 	},
 	{
 		id: 4,
 		name: 'Envolver Regalo',
-		shortDescription: '',
-		price: '$40.000',
-		listProducts: [products[3], products[2], products[1]]
+		price: 400,
+		products: [products[3], products[2], products[1]]
 	}
 ];
 

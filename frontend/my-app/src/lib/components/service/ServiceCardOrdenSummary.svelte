@@ -1,6 +1,6 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card/index.js';
-	import type { ProductInterface } from '$lib/types';
+	import type { ProductInterface, service } from '$lib/types';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { Trash2 } from '@lucide/svelte';
 	import Input from '../ui/input/input.svelte';
@@ -8,15 +8,12 @@
 
 	import { cartStore } from '$lib';
 
-	let { product = $bindable(), deleteButton } = $props<{
-		product: ProductInterface;
-		deleteButton?: boolean;
+	let { Service = $bindable() } = $props<{
+		Service: service;
 	}>();
-
-	product.quantity = product?.quantity! | 0;
 </script>
 
-<Card.Root>
+<!-- <Card.Root>
 	<Card.Content>
 		<div class="flex items-center justify-between gap-4">
 			<img src={product.img as string} alt={product.name} class="h-auto w-30" />
@@ -32,19 +29,12 @@
 				<h3 class="text-base font-semibold">Precio Total</h3>
 				<p class="text-sm font-semibold">${(product.price * product.quantity!).toFixed(2)}</p>
 			</div>
-			<Input
-				type="number"
-				bind:value={product.quantity}
-				class="w-18"
-				min={cartStore.serviceSelected ? 0 : 1}
-				max={product.stock}
-			/>
-			{#if deleteButton}
-				<Button
-					onclick={() => cartStore.removeProductById(product.id)}
-					class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
-				>
-			{/if}
+			<Input type="number" bind:value={product.quantity} class="w-18" min="1" max={product.stock} />
+
+			<Button
+				onclick={() => cartStore.removeProductById(product.id)}
+				class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
+			>
 		</div>
 		<p class="flex justify-end text-sm text-gray-500">Stock: {product.stock - product.quantity!}</p>
 	</Card.Content>
@@ -57,3 +47,4 @@
 		callback={() => (product!.quantity = product?.stock)}
 	/>
 {/if}
+ -->
