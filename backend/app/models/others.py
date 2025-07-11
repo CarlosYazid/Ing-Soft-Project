@@ -34,7 +34,7 @@ class PaymentBase(BaseModel):
     """
     Base model for payments.
     """
-    user_id: int = Field(..., description="User associated with the payment")
+    client_id: int = Field(..., description="Client associated with the payment")
     amount: Optional[float] = Field(None, description="Amount paid")
     method: PaymentMethod = Field(..., description="Payment method used")
     status: PaymentStatus = Field(..., description="Current status of the payment")

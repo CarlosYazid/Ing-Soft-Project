@@ -1,4 +1,4 @@
-from fastapi import BackgroundTasks, HTTPException
+from fastapi import HTTPException
 from weasyprint import HTML
 
 from models import Invoice, InvoiceItem, Email, File
@@ -112,9 +112,6 @@ class InvoiceService:
             items=[item.model_dump() for item in invoice.items]
         )
         
-        
-    
-    
     @classmethod
     async def send_invoice_email(cls, invoice: Invoice):
         """Send the generated invoice PDF to the client via email."""

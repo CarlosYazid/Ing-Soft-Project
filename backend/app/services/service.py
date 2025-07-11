@@ -6,13 +6,15 @@ from db import get_db_client
 
 class ServiceService:
     
+    FIELDS_SERVICE_BASE = set(ServiceBasePlusID.__fields__.keys())
+    
     @classmethod
     async def search_services_by_name(cls, name: str) -> list[ServiceBasePlusID]:
         """Search services by name."""
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).select("id", "name", "short_description", "price").ilike("name", f"%{name}%").execute()
+        response = await client.table(SETTINGS.service_table).select(*cls.FIELDS_SERVICE_BASE).ilike("name", f"%{name}%").execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No services found with this name", status_code=404)
@@ -25,7 +27,7 @@ class ServiceService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).select("id", "name", "short_description", "price").gte("price", min_price).lte("price", max_price).execute()
+        response = await client.table(SETTINGS.service_table).select(*cls.FIELDS_SERVICE_BASE).gte("price", min_price).lte("price", max_price).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No services found in this price range", status_code=404)
@@ -38,7 +40,7 @@ class ServiceService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).select("id", "name", "short_description", "price").gte("cost", min_cost).lte("cost", max_cost).execute()
+        response = await client.table(SETTINGS.service_table).select(*cls.FIELDS_SERVICE_BASE).gte("cost", min_cost).lte("cost", max_cost).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No services found in this cost range", status_code=404)

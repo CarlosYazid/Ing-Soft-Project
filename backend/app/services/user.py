@@ -7,13 +7,15 @@ from core import SETTINGS
 
 class UserService:
     
+    FIELDS_USER_BASE = set(UserBase.__fields__.keys())
+    
     @classmethod
     async def search_employees_by_name(cls, name: str) -> list[UserBase]:
         """Search employees by name."""
 
         client = await get_db_client()
             
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").ilike("name", f"%{name}%").execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given name", status_code=404)
@@ -26,7 +28,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("birth_date", birthday.isoformat()).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("birth_date", birthday.isoformat()).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given birthday", status_code=404)
@@ -39,7 +41,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("state", status).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("state", status).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given status", status_code=404)
@@ -52,7 +54,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("role", role.capitalize()).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("role", role.capitalize()).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given role", status_code=404)
@@ -65,7 +67,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").ilike("name", f"%{name}%").eq("role", role.capitalize()).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("role", role.capitalize()).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given name and role", status_code=404)
@@ -78,7 +80,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").ilike("name", f"%{name}%").eq("state", status).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("state", status).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given name and status", status_code=404)
@@ -91,7 +93,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").ilike("name", f"%{name}%").eq("birth_date", birthday.isoformat()).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("birth_date", birthday.isoformat()).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given name and birthday", status_code=404)
@@ -104,7 +106,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("role", role.capitalize()).eq("state", status).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("role", role.capitalize()).eq("state", status).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No employees found with the given role and status", status_code=404)
@@ -117,7 +119,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").ilike("name", f"%{name}%").execute()
+        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No clients found with the given name", status_code=404)
@@ -130,7 +132,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("state", status).execute()
+        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("state", status).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No clients found with the given status", status_code=404)
@@ -143,7 +145,7 @@ class UserService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").ilike("name", f"%{name}%").eq("state", status).execute()
+        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("state", status).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No clients found with the given name and status", status_code=404)

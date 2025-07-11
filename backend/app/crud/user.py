@@ -14,6 +14,9 @@ class UserCrud:
     EXCLUDED_FIELDS_FOR_UPDATE_CLIENT = {"created_at"}
     ALLOWED_FIELDS_FOR_UPDATE_CLIENT = set(ClientCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_CLIENT
 
+    FIELDS_USER_BASE = set(UserBase.__fields__.keys())
+
+
     @classmethod
     async def create_employee(cls, employee : EmployeeCreate) -> Employee:
         """Create a new employee."""
@@ -46,7 +49,7 @@ class UserCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).execute()
         
         if not bool(response.data):
             raise HTTPException(detail="No employees found", status_code=404)
@@ -73,7 +76,7 @@ class UserCrud:
         
         client = await get_db_client()
         
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("id", employee_id).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("id", employee_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Employee not found", status_code=404)
@@ -99,7 +102,7 @@ class UserCrud:
         
         client = await get_db_client()
         
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("email", email).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("email", email).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Employee not found", status_code=404)
@@ -124,7 +127,7 @@ class UserCrud:
         """Retrieve a user by document ID."""
         client = await get_db_client()
         
-        response = await client.table(SETTINGS.employee_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("documentid", documentid).execute()
+        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("documentid", documentid).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Employee not found", status_code=404)
@@ -299,7 +302,7 @@ class UserCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").execute()
+        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No clients found", status_code=404)
@@ -325,7 +328,7 @@ class UserCrud:
         
         client = await get_db_client()
         
-        response = await client.table(SETTINGS.client_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("id", client_id).execute()
+        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("id", client_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Client not found", status_code=404)
@@ -351,7 +354,7 @@ class UserCrud:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("email", email).execute()
+        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("email", email).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Client not found", status_code=404)
@@ -377,7 +380,7 @@ class UserCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.client_table).select("email", "name", "phone", "created_at", "updated_at", "state", "documentid").eq("documentid", documentid).execute()
+        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("documentid", documentid).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Client not found", status_code=404)
