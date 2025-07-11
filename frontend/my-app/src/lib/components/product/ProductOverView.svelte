@@ -9,9 +9,11 @@
 	import { cartStore } from '$lib';
 	import { goto } from '$app/navigation';
 
-	let product = $state(cartStore.productSelected);
-	if (product) {
-		product.quantity = product?.quantity! | 0;
+	let product = $derived(
+		cartStore.findProductById(cartStore.productSelected!.id) || cartStore.productSelected
+	);
+	if (cartStore.productSelected) {
+		cartStore.productSelected.quantity = cartStore.productSelected.quantity! | 0;
 	}
 </script>
 
@@ -46,7 +48,9 @@
 						/>
 						<Button
 							onclick={() => {
-								cartStore.addProduct(product);
+								if (!cartStore.findProductById(product.id)) {
+									cartStore.addProduct(product);
+								}
 								goto('/new-sale');
 							}}
 							class=" bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
