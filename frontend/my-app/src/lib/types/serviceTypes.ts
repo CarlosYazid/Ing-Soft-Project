@@ -5,6 +5,7 @@ export interface service {
 	name: string;
 	price: number;
 	products?: ProductInterface[];
+	quantity?: number;
 }
 
 export interface serviceFormInput {
