@@ -11,7 +11,9 @@ class ServiceCrud:
     ALLOWED_FIELDS_FOR_UPDATE = set(ServiceCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     EXCLUDED_FIELDS_FOR_UPDATE_INPUT = {"service_id"}
     ALLOWED_FIELDS_FOR_UPDATE_INPUT = set(ServiceInputCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_INPUT
-    
+
+    FIELDS_SERVICE_BASE = set(ServiceBasePlusID.__fields__.keys())
+
     @classmethod
     async def create_service(cls, service: ServiceCreate) -> Service:
         """Create a new service."""
@@ -44,7 +46,7 @@ class ServiceCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).select("id", "name", "short_description", "price").execute()
+        response = await client.table(SETTINGS.service_table).select(*cls.FIELDS_SERVICE_BASE).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No services found", status_code=404)
@@ -69,7 +71,7 @@ class ServiceCrud:
         """Retrieve a service by ID."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).select("id", "name", "short_description", "price").eq("id", service_id).execute()
+        response = await client.table(SETTINGS.service_table).select(*cls.FIELDS_SERVICE_BASE).eq("id", service_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Service not found", status_code=404)

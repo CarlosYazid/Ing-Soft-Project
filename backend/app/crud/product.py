@@ -11,6 +11,8 @@ class ProductCrud:
     EXCLUDED_FIELDS_FOR_UPDATE = {"id", "image_url", "created_at", "stock"}
     ALLOWED_FIELDS_FOR_UPDATE = set(ProductCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     
+    FIELDS_PRODUCT_BASE = set(ProductBasePlusID.__fields__.keys())
+    
     @classmethod
     async def create_product(cls, product: ProductCreate) -> Product:
         """Create a new product."""
@@ -59,7 +61,7 @@ class ProductCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "minimum_stock", "image_url").execute()
+        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found", status_code=404)
@@ -85,7 +87,7 @@ class ProductCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "minimum_stock", "image_url").eq("id", product_id).execute()
+        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).eq("id", product_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Product not found", status_code=404)
