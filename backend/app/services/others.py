@@ -39,6 +39,6 @@ class PaymentService:
         response = await client.table(SETTINGS.payment_table).select("id", "client_id", "amount", "method", "status").eq("client_id", client_id).execute()
 
         if not bool(response.data):
-            raise HTTPException(detail="No payments found for this user", status_code=404)
+            raise HTTPException(detail="No payments found for this client", status_code=404)
 
         return [PaymentBasePlusID.model_validate(payment) for payment in response.data]
