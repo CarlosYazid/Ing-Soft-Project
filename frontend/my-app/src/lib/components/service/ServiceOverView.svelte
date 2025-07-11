@@ -14,7 +14,7 @@
 	import { goto } from '$app/navigation';
 
 	let service = $derived(cartStore.serviceSelected);
-	let productsService: ProductInterface[] = $derived(service!.products || []);
+	/* let productsService: ProductInterface[] = $derived(service!.products || []);
 
 	onMount(async () => {
 		try {
@@ -28,7 +28,7 @@
 				}
 			});
 		}
-	});
+	}); */
 </script>
 
 <div class="flex h-full flex-col items-center justify-center px-8">
@@ -44,9 +44,16 @@
 						<p class="font-semibold text-gray-900 dark:text-white">
 							Precio Fijo: ${service.price}
 						</p>
-						{#each productsService as product, i (product.id)}
-							<ProductCardOrdenSummary bind:product={productsService[i]} deleteButton={false} />
-						{/each}
+						{#await serviceController.getProductsOfService(service!)}
+							<p>Estamos buscando los productos, Por favor espere</p>
+						{:then value}
+							{#each value as productService}
+								<ProductCardOrdenSummary
+									bind:product={inventory.products[inventory.products.indexOf(productService)]}
+									deleteButton={false}
+								/>
+							{/each}
+						{/await}
 						<Button
 							onclick={() => {
 								cartStore.addService(cartStore.serviceSelected!);

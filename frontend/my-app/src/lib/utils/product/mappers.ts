@@ -1,7 +1,7 @@
 // src/lib/product/mappers.ts (or within productController.ts)
 
 import type { BaseProductInterface, ProductInterface } from '$lib/types';
-import type { BackendBaseProduct, BackendProduct } from '$lib/types/responses';
+import type { BackendBaseProduct, BackendProduct } from '$lib/types/ProductResponses';
 
 /**
  * Transforms a `BackendProductBase` object from the API into a `ProductBase` object
@@ -19,7 +19,7 @@ export function mapBackendProductBaseToProductBase(
 		price: backendProductBase.price,
 		category: backendProductBase.category,
 		stock: backendProductBase.stock,
-		img: backendProductBase.image_url 
+		img: backendProductBase.image_url
 	};
 }
 
@@ -39,6 +39,7 @@ export function mapBackendProductToProduct(backendProduct: BackendProduct): Prod
 		img: backendProduct.image_url,
 		description: backendProduct.description,
 		cost: backendProduct.cost,
-		expirationDate: new Date(backendProduct.expiration_date)
+		expirationDate: new Date(backendProduct.expiration_date),
+		quantity: 0
 	};
 }
