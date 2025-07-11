@@ -12,7 +12,7 @@ class ProductService:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url").eq("category", category.capitalize()).execute()
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url","minimum_stock").eq("category", category.capitalize()).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found in this category", status_code=404)
@@ -25,7 +25,7 @@ class ProductService:
         """Retrieve products by type."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url").eq("type", product_type.capitalize()).execute()
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url","minimum_stock").eq("type", product_type.capitalize()).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found of this type", status_code=404)
@@ -39,7 +39,7 @@ class ProductService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url").ilike("name", f"%{name}%").execute()
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url","minimum_stock").ilike("name", f"%{name}%").execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found with this name", status_code=404)
@@ -52,7 +52,7 @@ class ProductService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url").gte("price", min_price).lte("price", max_price).execute()
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url", "minimum_stock").gte("price", min_price).lte("price", max_price).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found in this price range", status_code=404)
@@ -65,7 +65,7 @@ class ProductService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url").gte("stock", min_stock).lte("stock", max_stock).execute()
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url", "minimum_stock").gte("stock", min_stock).lte("stock", max_stock).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found in this stock range", status_code=404)
@@ -78,7 +78,7 @@ class ProductService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url").eq("expiration_date", expiration_date).execute()
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url", "minimum_stock").eq("expiration_date", expiration_date).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found with this expiration date", status_code=404)
@@ -91,7 +91,7 @@ class ProductService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url").gte("cost", min_cost).lte("cost", max_cost).execute()
+        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "image_url", "minimum_stock").gte("cost", min_cost).lte("cost", max_cost).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found in this cost range", status_code=404)

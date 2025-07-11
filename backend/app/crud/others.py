@@ -7,7 +7,7 @@ from utils import PaymentUtils
 
 class PaymentCrud:
     
-    EXCLUDED_FIELDS_FOR_UPDATE = {"user_id", "created_at"}
+    EXCLUDED_FIELDS_FOR_UPDATE = {"client_id", "created_at"}
     ALLOWED_FIELDS_FOR_UPDATE = set(PaymentCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     
     @classmethod
@@ -40,7 +40,7 @@ class PaymentCrud:
         
         client = await get_db_client()
         
-        response = await client.table(SETTINGS.payment_table).select("id", "user_id", "amount", "method", "status").execute()
+        response = await client.table(SETTINGS.payment_table).select("id", "client_id", "amount", "method", "status").execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No payments found", status_code=404)
@@ -65,7 +65,7 @@ class PaymentCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.payment_table).select("id", "user_id", "amount", "method", "status").eq("id", payment_id).execute()
+        response = await client.table(SETTINGS.payment_table).select("id", "client_id", "amount", "method", "status").eq("id", payment_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Payment not found", status_code=404)

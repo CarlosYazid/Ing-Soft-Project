@@ -74,19 +74,19 @@ async def delete_payment_2(request: Request, id: int):
     """
     return await PaymentCrud.delete_payment(id)
 
-@router.get("/search/user/{user_id}")
-async def search_payments_by_user(request: Request, user_id: int):
+@router.get("/search/client/{client_id}")
+async def search_payments_by_client(request: Request, client_id: int):
     """
-    Retrieve payments by user ID.
+    Retrieve payments by client ID.
     """
-    return await PaymentService.search_payments_by_user_id(user_id)
+    return await PaymentService.search_payments_by_client_id(client_id)
 
-@router.get("/search/user/")
-async def search_payments_by_user_2(request: Request, user_id: int):
+@router.get("/search/client/")
+async def search_payments_by_client_2(request: Request, client_id: int):
     """
-    Retrieve payments by user ID.
+    Retrieve payments by client ID.
     """
-    return await PaymentService.search_payments_by_user_id(user_id)
+    return await PaymentService.search_payments_by_client_id(client_id)
 
 @router.get("/search/status/{status}")
 async def search_payments_by_status(request: Request, status: PaymentStatus):
