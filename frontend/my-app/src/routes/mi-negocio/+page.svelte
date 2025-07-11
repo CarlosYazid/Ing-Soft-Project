@@ -18,6 +18,13 @@
 			class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Gestionar Servicios</Button
 		>
 	</div>
+	<div class="mt-4 flex justify-center">
+		<Button
+			href="/gestionar-clientes"
+			size="lg"
+			class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Gestionar Clientes</Button
+		>
+	</div>
 	<!--
 	<div class="mt-4 flex justify-center">
 		<Button href="#" size="lg" class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
