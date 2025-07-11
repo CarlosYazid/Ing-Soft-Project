@@ -93,19 +93,19 @@ async def create_input_service(request: Request, input_service: ServiceInputCrea
     """
     return await ServiceCrud.create_service_input(input_service)
 
-@router.get("/input_services/products/{service_id}")
-async def read_input_services_by_product(request: Request, service_id: int):
+@router.get("/input_services/products/{product_id}")
+async def read_input_services_by_product(request: Request, product_id: int):
     """
     Retrieve input services by product ID.
     """
-    return await ServiceCrud.read_services_inputs_by_product(service_id)
+    return await ServiceCrud.read_services_inputs_by_product(product_id)
 
 @router.get("/input_services/products/")
-async def read_input_services_by_product_2(request: Request, service_id: int):
+async def read_input_services_by_product_2(request: Request, product_id: int):
     """
     Retrieve input services by product ID.
     """
-    return await ServiceCrud.read_services_inputs_by_product(service_id)
+    return await ServiceCrud.read_services_inputs_by_product(product_id)
 
 
 @router.get("/input_services/service/{service_id}")
