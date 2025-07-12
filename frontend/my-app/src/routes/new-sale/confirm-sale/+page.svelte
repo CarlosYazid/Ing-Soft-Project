@@ -8,8 +8,9 @@
 	import * as Table from '$lib/components/ui/table/index.js';
 	import { onMount } from 'svelte';
 
-	import type { client } from '$lib';
-	import { cartStore, clientController } from '$lib';
+	import type { client, order } from '$lib';
+	import { cartStore } from '$lib';
+	import { clientController, orderController } from '$lib';
 
 	let confirmar = $state(false);
 	let clients: client[] = $state([]);
@@ -29,7 +30,19 @@
 		confirmar = true;
 	}
 
-	function confirmedSale2() {
+	async function confirmedSale2() {
+		// Crear la orden
+		const orderForm: order = {
+			id: 0,
+			client_id: cartStore.client?.id || cartStore.DEFAULT_CLIENT_ID,
+			employee_id: cartStore.DEFAULT_EMPLOYEE_ID,
+			status: 'Pendiente',
+			total_price: parseFloat(cartStore.recalculateTotal())
+		};
+
+		// Enviar Orden a DB, asocia productos y servicios, luego marca como completada
+		await orderController.createOrderWithItems(orderForm, cartStore.products, cartStore.services);
+
 		confirmar = false;
 		cartStore.clearCart();
 		goto('/gracias');
@@ -131,8 +144,8 @@
 					</Table.Body>
 					<Table.Footer>
 						<Table.Row>
-							<!-- <Table.Cell colspan={3}>Total</Table.Cell>
-						<Table.Cell class="text-right">$2,500.00</Table.Cell> -->
+							<Table.Cell colspan={3}>Total</Table.Cell>
+							<Table.Cell class="text-right">{cartStore.recalculateTotal()}</Table.Cell>
 						</Table.Row>
 					</Table.Footer>
 				</Table.Root>
@@ -190,7 +203,17 @@
 						{#each cartStore.services as orderService (orderService.id)}
 							<Table.Row>
 								<Table.Cell>{orderService.name}</Table.Cell>
-								<Table.Cell>{orderService.price.toLocaleString()}</Table.Cell>
+								<Table.Cell
+									>{orderService
+										.products!.reduce(
+											(acc, p) =>
+												acc +
+												orderService.price * p.quantityService! +
+												p.price * p.quantityService!,
+											0
+										)
+										.toLocaleString()}</Table.Cell
+								>
 							</Table.Row>
 						{/each}
 					</Table.Body>

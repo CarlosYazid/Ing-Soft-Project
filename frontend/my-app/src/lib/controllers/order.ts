@@ -20,8 +20,16 @@ function toOrder(data: any): order {
 }
 
 // CRUD principal de órdenes
-async function createOrder(payload: Partial<order>): Promise<order> {
+async function createOrder(order: Partial<order>): Promise<order> {
 	try {
+		const payload = {
+			client_id: order.client_id,
+			created_at: new Date().toISOString().split('.')[0] + 'Z',
+			employee_id: order.employee_id,
+			status: order.status,
+			total_price: order.total_price,
+			updated_at: new Date().toISOString().split('.')[0] + 'Z'
+		};
 		const created = await api.post(`${ORDER_BASE_PATH}/`, payload);
 		return toOrder(created);
 	} catch (error: any) {
@@ -74,11 +82,11 @@ async function addProductsToOrder(orderId: number, products: ProductInterface[])
 	const payloads = products.map((p) => ({
 		order_id: orderId,
 		product_id: p.id,
-		quantity: p.quantity ?? 1
+		quantity: p.quantity! + p.quantityService!
 	}));
 
 	try {
-		await Promise.all(payloads.map((p) => api.post(`${ORDER_PRODUCTS_PATH}/`, p)));
+		if (products) await Promise.all(payloads.map((p) => api.post(`${ORDER_PRODUCTS_PATH}/`, p)));
 	} catch (error) {
 		console.error('Error al asociar productos a la orden:', error);
 		throw new Error('No se pudieron asociar los productos a la orden');
@@ -90,7 +98,7 @@ async function addServicesToOrder(orderId: number, services: service[]) {
 	const payloads = services.map((s) => ({
 		order_id: orderId,
 		service_id: s.id,
-		quantity: s.quantity ?? 1
+		quantity: s.products?.reduce((acc, p) => acc + p.quantityService!, 0)
 	}));
 
 	try {

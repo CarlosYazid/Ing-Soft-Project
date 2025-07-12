@@ -7,6 +7,8 @@ class Cart {
 	/* total: number = $derived-by(...)); */ // Se podría activar para manejar como micro optimización o mejorar la reactividad, de momento estoy de afán, pailas
 	productSelected: ProductInterface | null = $state(null);
 	serviceSelected: service | null = $state(null);
+	DEFAULT_EMPLOYEE_ID: number = 8;
+	DEFAULT_CLIENT_ID: number = 5;
 
 	addProduct(product: ProductInterface) {
 		this.products.push(product);
