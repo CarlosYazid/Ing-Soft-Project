@@ -3,32 +3,14 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { ShoppingBasket } from '@lucide/svelte';
 	import { cartStore } from '$lib';
-	import { onMount } from 'svelte';
-
-	import { inventory, serviceStore } from '$lib/store';
-	import { productController, serviceController } from '$lib';
-	import type { ProductInterface } from '$lib';
-	import ProductCardSelectProducts from '$lib/components/product/ProductCardSelectProducts.svelte';
-	import { toast, Toaster } from 'svelte-sonner';
-	import ProductCardOrdenSummary from '../product/ProductCardOrdenSummary.svelte';
 	import { goto } from '$app/navigation';
 
-	let service = $derived(cartStore.serviceSelected);
-	/* let productsService: ProductInterface[] = $derived(service!.products || []);
+	import { inventory } from '$lib/store';
+	import { serviceController } from '$lib';
 
-	onMount(async () => {
-		try {
-			service!.products = await serviceController.getProductsOfService(service!);
-		} catch (e: any) {
-			toast('Algo ha salido mal', {
-				description: e.message || 'No se han podido cargar los productos',
-				action: {
-					label: 'Aceptar',
-					onClick: () => console.info('Aceptar')
-				}
-			});
-		}
-	}); */
+	import ProductCardOrdenSummary from '../product/ProductCardOrdenSummary.svelte';
+
+	let service = $derived(cartStore.serviceSelected);
 </script>
 
 <div class="flex h-full flex-col items-center justify-center px-8">
@@ -44,14 +26,20 @@
 						<p class="font-semibold text-gray-900 dark:text-white">
 							Precio Fijo: ${service.price}
 						</p>
-						{#await serviceController.getProductsOfService(service!)}
+						{#await serviceController.getProductIdsOfService(service!)}
 							<p>Estamos buscando los productos, Por favor espere</p>
-						{:then value}
-							{#each value as productService}
-								<ProductCardOrdenSummary
-									bind:product={inventory.products[inventory.products.indexOf(productService)]}
-									deleteButton={false}
-								/>
+						{:then data}
+							{#each data as productId}
+								{@const productService = inventory.findProductById(productId)!}
+
+								{#if productService}
+									<ProductCardOrdenSummary
+										bind:product={inventory.products[inventory.products.indexOf(productService)]}
+										deleteButton={false}
+									/>
+								{:else}
+									{console.log('pailas')}
+								{/if}
 							{/each}
 						{/await}
 						<Button

@@ -1,5 +1,14 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
+
+	import type { PageProps } from './$types';
+
+	import { inventory, serviceStore } from '$lib/store';
+
+	let { data }: PageProps = $props();
+
+	inventory.products = data.products;
+	serviceStore.services = data.services;
 </script>
 
 <div class="flex h-full flex-col items-center justify-center">

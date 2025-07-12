@@ -6,20 +6,6 @@
 	import { serviceController } from '$lib';
 
 	let services = $derived(serviceStore.services);
-
-	onMount(async () => {
-		try {
-			serviceStore.services = await serviceController.getAllServices();
-		} catch (e: any) {
-			toast('Algo ha salido mal', {
-				description: e.message || 'No se han podido cargar los servicios',
-				action: {
-					label: 'Aceptar',
-					onClick: () => console.info('Aceptar')
-				}
-			});
-		}
-	});
 </script>
 
 <div class="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-4 px-10">

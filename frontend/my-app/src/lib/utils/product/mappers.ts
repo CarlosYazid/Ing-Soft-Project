@@ -40,6 +40,7 @@ export function mapBackendProductToProduct(backendProduct: BackendProduct): Prod
 		description: backendProduct.description,
 		cost: backendProduct.cost,
 		expirationDate: new Date(backendProduct.expiration_date),
-		quantity: 0
+		quantity: 0,
+		quantityService: 0
 	};
 }

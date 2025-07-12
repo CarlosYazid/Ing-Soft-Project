@@ -2,30 +2,14 @@
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as Card from '$lib/components/ui/card/index.js';
 	import { Trash2, SquarePen } from '@lucide/svelte';
-	import { toast, Toaster } from 'svelte-sonner';
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
 
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
 	import { serviceStore } from '$lib';
-	import { serviceController } from '$lib';
+	import { serviceController } from '$lib/controllers';
 
 	let services = $derived(serviceStore.services);
-
-	onMount(async () => {
-		try {
-			serviceStore.services = await serviceController.getAllServices();
-		} catch (e: any) {
-			toast('Algo ha salido mal', {
-				description: e.message || 'No se han podido cargar los productos',
-				action: {
-					label: 'Aceptar',
-					onClick: () => console.info('Aceptar')
-				}
-			});
-		}
-	});
 
 	//Lógica modal de editar producto
 	let editar = $state(false);
@@ -66,8 +50,6 @@
 		serviceStore.clearDeleteService();
 	}
 </script>
-
-<Toaster />
 
 <div class="mt-4 flex justify-end">
 	<Button

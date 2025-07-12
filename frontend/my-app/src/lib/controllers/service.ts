@@ -107,10 +107,10 @@ async function addProductToService(productId: number, serviceId: number) {
 async function getProductsOfService(service: service) {
 	try {
 		const productsToGet = await api.get(
-			`${SERVICE_BASE_PATH}/input_services/products/${service.id}`
+			`${SERVICE_BASE_PATH}/input_services/service/${service.id}`
 		);
 		const fetched = await Promise.all(
-			productsToGet.map((input: any) => productController.getById(input.product_id))
+			productsToGet.map(async (input: any) => await productController.getById(input.product_id))
 		);
 		return fetched;
 	} catch (error: any) {
@@ -154,11 +154,27 @@ async function updateServiceProducts(service: service, oldProducts: ProductInter
 	await Promise.all(toAdd.map((id) => addProductToService(id, service.id)));
 }
 
+async function getProductIdsOfService(service: service): Promise<number[]> {
+	try {
+		const productsToGet = await api.get(
+			`${SERVICE_BASE_PATH}/input_services/service/${service.id}`
+		);
+
+		// Solo retornamos el listado de product_id
+		const productIds = productsToGet.map((input: any) => input.product_id);
+		return productIds;
+	} catch (error: any) {
+		console.error(`Error al obtener los IDs de productos del servicio ${service.id}:`, error);
+		throw new Error(`No se pudieron obtener los IDs de productos del servicio: ${error.message}`);
+	}
+}
+
 // Exportamos los métodos en un solo objeto
 export const serviceController = {
 	getAllServices,
 	createService,
 	updateService,
 	deleteServiceById,
-	getProductsOfService
+	getProductsOfService,
+	getProductIdsOfService
 };

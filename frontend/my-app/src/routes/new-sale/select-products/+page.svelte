@@ -2,9 +2,7 @@
 	/* import { products } from '$lib/data/products.js'; */
 	import ProductCardSelectProducts from '$lib/components/product/ProductCardSelectProducts.svelte';
 
-	import { onMount } from 'svelte';
 	import { inventory } from '$lib';
-	import { productController } from '$lib';
 
 	let products = $derived(inventory.products);
 
@@ -14,10 +12,6 @@
 			? [...products].filter((p) => p.name.toLowerCase().startsWith(searchTerm.toLowerCase()))
 			: products
 	);
-
-	onMount(async () => {
-		inventory.products = await productController.getAll();
-	});
 </script>
 
 <div class="flex w-full flex-col items-center gap-6 p-8">

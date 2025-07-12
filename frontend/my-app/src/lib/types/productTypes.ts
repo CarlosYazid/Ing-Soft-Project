@@ -30,6 +30,9 @@ export interface BaseProductInterface {
 
 	/* Un atributo para el manejo del producto en el carrito */
 	quantity?: number;
+
+	/* Un atributo para el manejo del producto del servicio en el carrito */
+	quantityService?: number;
 }
 
 /**

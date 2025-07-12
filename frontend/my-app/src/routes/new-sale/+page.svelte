@@ -9,7 +9,6 @@
 
 	import { onMount } from 'svelte';
 	import { inventory, serviceStore, cartStore } from '$lib';
-	import { productController, serviceController } from '$lib';
 	import type { ProductInterface, service } from '$lib';
 	import ServiceOverView from '$lib/components/service/ServiceOverView.svelte';
 	import ServiceCardOrdenSummary from '$lib/components/service/ServiceCardOrdenSummary.svelte';
@@ -29,18 +28,11 @@
 		confirmar = false;
 	}
 
-	//Quizas sea contra producente al manejar lógica de negocio desde del frontend pero bueh en cualquier caso se podría implementar
-	/* onMount(async () => {
-		//Actualizamos las stores
-		inventory.products = await productController.getAll();
-		serviceStore.services = await serviceController.getAllServices();
-	}); */
-
 	let orderProducts: ProductInterface[] = $derived(cartStore.products);
 	let orderServices: service[] = $derived(cartStore.services);
 	let totalStore: string = $derived.by(() => cartStore.recalculateTotal());
-	$inspect(orderProducts);
-	$inspect(cartStore.products);
+	$inspect(serviceStore.services).with(console.trace);
+	$inspect(inventory.products).with(console.trace);
 </script>
 
 <div class="mt-4 flex justify-end">

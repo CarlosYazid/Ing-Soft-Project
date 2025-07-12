@@ -13,56 +13,62 @@
 		deleteButton: boolean;
 	}>();
 
-	product.quantity = product?.quantity! | 0;
+	if (product) product.quantity = product?.quantity! || 0;
 </script>
 
-<Card.Root>
-	<Card.Content>
-		<div class="flex items-center justify-between gap-4">
-			<img src={product.img as string} alt={product.name} class="h-auto w-30" />
-			<div class="grid grid-cols-1 gap-2">
-				<h3 class="text-2xl font-bold">{product.name}</h3>
-				<p class="text-sm text-gray-500">{product.short_description}</p>
-			</div>
-			<div class="grid grid-cols-1 gap-2">
-				<h3 class="text-base font-semibold">Precio Unitario</h3>
-				<p class="text-sm text-gray-500">${product.price}</p>
-			</div>
-			<div class="grid grid-cols-1 gap-2">
-				<h3 class="text-base font-semibold">Precio Total</h3>
-				<p class="text-sm font-semibold">${(product.price * product.quantity!).toFixed(2)}</p>
-			</div>
+{#if product}
+	<Card.Root>
+		<Card.Content>
+			<div class="flex items-center justify-between gap-4">
+				<img src={product.img as string} alt={product.name} class="h-auto w-30" />
+				<div class="grid grid-cols-1 gap-2">
+					<h3 class="text-2xl font-bold">{product.name}</h3>
+					<p class="text-sm text-gray-500">{product.short_description}</p>
+				</div>
+				<div class="grid grid-cols-1 gap-2">
+					<h3 class="text-base font-semibold">Precio Unitario</h3>
+					<p class="text-sm text-gray-500">${product.price}</p>
+				</div>
+				<div class="grid grid-cols-1 gap-2">
+					<h3 class="text-base font-semibold">Precio Total</h3>
+					<p class="text-sm font-semibold">
+						${(product.price * product.quantity!).toFixed(2)}
+					</p>
+				</div>
 
-			{#if deleteButton}
-				<Input
-					type="number"
-					bind:value={product.quantity}
-					class="w-18"
-					min="1"
-					max={product.stock}
-				/>
-				<Button
-					onclick={() => cartStore.removeProductById(product.id)}
-					class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
-				>
-			{:else}
-				<Input
-					type="number"
-					bind:value={product.quantity}
-					class="w-18"
-					min="0"
-					max={product.stock}
-				/>
-			{/if}
-		</div>
-		<p class="flex justify-end text-sm text-gray-500">Stock: {product.stock - product.quantity!}</p>
-	</Card.Content>
-</Card.Root>
+				{#if deleteButton}
+					<Input
+						type="number"
+						bind:value={product.quantity}
+						class="w-18"
+						min="1"
+						max={product.stock}
+					/>
+					<Button
+						onclick={() => cartStore.removeProductById(product.id)}
+						class="bg-red-700 hover:bg-red-300 hover:text-red-700"><Trash2 /></Button
+					>
+				{:else}
+					<Input
+						type="number"
+						bind:value={product.quantity}
+						class="w-18"
+						min="0"
+						max={product.stock}
+					/>
+				{/if}
+			</div>
+			<p class="flex justify-end text-sm text-gray-500">
+				Stock: {product.stock - product.quantity!}
+			</p>
+		</Card.Content>
+	</Card.Root>
 
-{#if product?.quantity! > product?.stock! || product?.quantity! < 0}
-	<SuccessOrFailDialog
-		infoDialog={false}
-		contentDialog={'La cantidad ingresada no puede ser procesada'}
-		callback={() => (product!.quantity = product?.stock)}
-	/>
+	{#if product?.quantity! > product?.stock! || product?.quantity! < 0}
+		<SuccessOrFailDialog
+			infoDialog={false}
+			contentDialog={'La cantidad ingresada no puede ser procesada'}
+			callback={() => (product!.quantity = product?.stock)}
+		/>
+	{/if}
 {/if}
