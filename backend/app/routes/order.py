@@ -77,56 +77,56 @@ async def delete_order_2(request: Request, id: int):
     """
     return await OrderCrud.delete_order(id)
 
-@router.post("/services/")
+@router.post("/service/")
 async def create_order_service(request: Request, order_service: OrderServiceCreate):
     """
     Create a new order service.
     """
     return await OrderCrud.create_order_service(order_service)
 
-@router.get("/services/{order_service_id}")
+@router.get("/service/{order_service_id}")
 async def read_order_service(request: Request, order_service_id: int):
     """
     Retrieve an order service by ID.
     """
     return await OrderCrud.read_order_service(order_service_id)
 
-@router.get("/services/")
+@router.get("/service/")
 async def read_order_service_2(request: Request, order_service_id: int):
     """
     Retrieve an order service by ID.
     """
     return await OrderCrud.read_order_service(order_service_id)
 
-@router.get("/services/orders/{order_id}")
+@router.get("/service/order/{order_id}")
 async def read_orders_services_by_order_id(request: Request, order_id: int):
     """
     Retrieve order services by order ID.
     """
     return await OrderCrud.read_orders_services_by_order_id(order_id)
 
-@router.get("/services/orders/")
+@router.get("/service/order/")
 async def read_orders_services_by_order_id_2(request: Request, order_id: int):
     """
     Retrieve order services by order ID.
     """
     return await OrderCrud.read_orders_services_by_order_id(order_id)
 
-@router.put("/services/{_id}")
+@router.put("/service/{_id}")
 async def update_order_service(request: Request, _id: int, fields: dict):
     """
     Update an existing order service by ID.
     """
     return await OrderCrud.update_order_service(_id, fields)
 
-@router.delete("/services/{_id}")
+@router.delete("/service/{_id}")
 async def delete_order_service(request: Request, _id: int):
     """
     Delete an order service by ID.
     """
     return await OrderCrud.delete_order_service(_id)
 
-@router.delete("/services/")
+@router.delete("/service/")
 async def delete_order_service_2(request: Request, id: int):
     """
     Delete an order service by ID.
@@ -134,42 +134,42 @@ async def delete_order_service_2(request: Request, id: int):
     return await OrderCrud.delete_order_service(id)
 
 
-@router.post("/products/")
+@router.post("/product/")
 async def create_order_product(request: Request, order_product: OrderProductCreate):
     """
     Create a new order product.
     """
     return await OrderCrud.create_order_product(order_product)
 
-@router.get("/products/{_id}")
+@router.get("/product/{_id}")
 async def read_order_product(request: Request, _id: int):
     """
     Retrieve an order product by ID.
     """
     return await OrderCrud.read_order_product(_id)
 
-@router.get("/products/")
+@router.get("/product/")
 async def read_order_product_2(request: Request, id: int):
     """
     Retrieve an order product by ID.
     """
     return await OrderCrud.read_order_product(id)
 
-@router.put("/products/{_id}")
+@router.put("/product/{_id}")
 async def update_order_product(request: Request, _id: int, fields: dict):
     """
     Update an existing order product by ID.
     """
     return await OrderCrud.update_order_product(_id, fields)
 
-@router.delete("/products/{_id}")
+@router.delete("/product/{_id}")
 async def delete_order_product(request: Request, _id: int):
     """
     Delete an order product by ID.
     """
     return await OrderCrud.delete_order_product(_id)
 
-@router.delete("/products/")
+@router.delete("/product/")
 async def delete_order_product_2(request: Request, id: int):
     """
     Delete an order product by ID.
@@ -177,14 +177,14 @@ async def delete_order_product_2(request: Request, id: int):
     return await OrderCrud.delete_order_product(id)
 
 
-@router.get("/products/orders/{order_id}")
+@router.get("/product/order/{order_id}")
 async def read_orders_products_by_order_id(request: Request, order_id: int):
     """
     Retrieve order products by order ID.
     """
     return await OrderCrud.read_orders_products_by_order_id(order_id)
 
-@router.get("/products/orders/")
+@router.get("/product/order/")
 async def read_order_products_by_order_id_2(request: Request, order_id: int):
     """
     Retrieve order products by order ID.
