@@ -5,7 +5,7 @@ from models import ProductCreate, ProductCategory, ProductTypes
 from crud import ProductCrud
 from services import AuthService, ProductService
 
-router = APIRouter(prefix="/products")
+router = APIRouter(prefix="/product")
 
 @router.post("/")
 async def create_product(request: Request, product: ProductCreate):
@@ -194,3 +194,17 @@ async def search_products_by_cost_range_2(request: Request, min_cost: float, max
     Search products by cost range in base format.
     """
     return await ProductService.search_products_by_cost_range(min_cost, max_cost)
+
+@router.get("/search/low-stock")
+async def search_low_stock_products(request: Request):
+    """
+    Search products with low stock.
+    """
+    return await ProductService.search_low_stock_products()
+
+@router.get("/search/expired")
+async def search_expired_products(request: Request):
+    """
+    Search expired products.
+    """
+    return await ProductService.search_expired_products()

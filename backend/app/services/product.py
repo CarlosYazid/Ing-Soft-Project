@@ -99,3 +99,29 @@ class ProductService:
             raise HTTPException(detail="No products found in this cost range", status_code=404)
 
         return [ProductBasePlusID.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_low_stock_products(cls) -> list[ProductBasePlusID]:
+        """Search products with low stock."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.low_stock_products_view).select(*cls.FIELDS_PRODUCT_BASE).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No low stock products found", status_code=404)
+
+        return [ProductBasePlusID.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_expired_products(cls) -> list[ProductBasePlusID]:
+        """Search products that are expired."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.expired_products_view).select(*cls.FIELDS_PRODUCT_BASE).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No expired products found", status_code=404)
+
+        return [ProductBasePlusID.model_validate(product) for product in response.data]

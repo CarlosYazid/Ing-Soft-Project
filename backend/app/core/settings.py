@@ -25,6 +25,8 @@ class Settings(BaseSettings):
     bucket_name: str = Field(..., alias="bucket_name")
     service_table: str = Field(..., alias="service_table")
     product_table: str = Field(..., alias="product_table")
+    low_stock_products_view: str = Field(..., alias="low_stock_products_view")
+    expired_products_view: str = Field(..., alias="expired_products_view")
     service_inputs_table: str = Field(..., alias="service_inputs_table")
     order_table: str = Field(..., alias="order_table")
     order_service_table: str = Field(..., alias="order_service_table")
