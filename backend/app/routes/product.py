@@ -202,7 +202,7 @@ async def search_low_stock_products(request: Request):
     """
     return await ProductService.search_low_stock_products()
 
-@router.get("/search/expired/")
+@router.get("/search/expired")
 async def search_expired_products(request: Request):
     """
     Search expired products.
