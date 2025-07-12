@@ -36,7 +36,15 @@ class Cart {
 
 	recalculateTotal() {
 		const totalProductos = this.products.reduce((acc, p) => acc + p.price * p.quantity!, 0);
-		const totalServicios = this.services.reduce((acc, s) => acc + s.price, 0);
+		const totalServicios = this.services.reduce(
+			(acc, s) =>
+				acc +
+				s.products!.reduce(
+					(acc, p) => acc + s.price * p.quantityService! + p.price * p.quantityService!,
+					0
+				),
+			0
+		);
 		return (totalProductos + totalServicios).toFixed(2);
 	}
 

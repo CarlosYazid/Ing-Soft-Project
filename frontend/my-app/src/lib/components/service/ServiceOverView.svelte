@@ -5,7 +5,7 @@
 	import { cartStore } from '$lib';
 	import { goto } from '$app/navigation';
 
-	import { inventory } from '$lib/store';
+	import { inventory, serviceStore } from '$lib/store';
 	import { serviceController } from '$lib';
 
 	import ProductCardOrdenSummary from '../product/ProductCardOrdenSummary.svelte';
@@ -31,14 +31,16 @@
 						{:then data}
 							{#each data as productId}
 								{@const productService = inventory.findProductById(productId)!}
+								{!cartStore.serviceSelected?.products?.find((p) => p.id === productService.id)
+									? cartStore.serviceSelected?.products?.push(productService)
+									: 'Ya estaba, melos, parchese'}
 
 								{#if productService}
 									<ProductCardOrdenSummary
 										bind:product={inventory.products[inventory.products.indexOf(productService)]}
 										deleteButton={false}
+										onServiceCard={true}
 									/>
-								{:else}
-									{console.log('pailas')}
 								{/if}
 							{/each}
 						{/await}

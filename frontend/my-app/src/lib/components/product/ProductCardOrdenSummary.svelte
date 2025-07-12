@@ -8,12 +8,15 @@
 
 	import { cartStore } from '$lib';
 
-	let { product = $bindable(), deleteButton } = $props<{
+	let {
+		product = $bindable(),
+		deleteButton,
+		onServiceCard
+	} = $props<{
 		product: ProductInterface;
 		deleteButton: boolean;
+		onServiceCard: boolean;
 	}>();
-
-	if (product) product.quantity = product?.quantity! || 0;
 </script>
 
 {#if product}
@@ -32,7 +35,10 @@
 				<div class="grid grid-cols-1 gap-2">
 					<h3 class="text-base font-semibold">Precio Total</h3>
 					<p class="text-sm font-semibold">
-						${(product.price * product.quantity!).toFixed(2)}
+						${(product.price * onServiceCard
+							? product.quantityService!
+							: product.quantity!
+						).toFixed(2)}
 					</p>
 				</div>
 
@@ -42,7 +48,7 @@
 						bind:value={product.quantity}
 						class="w-18"
 						min="1"
-						max={product.stock}
+						max={product.stock - product.quantityService!}
 					/>
 					<Button
 						onclick={() => cartStore.removeProductById(product.id)}
@@ -51,15 +57,15 @@
 				{:else}
 					<Input
 						type="number"
-						bind:value={product.quantity}
+						bind:value={product.quantityService}
 						class="w-18"
 						min="0"
-						max={product.stock}
+						max={product.stock - product.quantity!}
 					/>
 				{/if}
 			</div>
 			<p class="flex justify-end text-sm text-gray-500">
-				Stock: {product.stock - product.quantity!}
+				Stock: {product.stock - product.quantity! - product.quantityService!}
 			</p>
 		</Card.Content>
 	</Card.Root>

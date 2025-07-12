@@ -2,7 +2,7 @@
 	import type { service } from '$lib/types';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import { ArrowRight } from '@lucide/svelte';
-	import { cartStore } from '$lib/store';
+	import { cartStore, serviceStore } from '$lib/store';
 	import { goto } from '$app/navigation';
 
 	let { Service } = $props<{
@@ -10,7 +10,7 @@
 	}>();
 
 	async function handleClick(Service: service) {
-		cartStore.serviceSelected = Service;
+		cartStore.serviceSelected = serviceStore.findServiceById(Service.id);
 		goto('/new-sale/select-services/service-overview');
 	}
 </script>

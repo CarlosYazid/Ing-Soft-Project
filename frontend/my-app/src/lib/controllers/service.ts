@@ -22,7 +22,12 @@ async function getAllServices(): Promise<service[]> {
 		const rawServices = await api.get(`${SERVICE_BASE_PATH}/all`);
 		const services: service[] = rawServices.map(toService);
 
-		return services;
+		return await Promise.all(
+			services.map(async (s) => {
+				s.products = await getProductsOfService(s);
+				return s;
+			})
+		);
 	} catch (error: any) {
 		console.error('Error al obtener servicios:', error);
 		throw new Error(`No se pudieron obtener los servicios: ${error.message}`);

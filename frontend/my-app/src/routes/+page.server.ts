@@ -3,7 +3,7 @@ import { productController, serviceController } from '$lib/controllers';
 
 export const load: PageServerLoad = async () => {
 	return {
-		services: await serviceController.getAllServices(),
-		products: await productController.getAll()
+		products: await productController.getAll(),
+		services: await serviceController.getAllServices()
 	};
 };

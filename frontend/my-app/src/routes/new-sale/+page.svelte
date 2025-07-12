@@ -33,6 +33,8 @@
 	let totalStore: string = $derived.by(() => cartStore.recalculateTotal());
 	$inspect(serviceStore.services).with(console.trace);
 	$inspect(inventory.products).with(console.trace);
+	$inspect(orderProducts);
+	$inspect(orderServices);
 </script>
 
 <div class="mt-4 flex justify-end">
@@ -55,7 +57,11 @@
 		<h3 class="font-semiboldc mt-8 bg-zinc-500/5 text-lg">Lista de Productos Seleccionados</h3>
 		<div class="mt-4 grid grid-cols-1 gap-4">
 			{#each orderProducts as orderProduct, i (orderProduct.id)}
-				<ProductCardOrdenSummary bind:product={orderProducts[i]} deleteButton={true} />
+				<ProductCardOrdenSummary
+					bind:product={orderProducts[i]}
+					deleteButton={true}
+					onServiceCard={false}
+				/>
 			{:else}
 				<p>Aún no se ha registrado ningún producto</p>
 			{/each}
