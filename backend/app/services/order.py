@@ -6,7 +6,7 @@ from db import get_db_client
 
 class OrderService:
     
-    FIELDS_ORDER_BASE = set(OrderBasePlusID.__fields__.keys())
+    FIELDS_ORDER_BASE = set(OrderBasePlusID.model_fields.keys())
     
     @classmethod
     async def search_orders_by_status(cls, status: OrderStatus) -> list[OrderBasePlusID]:

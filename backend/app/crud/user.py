@@ -9,12 +9,12 @@ class UserCrud:
     """CRUD operations for users"""
     
     EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE = {"created_at"}
-    ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE = set(EmployeeCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE
+    ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE = set(EmployeeCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE
 
     EXCLUDED_FIELDS_FOR_UPDATE_CLIENT = {"created_at"}
-    ALLOWED_FIELDS_FOR_UPDATE_CLIENT = set(ClientCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_CLIENT
+    ALLOWED_FIELDS_FOR_UPDATE_CLIENT = set(ClientCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_CLIENT
 
-    FIELDS_USER_BASE = set(UserBase.__fields__.keys())
+    FIELDS_USER_BASE = set(UserBase.model_fields.keys())
 
 
     @classmethod
@@ -144,7 +144,7 @@ class UserCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
             raise HTTPException(detail="Update attribute of employee", status_code=400)
 
         client = await get_db_client()
@@ -166,7 +166,7 @@ class UserCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
             raise HTTPException(detail="Update attribute of employee", status_code=400)
 
         client = await get_db_client()
@@ -188,7 +188,7 @@ class UserCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
             raise HTTPException(detail="Update fields are invalid", status_code=400)
 
         client = await get_db_client()
@@ -397,7 +397,7 @@ class UserCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
             raise HTTPException(detail="Update attribute of client", status_code=400)
         
         client = await get_db_client()
@@ -419,7 +419,7 @@ class UserCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
             raise HTTPException(detail="Update attribute of client", status_code=400)
         
         client = await get_db_client()
@@ -441,7 +441,7 @@ class UserCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
             raise HTTPException(detail="Update fields are invalid", status_code=400)
         
         client = await get_db_client()
