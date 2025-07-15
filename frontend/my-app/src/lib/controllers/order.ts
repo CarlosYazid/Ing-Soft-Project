@@ -3,8 +3,8 @@ import type { ProductInterface, service, order } from '$lib/types';
 import { api } from '$lib/http/api';
 
 const ORDER_BASE_PATH = '/order';
-const ORDER_PRODUCTS_PATH = '/order/products';
-const ORDER_SERVICES_PATH = '/order/services';
+const ORDER_PRODUCTS_PATH = '/order/product';
+const ORDER_SERVICES_PATH = '/order/service';
 
 /**
  * Transforma un objeto recibido de la base de datos al tipo frontend `order`.

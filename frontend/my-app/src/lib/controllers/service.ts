@@ -102,7 +102,7 @@ async function addProductToService(productId: number, serviceId: number) {
 	console.log('payload', payload);
 
 	try {
-		await api.post(`${SERVICE_BASE_PATH}/input_services/`, payload);
+		await api.post(`${SERVICE_BASE_PATH}/input_service/`, payload);
 	} catch (error) {
 		console.error(`Error al añadir producto con ID ${productId}:`, error);
 		throw new Error('No se pudo añadir el producto');
@@ -111,9 +111,7 @@ async function addProductToService(productId: number, serviceId: number) {
 
 async function getProductsOfService(service: service) {
 	try {
-		const productsToGet = await api.get(
-			`${SERVICE_BASE_PATH}/input_services/service/${service.id}`
-		);
+		const productsToGet = await api.get(`${SERVICE_BASE_PATH}/input_service/service/${service.id}`);
 		const fetched = await Promise.all(
 			productsToGet.map(async (input: any) => await productController.getById(input.product_id))
 		);
@@ -126,7 +124,7 @@ async function getProductsOfService(service: service) {
 
 async function deleteProductFromService(productId: number, serviceId: number) {
 	try {
-		await api.delete(`${SERVICE_BASE_PATH}/input_services/${serviceId}/${productId}`);
+		await api.delete(`${SERVICE_BASE_PATH}/input_service/${serviceId}/${productId}`);
 	} catch (error) {
 		// Parchado que si hay error es pq ese producto no estaba asociado
 	}
@@ -161,9 +159,7 @@ async function updateServiceProducts(service: service, oldProducts: ProductInter
 
 async function getProductIdsOfService(service: service): Promise<number[]> {
 	try {
-		const productsToGet = await api.get(
-			`${SERVICE_BASE_PATH}/input_services/service/${service.id}`
-		);
+		const productsToGet = await api.get(`${SERVICE_BASE_PATH}/input_service/service/${service.id}`);
 
 		// Solo retornamos el listado de product_id
 		const productIds = productsToGet.map((input: any) => input.product_id);

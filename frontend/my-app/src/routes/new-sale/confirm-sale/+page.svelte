@@ -203,6 +203,7 @@
 						{#each cartStore.services as orderService (orderService.id)}
 							<Table.Row>
 								<Table.Cell>{orderService.name}</Table.Cell>
+								<!-- <Table.Cell>{orderService.pro}</Table.Cell> -->
 								<Table.Cell
 									>{orderService
 										.products!.reduce(
