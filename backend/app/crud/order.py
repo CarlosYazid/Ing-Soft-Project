@@ -8,13 +8,15 @@ from utils import OrderUtils
 class OrderCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"created_at", "client_id"}
-    ALLOWED_FIELDS_FOR_UPDATE = set(OrderCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
+    ALLOWED_FIELDS_FOR_UPDATE = set(OrderCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     
     EXCLUDED_FIELDS_FOR_UPDATE_SERVICE = {"order_id", "service_id"}
-    ALLOWED_FIELDS_FOR_UPDATE_SERVICE = set(OrderServiceCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_SERVICE
+    ALLOWED_FIELDS_FOR_UPDATE_SERVICE = set(OrderServiceCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_SERVICE
 
     EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT = {"order_id", "product_id"}
-    ALLOWED_FIELDS_FOR_UPDATE_PRODUCT = set(OrderProductCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT
+    ALLOWED_FIELDS_FOR_UPDATE_PRODUCT = set(OrderProductCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT
+
+    FIELDS_ORDER_BASE = set(OrderBasePlusID.model_fields.keys())
 
     @classmethod
     async def create_order(cls, order: OrderCreate) -> Order:
@@ -51,7 +53,7 @@ class OrderCrud:
         """Retrieve all orders."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.order_table).select("id", "client_id", "total_price", "status").execute()
+        response = await client.table(SETTINGS.order_table).select(*cls.FIELDS_ORDER_BASE).execute()
         
         if not bool(response.data):
             raise HTTPException(detail="No orders found", status_code=404)
@@ -75,7 +77,7 @@ class OrderCrud:
         """Retrieve an order by ID."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.order_table).select("id", "client_id", "total_price", "status").eq("id", order_id).execute()
+        response = await client.table(SETTINGS.order_table).select(*cls.FIELDS_ORDER_BASE).eq("id", order_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Order not found", status_code=404)
@@ -109,7 +111,7 @@ class OrderCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Update attribute of order", status_code=400)
 
         client = await get_db_client()
@@ -160,9 +162,9 @@ class OrderCrud:
         if await cls.read_order_status(order_id) is OrderStatus.COMPLETED:
             raise HTTPException(detail="Cannot delete a completed order", status_code=400)
         
-        order_products = await cls.get_order_products(order_id)
-        order_services = await cls.get_order_services(order_id)
-        
+        order_products = await cls.read_orders_products_by_order_id(order_id)
+        order_services = await cls.read_orders_services_by_order_id(order_id)
+
         # Delete associated order products
         for order_product in order_products:
             await cls.delete_order_product(order_product.id)
@@ -275,16 +277,16 @@ class OrderCrud:
         """Update an existing order service."""
         client = await get_db_client()
         
-        if not await cls.exist_order_service_by_id(order_service_id):
+        if not await OrderUtils.exist_order_service(order_service_id):
             raise HTTPException(detail="Order service not found", status_code=404)
         
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_SERVICE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_SERVICE), status_code=400)
         
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_SERVICE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_SERVICE):
             raise HTTPException(detail="Update attribute of order service", status_code=400)
         
-        if cls.get_order_status(cls.get_order_service_by_id(order_service_id).order_id) is OrderStatus.COMPLETED:
+        if cls.read_order_status(cls.read_order_service(order_service_id).order_id) is OrderStatus.COMPLETED:
             raise HTTPException(detail="Cannot update service in a completed order", status_code=400)
 
         response = await client.table(SETTINGS.order_service_table).update(fields).eq("id", order_service_id).execute()
@@ -300,7 +302,7 @@ class OrderCrud:
         client = await get_db_client()
 
         # Check if the order service exists before attempting to delete
-        if not await cls.exist_order_service_by_id(order_service_id):
+        if not await OrderUtils.exist_order_service(order_service_id):
             raise HTTPException(detail="Order service not found", status_code=404)
 
         response = await client.table(SETTINGS.order_service_table).delete().eq("id", order_service_id).execute()
@@ -382,7 +384,6 @@ class OrderCrud:
 
         return [int(product["id"]) for product in response.data]
     
-    
     @classmethod
     async def read_orders_products_by_product_id(cls, product_id: int) -> list[OrderProduct]:
         """Retrieve all orders for a specific product."""
@@ -407,16 +408,16 @@ class OrderCrud:
         """Update an existing order product."""
         client = await get_db_client()
         
-        if not await cls.exist_order_product_by_id(order_product_id):
+        if not await OrderUtils.exist_order_product(order_product_id):
             raise HTTPException(detail="Order product not found", status_code=404)
         
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT), status_code=400)
         
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_PRODUCT):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_PRODUCT):
             raise HTTPException(detail="Update attribute of order product", status_code=400)
         
-        if cls.get_order_status(cls.get_order_product_by_id(order_product_id).order_id) is OrderStatus.COMPLETED:
+        if cls.read_order_status(cls.read_order_product(order_product_id).order_id) is OrderStatus.COMPLETED:
             raise HTTPException(detail="Cannot update product in a completed order", status_code=400)
 
         response = await client.table(SETTINGS.order_product_table).update(fields).eq("id", order_product_id).execute()
@@ -432,7 +433,7 @@ class OrderCrud:
         client = await get_db_client()
 
         # Check if the order product exists before attempting to delete
-        if not await cls.exist_order_product_by_id(order_product_id):
+        if not await OrderUtils.exist_order_product(order_product_id):
             raise HTTPException(detail="Order product not found", status_code=404)
 
         response = await client.table(SETTINGS.order_product_table).delete().eq("id", order_product_id).execute()

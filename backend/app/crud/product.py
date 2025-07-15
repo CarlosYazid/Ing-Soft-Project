@@ -1,7 +1,7 @@
 from fastapi import HTTPException, UploadFile
 
 from db import get_db_client
-from models import Product, ProductCreate, ProductBasePlusID
+from models import Product, ProductCreate, ProductBasePlusID, ProductCategory, Category, ProductCategoryCreate, CategoryPlusID, CategoryCreate
 from core import SETTINGS
 from utils import ProductUtils
 
@@ -9,8 +9,15 @@ class ProductCrud:
 
     ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
     EXCLUDED_FIELDS_FOR_UPDATE = {"id", "image_url", "created_at", "stock"}
-    ALLOWED_FIELDS_FOR_UPDATE = set(ProductCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
-    
+    ALLOWED_FIELDS_FOR_UPDATE = set(ProductCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
+    EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE = {"id", "created_at"}
+    ALLOWED_FIELDS_FOR_CATEGORY_UPDATE = set(ProductCategoryCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE
+    EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE = {"id", "created_at", "product_id"}
+    ALLOWED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE = set(ProductCategoryCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE
+
+    FIELDS_PRODUCT_BASE = set(ProductBasePlusID.model_fields.keys())
+    FIELDS_CATEGORY_BASE = set(CategoryPlusID.model_fields.keys())
+
     @classmethod
     async def create_product(cls, product: ProductCreate) -> Product:
         """Create a new product."""
@@ -59,7 +66,7 @@ class ProductCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "minimum_stock", "image_url").execute()
+        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found", status_code=404)
@@ -85,7 +92,7 @@ class ProductCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select("id", "name", "short_description", "price", "category", "stock", "minimum_stock", "image_url").eq("id", product_id).execute()
+        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).eq("id", product_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Product not found", status_code=404)
@@ -103,7 +110,7 @@ class ProductCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail=f"Cannot update fields: {', '.join(cls.EXCLUDED_FIELDS_FOR_UPDATE)}", status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Update attribute of product", status_code=400)
 
         client = await get_db_client()
@@ -211,5 +218,196 @@ class ProductCrud:
 
         if not bool(response.data):
             raise HTTPException(detail="Failed to delete product", status_code=500)
+        
+        return bool(response.data)
+    
+    @classmethod
+    async def create_product_category(cls, category: ProductCategoryCreate) -> ProductCategory:
+        """Create a new product category."""
+        
+        if not await ProductUtils.exist_product(category.product_id):
+            raise HTTPException(detail="Product not found", status_code=404)
+        
+        if not await ProductUtils.exist_category(category.category_id):
+            raise HTTPException(detail="Category not found", status_code=404)
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_category_table).insert(category.model_dump(mode="json")).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to create product category", status_code=500)
+
+        return ProductCategory.model_validate(response.data[0])
+    
+    @classmethod
+    async def read_all_product_categories(cls) -> list[ProductCategory]:
+        """Retrieve all product categories."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_category_table).select("*").execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No product categories found", status_code=404)
+
+        return [ProductCategory.model_validate(category) for category in response.data]
+    
+    @classmethod
+    async def read_product_category(cls, category_id: int) -> ProductCategory:
+        """Retrieve a product category by ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_category_table).select("*").eq("id", category_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Product category not found", status_code=404)
+
+        return ProductCategory.model_validate(response.data[0])
+
+    @classmethod
+    async def update_product_category(cls, product_category_id: int, fields: dict) -> ProductCategory:
+        """Update an existing product category."""
+
+        # Check if the category exists before attempting to update
+        if not await ProductUtils.exist_product_category(product_category_id):
+            raise HTTPException(detail="Category not found", status_code=404)
+        
+        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE):
+            raise HTTPException(detail=f"Cannot update fields: {', '.join(cls.EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE)}", status_code=400)
+        
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE):
+            print(fields.keys(), cls.ALLOWED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE)
+            raise HTTPException(detail="Update attribute of product category", status_code=400)
+        
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_category_table).update(fields).eq("id", product_category_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to update category", status_code=500)
+
+        return ProductCategory.model_validate(response.data[0])
+
+    @classmethod
+    async def delete_product_category(cls, category_id: int) -> None:
+        """Delete a product category by ID."""
+
+        # Check if the category exists before attempting to delete
+        if not await ProductUtils.exist_category(category_id):
+            raise HTTPException(detail="Category not found", status_code=404)
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.product_category_table).delete().eq("id", category_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to delete category", status_code=500)
+        
+        return bool(response.data)
+
+    @classmethod
+    async def create_category(cls, category: CategoryCreate) -> Category:
+        """Create a new product category."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).insert(category.model_dump(mode="json")).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to create category", status_code=500)
+
+        return Category.model_validate(response.data[0])
+    
+    @classmethod
+    async def read_all_categories(cls) -> list[Category]:
+        """Retrieve all product categories."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).select("*").execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No categories found", status_code=404)
+
+        return [Category.model_validate(category) for category in response.data]
+    
+    @classmethod
+    async def read_category(cls, category_id: int) -> Category:
+        """Retrieve a product category by ID."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).select("*").eq("id", category_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Category not found", status_code=404)
+
+        return Category.model_validate(response.data[0])
+    
+    @classmethod
+    async def read_category_base(cls, category_id: int) -> CategoryPlusID:
+        """Retrieve a product category by ID."""
+        
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).select(*cls.FIELDS_CATEGORY_BASE).eq("id", category_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Category not found", status_code=404)
+
+        return CategoryPlusID.model_validate(response.data[0])
+    
+    @classmethod
+    async def read_all_categories_base(cls) -> list[CategoryPlusID]:
+        """Retrieve all product categories."""
+        
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).select(*cls.FIELDS_CATEGORY_BASE).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No categories found", status_code=404)
+
+        return [CategoryPlusID.model_validate(category) for category in response.data]
+    
+    @classmethod
+    async def update_category(cls, category_id: int, fields: dict) -> Category:
+        """Update an existing product category."""
+        
+        # Check if the category exists before attempting to update
+        if not await ProductUtils.exist_category(category_id):
+            raise HTTPException(detail="Category not found", status_code=404)
+        
+        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE):
+            raise HTTPException(detail=f"Cannot update fields: {', '.join(cls.EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE)}", status_code=400)
+        
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_CATEGORY_UPDATE):
+            raise HTTPException(detail="Update attribute of category", status_code=400)
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).update(fields).eq("id", category_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to update category", status_code=500)
+
+        return Category.model_validate(response.data[0])
+    
+    @classmethod
+    async def delete_category(cls, category_id: int) -> None:
+        """Delete a product category by ID."""
+
+        # Check if the category exists before attempting to delete
+        if not await ProductUtils.exist_category(category_id):
+            raise HTTPException(detail="Category not found", status_code=404)
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).delete().eq("id", category_id).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="Failed to delete category", status_code=500)
         
         return bool(response.data)

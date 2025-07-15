@@ -8,10 +8,12 @@ from utils import ServiceUtils
 class ServiceCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"created_at"}
-    ALLOWED_FIELDS_FOR_UPDATE = set(ServiceCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
+    ALLOWED_FIELDS_FOR_UPDATE = set(ServiceCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     EXCLUDED_FIELDS_FOR_UPDATE_INPUT = {"service_id"}
-    ALLOWED_FIELDS_FOR_UPDATE_INPUT = set(ServiceInputCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_INPUT
-    
+    ALLOWED_FIELDS_FOR_UPDATE_INPUT = set(ServiceInputCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_INPUT
+
+    FIELDS_SERVICE_BASE = set(ServiceBasePlusID.model_fields.keys())
+
     @classmethod
     async def create_service(cls, service: ServiceCreate) -> Service:
         """Create a new service."""
@@ -44,7 +46,7 @@ class ServiceCrud:
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).select("id", "name", "short_description", "price").execute()
+        response = await client.table(SETTINGS.service_table).select(*cls.FIELDS_SERVICE_BASE).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No services found", status_code=404)
@@ -69,7 +71,7 @@ class ServiceCrud:
         """Retrieve a service by ID."""
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.service_table).select("id", "name", "short_description", "price").eq("id", service_id).execute()
+        response = await client.table(SETTINGS.service_table).select(*cls.FIELDS_SERVICE_BASE).eq("id", service_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="Service not found", status_code=404)
@@ -87,7 +89,7 @@ class ServiceCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE), status_code=400)
         
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Update attribute of service", status_code=400)
 
         client = await get_db_client()
@@ -230,7 +232,7 @@ class ServiceCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_INPUT):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_INPUT), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_INPUT):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_INPUT):
             raise HTTPException(detail="Update attribute of input service", status_code=400)
 
         client = await get_db_client()
@@ -254,7 +256,7 @@ class ServiceCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_INPUT):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_INPUT), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_INPUT):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_INPUT):
             raise HTTPException(detail="Update attribute of input service", status_code=400)
 
         client = await get_db_client()

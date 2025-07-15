@@ -34,4 +34,4 @@ app.mount("/static", StaticFiles(directory="../frontend/my-app/static", html=Tru
 
 @app.get("/")
 async def root():
-    return {"status": "Ok"}
+    return { "status" : "Ok" }

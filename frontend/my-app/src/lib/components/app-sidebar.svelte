@@ -62,6 +62,10 @@
 					{
 						title: 'Gestionar Servicios',
 						url: '/gestionar-servicios'
+					},
+					{
+						title: 'Gestionar Clientes',
+						url: '/gestionar-clientes'
 					}
 				]
 			}

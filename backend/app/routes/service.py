@@ -86,54 +86,82 @@ async def delete_service_2(request: Request, id: int):
     """
     return await ServiceCrud.delete_service(id)
 
-@router.post("/input_services/")
+@router.post("/input_service/")
 async def create_input_service(request: Request, input_service: ServiceInputCreate):
     """
     Create a new input service for a specific service ID.
     """
     return await ServiceCrud.create_service_input(input_service)
 
-@router.get("/input_services/products/{service_id}")
+@router.get("/input_service/product/{product_id}")
+async def read_input_services_by_product(request: Request, product_id: int):
+    """
+    Retrieve input services by product ID.
+    """
+    return await ServiceCrud.read_services_inputs_by_product(product_id)
+
+@router.get("/input_service/product/")
+async def read_input_services_by_product_2(request: Request, product_id: int):
+    """
+    Retrieve input services by product ID.
+    """
+    return await ServiceCrud.read_services_inputs_by_product(product_id)
+
+
+@router.get("/input_service/service/{service_id}")
 async def read_input_services_by_service(request: Request, service_id: int):
     """
     Retrieve input services by service ID.
     """
     return await ServiceCrud.read_services_inputs_by_service(service_id)
 
-@router.get("/input_services/products/")
+@router.get("/input_service/service/")
 async def read_input_services_by_service_2(request: Request, service_id: int):
     """
     Retrieve input services by service ID.
     """
     return await ServiceCrud.read_services_inputs_by_service(service_id)
 
-@router.get("/input_services/{_id}")
+@router.get("/input_service/{service_id}/{product_id}")
+async def read_input_services_by_service_and_product(request: Request, service_id: int, product_id: int):
+    """
+    Retrieve input services by service ID and product ID.
+    """
+    return await ServiceCrud.read_service_input_by_service_id_and_product_id(service_id, product_id)
+
+@router.get("/input_service/{_id}")
 async def read_input_service(request: Request, _id: int):
     """
     Retrieve an input service by ID.
     """
     return await ServiceCrud.read_service_input(_id)
 
-@router.get("/input_services/")
+@router.get("/input_service/")
 async def read_input_service_2(request: Request, id: int):
     """
     Retrieve an input service by ID.
     """
     return await ServiceCrud.read_service_input(id)
 
-@router.put("/input_services/{_id}")
+@router.put("/input_service/{_id}")
 async def update_input_service(request: Request, _id: int, fields: dict):
     """
     Update an existing input service.
     """
     return await ServiceCrud.update_service_input(_id, fields)
 
-@router.put("/input_services/")
+@router.put("/input_service/")
 async def update_input_service_2(request: Request, _id : int, fields: dict):
     """
     Update an existing input service.
     """
     return await ServiceCrud.update_service_input(_id, fields)
+
+@router.put("/input_service/{service_id}/{product_id}")
+async def update_input_service_by_service_and_product(request: Request, service_id: int, product_id: int, fields: dict):
+    """ Update an existing input service by service ID and product ID.
+    """
+    return await ServiceCrud.update_service_input_by_service_id_and_product_id(service_id, product_id, fields)
 
 @router.delete("/input_service/{_id}")
 async def delete_input_service(request: Request, _id: int):
@@ -142,12 +170,19 @@ async def delete_input_service(request: Request, _id: int):
     """
     return await ServiceCrud.delete_service_input(_id)
 
-@router.delete("/input_services/")
+@router.delete("/input_service/")
 async def delete_input_service_2(request: Request, _id : int):
     """
     Delete an existing input service.
     """
     return await ServiceCrud.delete_service_input(_id)
+
+@router.delete("/input_service/{service_id}/{product_id}")
+async def delete_input_service_by_service_and_product(request: Request, service_id: int, product_id: int):
+    """
+    Delete an existing input service by service ID and product ID.
+    """
+    return await ServiceCrud.delete_service_input_by_service_id_and_product_id(service_id, product_id)
 
 @router.get("/search/name/{name}")
 async def search_services_by_name(request: Request, name: str):

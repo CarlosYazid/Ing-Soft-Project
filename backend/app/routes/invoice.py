@@ -2,9 +2,9 @@ from fastapi import APIRouter, Request, BackgroundTasks
 from services import InvoiceService
 from models import InvoiceRequest
 
-router = APIRouter()
+router = APIRouter(prefix="/invoice")
 
-@router.post("/invoices/generate")
+@router.post("/generate")
 async def generate_invoice(invoice_request: InvoiceRequest, background_tasks: BackgroundTasks):
     invoice = await InvoiceService.workflow(
         order_id=invoice_request.order_id,

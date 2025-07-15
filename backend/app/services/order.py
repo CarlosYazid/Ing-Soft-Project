@@ -6,13 +6,15 @@ from db import get_db_client
 
 class OrderService:
     
+    FIELDS_ORDER_BASE = set(OrderBasePlusID.model_fields.keys())
+    
     @classmethod
     async def search_orders_by_status(cls, status: OrderStatus) -> list[OrderBasePlusID]:
         """Retrieve orders by status."""
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.order_table).select("id", "client_id", "total_price", "status").eq("status", status.capitalize()).execute()
+        response = await client.table(SETTINGS.order_table).select(*cls.FIELDS_ORDER_BASE).eq("status", status.capitalize()).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No orders found with this status", status_code=404)
@@ -31,7 +33,7 @@ class OrderService:
 
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.order_table).select("id", "client_id", "total_price", "status").eq("client_id", client_id).execute()
+        response = await client.table(SETTINGS.order_table).select(*cls.FIELDS_ORDER_BASE).eq("client_id", client_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No orders found for this client", status_code=404)
@@ -42,18 +44,12 @@ class OrderService:
     async def update_inventory(cls, order_id: int) -> bool:
         """Update inventory after an order is placed."""
         
-        from crud import OrderCrud, ProductCrud, ServiceCrud
+        from crud import OrderCrud, ProductCrud
         
         order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
-        order_services_ids = await OrderCrud.read_orders_services_ids_by_order_id(order_id)
 
         for order_product in order_products:
             await ProductCrud.update_stock(order_product.product_id, -order_product.quantity, False)
-
-        for order_service_id in order_services_ids:
-            products_ids = await ServiceCrud.read_services_inputs_ids_by_service(order_service_id)
-            for product_id in products_ids:
-                await ProductCrud.update_stock(product_id, -1, False)
         
         return True
 

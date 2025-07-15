@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Request, Depends, UploadFile, File, Form
 from datetime import date
 
-from models import ProductCreate, ProductCategory, ProductTypes
+from models import ProductCreate, ProductCategoryCreate
 from crud import ProductCrud
 from services import AuthService, ProductService
 
-router = APIRouter(prefix="/products")
+router = APIRouter(prefix="/product")
 
 @router.post("/")
 async def create_product(request: Request, product: ProductCreate):
@@ -96,33 +96,155 @@ async def delete_product_2(request: Request, id: int):
     """
     return await ProductCrud.delete_product(id)
 
-@router.get("/search/category/{category}")
-async def search_products_by_category(request: Request, category: ProductCategory):
+@router.post("/product_category")
+async def create_product_category(request: Request, category: ProductCategoryCreate):
+    """
+    Create a new product category.
+    """
+    return await ProductCrud.create_product_category(category)
+
+@router.get("/product_category/all")
+async def read_all_product_categories(request: Request):
+    """
+    Retrieve all product categories.
+    """
+    return await ProductCrud.read_all_product_categories()
+
+@router.get("/product_category/{_id}")
+async def read_product_category(request: Request, _id: int):
+    """
+    Retrieve a product category by ID.
+    """
+    return await ProductCrud.read_product_category(_id)
+
+@router.get("/product_category/")
+async def read_product_category_2(request: Request, id: int):
+    """
+    Retrieve a product category by ID.
+    """
+    return await ProductCrud.read_product_category(id)
+
+@router.put("/product_category/{_id}")
+async def update_product_category(request: Request, _id: int, fields: dict):
+    """
+    Update an existing product category by ID.
+    """
+    return await ProductCrud.update_product_category(_id, fields)
+
+@router.put("/product_category/")
+async def update_product_category_2(request: Request, id: int, fields: dict):
+    """
+    Update an existing product category by ID.
+    """
+    return await ProductCrud.update_product_category(id, fields)
+
+@router.delete("/product_category/{_id}")
+async def delete_product_category(request: Request, _id: int):
+    """
+    Delete a product category by ID.
+    """
+    return await ProductCrud.delete_product_category(_id)
+
+@router.delete("/product_category/")
+async def delete_product_category_2(request: Request, id: int):
+    """
+    Delete a product category by ID.
+    """
+    return await ProductCrud.delete_product_category(id)
+
+@router.post("/category")
+async def create_category(request: Request, category: ProductCategoryCreate):
+    """
+    Create a new product category.
+    """
+    return await ProductCrud.create_category(category)
+
+@router.get("/category/all")
+async def read_all_categories(request: Request):
+    """
+    Retrieve all product categories.
+    """
+    return await ProductCrud.read_all_categories()
+
+@router.get("/category/base/all")
+async def read_all_categories_base(request: Request):
+    """
+    Retrieve all product categories in base format.
+    """
+    return await ProductCrud.read_all_categories_base()
+
+@router.get("/category/{_id}")
+async def read_category(request: Request, _id: int):
+    """
+    Retrieve a product category by ID.
+    """
+    return await ProductCrud.read_category(_id)
+
+@router.get("/category/")
+async def read_category_2(request: Request, id: int):
+    """
+    Retrieve a product category by ID.
+    """
+    return await ProductCrud.read_category(id)
+
+@router.get("/category/base/{_id}")
+async def read_category_base(request: Request, _id: int):
+    """
+    Get a product category base by ID.
+    """
+    return await ProductCrud.read_category_base(_id)
+
+@router.get("/category/base/")
+async def read_category_base_2(request: Request, id: int):
+    """
+    Get a product category base by ID.
+    """
+    return await ProductCrud.read_category_base(id)
+
+@router.put("/category/{_id}")
+async def update_category(request: Request, _id: int, fields: dict):
+    """
+    Update an existing product category by ID.
+    """
+    return await ProductCrud.update_category(_id, fields)
+
+
+@router.put("/category/")
+async def update_category_2(request: Request, id: int, fields: dict):
+    """
+    Update an existing product category by ID.
+    """
+    return await ProductCrud.update_category(id, fields)
+
+
+@router.delete("/category/{_id}")
+async def delete_category(request: Request, _id: int):
+    """
+    Delete a product category by ID.
+    """
+    return await ProductCrud.delete_category(_id)
+
+@router.delete("/category/")
+async def delete_category_2(request: Request, id: int):
+    """
+    Delete a product category by ID.
+    """
+    return await ProductCrud.delete_category(id)
+
+@router.get("/search/category/{category_id}")
+async def search_products_by_category(request: Request, category_id: int):
     """
     Get products by category.
     """
-    return await ProductService.search_products_by_category(category)
+    return await ProductService.search_products_by_category(category_id)
 
 @router.get("/search/category/")
-async def search_products_by_category_2(request: Request, category: ProductCategory):
+async def search_products_by_category_2(request: Request, category_id: int):
     """
     Get products by category in base format.
     """
-    return await ProductService.search_products_by_category(category)
+    return await ProductService.search_products_by_category(category_id)
 
-@router.get("/search/type/{product_type}")
-async def search_products_by_type(request: Request, product_type: ProductTypes):
-    """
-    Get products by type.
-    """
-    return await ProductService.search_products_by_type(product_type)
-
-@router.get("/search/type/")
-async def search_products_by_type_2(request: Request, product_type: ProductTypes):
-    """
-    Get products by type in base format.
-    """
-    return await ProductService.search_products_by_type(product_type)
 
 @router.get("/search/name/{name}")
 async def search_products_by_name(request: Request, name: str):
@@ -194,3 +316,31 @@ async def search_products_by_cost_range_2(request: Request, min_cost: float, max
     Search products by cost range in base format.
     """
     return await ProductService.search_products_by_cost_range(min_cost, max_cost)
+
+@router.get("/search/low-stock")
+async def search_low_stock_products(request: Request):
+    """
+    Search products with low stock.
+    """
+    return await ProductService.search_low_stock_products()
+
+@router.get("/search/expired")
+async def search_expired_products(request: Request):
+    """
+    Search expired products.
+    """
+    return await ProductService.search_expired_products()
+
+@router.get("/search/category/name/{category_name}")
+async def search_category_by_name(request: Request, category_name: str):
+    """
+    Search products by category name.
+    """
+    return await ProductService.search_category_by_name(category_name)
+
+@router.get("/search/category/name/")
+async def search_category_by_name_2(request: Request, category_name: str):
+    """
+    Search products by category name in base format.
+    """
+    return await ProductService.search_category_by_name(category_name)
