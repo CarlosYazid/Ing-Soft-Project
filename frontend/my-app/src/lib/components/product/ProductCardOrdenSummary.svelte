@@ -35,9 +35,8 @@
 				<div class="grid grid-cols-1 gap-2">
 					<h3 class="text-base font-semibold">Precio Total</h3>
 					<p class="text-sm font-semibold">
-						${(product.price * onServiceCard
-							? product.quantityService!
-							: product.quantity!
+						${(
+							product.price * (onServiceCard ? product.quantityService! : product.quantity!)
 						).toFixed(2)}
 					</p>
 				</div>

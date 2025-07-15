@@ -12,7 +12,7 @@ import type {
 	ProductInterface
 } from '$lib/types';
 
-const PRODUCTS_BASE_PATH = '/products';
+const PRODUCTS_BASE_PATH = '/product';
 
 export const productController = {
 	/**

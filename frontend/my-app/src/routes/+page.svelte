@@ -1,14 +1,14 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
-
-	import type { PageProps } from './$types';
-
 	import { inventory, serviceStore } from '$lib/store';
+	import { productController, serviceController } from '$lib/controllers';
 
-	let { data }: PageProps = $props();
+	import { onMount } from 'svelte';
 
-	inventory.products = data.products;
-	serviceStore.services = data.services;
+	onMount(async () => {
+		inventory.products = await productController.getAll();
+		serviceStore.services = await serviceController.getAllServices();
+	});
 </script>
 
 <div class="flex h-full flex-col items-center justify-center">

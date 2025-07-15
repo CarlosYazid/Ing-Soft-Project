@@ -4,6 +4,7 @@
 	import { ShoppingBasket } from '@lucide/svelte';
 	import { cartStore } from '$lib';
 	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
 	import { inventory, serviceStore } from '$lib/store';
 	import { serviceController } from '$lib';
@@ -11,6 +12,16 @@
 	import ProductCardOrdenSummary from '../product/ProductCardOrdenSummary.svelte';
 
 	let service = $derived(cartStore.serviceSelected);
+
+	// Lógica barra de carga
+	import { Progress } from '$lib/components/ui/progress/index.js';
+
+	let value = $state(13);
+
+	onMount(() => {
+		const timer = setTimeout(() => (value = 88), 500);
+		return () => clearTimeout(timer);
+	});
 </script>
 
 <div class="flex h-full flex-col items-center justify-center px-8">
@@ -27,13 +38,13 @@
 							Precio Fijo: ${service.price}
 						</p>
 						{#await serviceController.getProductIdsOfService(service!)}
-							<p>Estamos buscando los productos, Por favor espere</p>
+							<Progress {value} max={100} class="w-[60%]" />
 						{:then data}
 							{#each data as productId}
 								{@const productService = inventory.findProductById(productId)!}
 								{!cartStore.serviceSelected?.products?.find((p) => p.id === productService.id)
 									? cartStore.serviceSelected?.products?.push(productService)
-									: 'Ya estaba, melos, parchese'}
+									: ''}
 
 								{#if productService}
 									<ProductCardOrdenSummary
