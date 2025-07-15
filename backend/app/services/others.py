@@ -6,7 +6,7 @@ from db import get_db_client
 
 class PaymentService:
     
-    FIELDS_PAYMENT_BASE = set(PaymentBasePlusID.__fields__.keys())
+    FIELDS_PAYMENT_BASE = set(PaymentBasePlusID.model_fields.keys())
     
     @classmethod
     async def search_payments_by_status(cls, status: PaymentStatus) -> list[PaymentBasePlusID]:

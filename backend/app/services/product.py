@@ -1,38 +1,28 @@
 from fastapi import HTTPException
 from datetime import date
 
-from models import ProductBasePlusID, ProductCategory, ProductTypes
+from models import ProductBasePlusID, ProductCategory, Category
 from db import get_db_client
 from core import SETTINGS
+from crud import ProductCrud
+
 class ProductService:
     
-    FIELDS_PRODUCT_BASE = set(ProductBasePlusID.__fields__.keys())
+    FIELDS_PRODUCT_BASE = set(ProductBasePlusID.model_fields.keys())
     
     @classmethod
-    async def search_products_by_category(cls, category: ProductCategory) -> list[ProductBasePlusID]:
+    async def search_products_by_category(cls, category_id: int) -> list[ProductBasePlusID]:
         """Retrieve products by category."""
         
         client = await get_db_client()
 
-        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).eq("category", category.capitalize()).execute()
+        response = await client.table(SETTINGS.product_category_table).select("product_id").eq("category_id", category_id).execute()
 
         if not bool(response.data):
             raise HTTPException(detail="No products found in this category", status_code=404)
-
-        return [ProductBasePlusID.model_validate(product) for product in response.data]
-
-
-    @classmethod
-    async def search_products_by_type(cls, product_type: ProductTypes) -> list[ProductBasePlusID]:
-        """Retrieve products by type."""
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).eq("type", product_type.capitalize()).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No products found of this type", status_code=404)
-
-        return [ProductBasePlusID.model_validate(product) for product in response.data]
+        
+        # Retrieve product details using the product IDs
+        return [await ProductCrud.read_product_base(int(product['product_id'])) for product in response.data]
 
 
     @classmethod
@@ -125,3 +115,17 @@ class ProductService:
             raise HTTPException(detail="No expired products found", status_code=404)
 
         return [ProductBasePlusID.model_validate(product) for product in response.data]
+    
+    @classmethod
+    async def search_category_by_name(cls, category_name: str) -> list[Category]:
+        """Search products by category name."""
+
+        client = await get_db_client()
+
+        response = await client.table(SETTINGS.category_table).select("*").ilike("name", category_name).execute()
+
+        if not bool(response.data):
+            raise HTTPException(detail="No products found in this category", status_code=404)
+
+        # Validate and return the categories
+        return [Category.model_validate(category) for category in response.data]

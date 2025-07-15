@@ -6,7 +6,7 @@ from db import get_db_client
 
 class ServiceService:
     
-    FIELDS_SERVICE_BASE = set(ServiceBasePlusID.__fields__.keys())
+    FIELDS_SERVICE_BASE = set(ServiceBasePlusID.model_fields.keys())
     
     @classmethod
     async def search_services_by_name(cls, name: str) -> list[ServiceBasePlusID]:

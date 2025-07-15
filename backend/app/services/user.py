@@ -7,7 +7,7 @@ from core import SETTINGS
 
 class UserService:
     
-    FIELDS_USER_BASE = set(UserBase.__fields__.keys())
+    FIELDS_USER_BASE = set(UserBase.model_fields.keys())
     
     @classmethod
     async def search_employees_by_name(cls, name: str) -> list[UserBase]:

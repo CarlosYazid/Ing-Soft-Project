@@ -8,15 +8,15 @@ from utils import OrderUtils
 class OrderCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"created_at", "client_id"}
-    ALLOWED_FIELDS_FOR_UPDATE = set(OrderCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
+    ALLOWED_FIELDS_FOR_UPDATE = set(OrderCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     
     EXCLUDED_FIELDS_FOR_UPDATE_SERVICE = {"order_id", "service_id"}
-    ALLOWED_FIELDS_FOR_UPDATE_SERVICE = set(OrderServiceCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_SERVICE
+    ALLOWED_FIELDS_FOR_UPDATE_SERVICE = set(OrderServiceCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_SERVICE
 
     EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT = {"order_id", "product_id"}
-    ALLOWED_FIELDS_FOR_UPDATE_PRODUCT = set(OrderProductCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT
+    ALLOWED_FIELDS_FOR_UPDATE_PRODUCT = set(OrderProductCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT
 
-    FIELDS_ORDER_BASE = set(OrderBasePlusID.__fields__.keys())
+    FIELDS_ORDER_BASE = set(OrderBasePlusID.model_fields.keys())
 
     @classmethod
     async def create_order(cls, order: OrderCreate) -> Order:
@@ -111,7 +111,7 @@ class OrderCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE), status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Update attribute of order", status_code=400)
 
         client = await get_db_client()
@@ -283,7 +283,7 @@ class OrderCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_SERVICE):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_SERVICE), status_code=400)
         
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_SERVICE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_SERVICE):
             raise HTTPException(detail="Update attribute of order service", status_code=400)
         
         if cls.read_order_status(cls.read_order_service(order_service_id).order_id) is OrderStatus.COMPLETED:
@@ -414,7 +414,7 @@ class OrderCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT):
             raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_PRODUCT), status_code=400)
         
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE_PRODUCT):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_PRODUCT):
             raise HTTPException(detail="Update attribute of order product", status_code=400)
         
         if cls.read_order_status(cls.read_order_product(order_product_id).order_id) is OrderStatus.COMPLETED:

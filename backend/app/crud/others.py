@@ -8,9 +8,9 @@ from utils import PaymentUtils
 class PaymentCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"client_id", "created_at"}
-    ALLOWED_FIELDS_FOR_UPDATE = set(PaymentCreate.__fields__.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
+    ALLOWED_FIELDS_FOR_UPDATE = set(PaymentCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
     
-    FIELDS_PAYMENT_BASE = set(PaymentBasePlusID.__fields__.keys())
+    FIELDS_PAYMENT_BASE = set(PaymentBasePlusID.model_fields.keys())
     
     @classmethod
     async def create_payment(cls, payment: PaymentCreate) -> Payment:
@@ -85,7 +85,7 @@ class PaymentCrud:
         if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail=f"Cannot update: {', '.join(cls.EXCLUDED_FIELDS_FOR_UPDATE)}", status_code=400)
 
-        if not(set(fields.keys()) < cls.ALLOWED_FIELDS_FOR_UPDATE):
+        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE):
             raise HTTPException(detail="Update attribute of payment", status_code=400)
         
         client = await get_db_client()

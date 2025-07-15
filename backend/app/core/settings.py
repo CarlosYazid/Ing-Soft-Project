@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     low_stock_products_view: str = Field(..., alias="low_stock_products_view")
     expired_products_view: str = Field(..., alias="expired_products_view")
     service_inputs_table: str = Field(..., alias="service_inputs_table")
+    product_category_table: str = Field(..., alias="product_category_table")
+    category_table: str = Field(..., alias="category_table")
     order_table: str = Field(..., alias="order_table")
     order_service_table: str = Field(..., alias="order_service_table")
     order_product_table: str = Field(..., alias="order_product_table")
