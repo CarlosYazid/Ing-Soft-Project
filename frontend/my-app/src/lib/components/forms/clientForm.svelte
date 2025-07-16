@@ -6,7 +6,7 @@
 	import { goto } from '$app/navigation';
 
 	import type { client } from '$lib/types';
-	import { /* clientStore, */ cartStore } from '$lib/store'; /* Implementar en un futuro */
+	import { clientStore, cartStore } from '$lib/store';
 	import { clientController } from '$lib/controllers';
 	import { validateClientForm } from '$lib/utils/';
 
@@ -43,31 +43,37 @@
 
 		try {
 			let saved: client;
-			saved = await clientController.createClient(formData);
-			toast.success('Cliente registrado correctamente');
-			/* if (current) {
-				saved = await clientController.updateClient(current.documentid, formData);
+			if (false) {
+				/* saved = await clientController.updateClient(current.documentid, formData);
 				clientStore.clearEditClient();
-				toast.success('Cliente actualizado correctamente');
+				toast.success('Cliente actualizado correctamente'); */
 			} else {
 				console.log('Hola');
 				saved = await clientController.createClient(formData);
-				clientStore.addClient(saved);
+				/* clientStore.addClient(saved); // Esto pa que hptas si igual estoy sobreescribiendo esto con la info del server */
 				toast.success('Cliente registrado correctamente');
-			} */
-			/* clientStore.clients = await clientController.getAllClients(); */
+			}
+			clientStore.clients = await clientController.getAllClients();
 			cartStore.client = saved;
-			goto('/new-sale/confirm-sale');
 		} catch (err) {
 			console.error(err);
 			toast.error('Error al guardar el cliente. Intenta de nuevo.');
 		}
+
+		handleCancel() //Ejecutamos esa misma lógica para regresar a la page correspondiente
 	}
 
 	function handleCancel() {
-		/* clientStore.clearEditClient(); */
-		goto('/gestionar-clientes');
+		goto(
+			clientStore.addingClient || clientStore.editClient
+				? '/gestionar-clientes'
+				: '/new-sale/confirm-sale'
+		);
+		clientStore.clearEditClient();
+		clientStore.addingClient = false;
 	}
+
+	$inspect(clientStore.clients);
 </script>
 
 <Toaster />

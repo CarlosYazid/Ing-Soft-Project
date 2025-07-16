@@ -8,7 +8,9 @@
 	import { goto } from '$app/navigation';
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import type { client } from '$lib';
-	import { cartStore, clientController } from '$lib';
+	import { clientController } from '$lib';
+	import { cartStore, clientStore } from '$lib/store';
+
 	import { SquarePen, Trash2 } from '@lucide/svelte';
 
 	onMount(async () => {
@@ -52,7 +54,10 @@
 
 <div class="mt-4 flex justify-end">
 	<Button
-		href="/gestionar-clientes/add-client"
+		onclick={() => {
+			clientStore.addingClient = true;
+			goto('/gestionar-clientes/add-client');
+		}}
 		size="lg"
 		class="mr-4 mb-4 bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Añadir nuevo cliente</Button
 	>
