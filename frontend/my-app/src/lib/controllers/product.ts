@@ -72,8 +72,9 @@ export const productController = {
 				productData.img.name.trim()
 			) {
 				// Archivo válido, subir
-				dataToSend.image_url = await this.uploadProductImage(productData.id, productData.img);
+				await this.uploadProductImage(productData.id, productData.img);
 			}
+
 			const response: BackendProduct = await api.putJson(`${PRODUCTS_BASE_PATH}/${id}`, dataToSend);
 
 			await this.updateStock(productData.id, productData.stock, true);
