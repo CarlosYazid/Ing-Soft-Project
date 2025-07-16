@@ -69,10 +69,14 @@
 		</Card.Content>
 	</Card.Root>
 
-	{#if product?.quantity! > product?.stock! || product?.quantity! < 0}
+	{#if product?.quantity! > product?.stock! || product?.quantity! < 0 || !Number.isInteger(product?.quantity) || product?.quantityService! > product?.stock! || product?.quantityService! < 0 || !Number.isInteger(product?.quantityService)}
 		<SuccessOrFailDialog
 			infoDialog={false}
-			contentDialog={'La cantidad ingresada no puede ser procesada'}
+			contentDialog={`La cantidad ingresada no puede ser procesada ${
+				product?.quantity! > product?.stock! || product?.quantityService! > product?.stock!
+					? ': El stock disponible es insuficiente'
+					: ''
+			}`}
 			callback={() => (product!.quantity = product?.stock)}
 		/>
 	{/if}
