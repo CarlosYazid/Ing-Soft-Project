@@ -11,11 +11,11 @@
 	import { validateClientForm } from '$lib/utils/';
 
 	// — Estados locales —
-	let current = false; /*clientStore.editClient; Implementar en un futuro*/
-	let documentid = $state(/* current?.documentid?.toString() ?? */ '');
-	let name = $state(/* current?.name ?? */ '');
-	let email = $state(/* current?.email ?? */ '');
-	let phone = $state(/* current?.phone ?? */ '');
+	let current = $state(clientStore.editClient);
+	let documentid = $state(current?.documentid?.toString() || '');
+	let name = $state(current?.name || '');
+	let email = $state(current?.email || '');
+	let phone = $state(current?.phone || '');
 
 	let formErrors = $state<{ documentid?: string; name?: string; email?: string; phone?: string }>(
 		{}
@@ -43,14 +43,13 @@
 
 		try {
 			let saved: client;
-			if (false) {
-				/* saved = await clientController.updateClient(current.documentid, formData);
+			if (current) {
+				saved = await clientController.updateClient(current.documentid, formData);
 				clientStore.clearEditClient();
-				toast.success('Cliente actualizado correctamente'); */
+				toast.success('Cliente actualizado correctamente');
 			} else {
 				console.log('Hola');
 				saved = await clientController.createClient(formData);
-				/* clientStore.addClient(saved); // Esto pa que hptas si igual estoy sobreescribiendo esto con la info del server */
 				toast.success('Cliente registrado correctamente');
 			}
 			clientStore.clients = await clientController.getAllClients();
@@ -60,7 +59,7 @@
 			toast.error('Error al guardar el cliente. Intenta de nuevo.');
 		}
 
-		handleCancel() //Ejecutamos esa misma lógica para regresar a la page correspondiente
+		handleCancel(); //Ejecutamos esa misma lógica para regresar a la page correspondiente
 	}
 
 	function handleCancel() {
@@ -72,8 +71,6 @@
 		clientStore.clearEditClient();
 		clientStore.addingClient = false;
 	}
-
-	$inspect(clientStore.clients);
 </script>
 
 <Toaster />
