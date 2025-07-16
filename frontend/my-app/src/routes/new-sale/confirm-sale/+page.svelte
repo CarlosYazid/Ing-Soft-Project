@@ -18,11 +18,13 @@
 	let selectedDocumentid = $derived(cartStore.client?.documentid);
 	let selectedName = $derived(cartStore.client?.name);
 	let selectedPhone = $derived(cartStore.client?.phone);
-	let buscarNombre = $state('');
+	let buscarDocumento = $state('');
 
 	let filteredClients: client[] = $derived(
-		buscarNombre.trim()
-			? [...clients].filter((c) => c.name.toLowerCase().startsWith(buscarNombre.toLowerCase()))
+		buscarDocumento.trim()
+			? [...clients].filter((c) =>
+					c.documentid.toString().toLowerCase().startsWith(buscarDocumento.toLowerCase())
+				)
 			: clients
 	);
 
@@ -104,13 +106,18 @@
 
 	<div class="flex w-full flex-col items-center justify-center gap-8 px-8 pt-4">
 		<h3 class="text-2xl font-bold">Buscar Cliente</h3>
-		<Label for="buscarNombre">Ingrese nombre de cliente</Label>
+		<Label for="buscarDocumento">Ingrese Cédula de cliente</Label>
 		<div class="flex gap-4">
-			<Input name="buscarNombre" type="text" placeholder="ej: Andrés" bind:value={buscarNombre} />
+			<Input
+				name="buscarDocumento"
+				type="text"
+				placeholder="ej: 1099737114"
+				bind:value={buscarDocumento}
+			/>
 			<Button class=" bg-blue-700 hover:bg-blue-300 hover:text-blue-700">Buscar<Search /></Button>
 		</div>
 		<div class="grid w-full grid-cols-1 gap-4">
-			{#key buscarNombre}
+			{#key buscarDocumento}
 				<Table.Root class="w-full">
 					<Table.Caption>Clientes Registrados</Table.Caption>
 					<Table.Header>
@@ -140,6 +147,8 @@
 								<Table.Cell>{client.email}</Table.Cell>
 								<Table.Cell class="text-right">{client.documentid}</Table.Cell>
 							</Table.Row>
+						{:else}
+							<div class="my-4 w-full text-center"><h1>Cliente no encontrado</h1></div>
 						{/each}
 					</Table.Body>
 					<Table.Footer>
