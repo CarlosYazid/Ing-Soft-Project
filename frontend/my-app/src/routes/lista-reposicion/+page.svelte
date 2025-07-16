@@ -13,13 +13,14 @@
 	import { Input } from '$lib/components/ui/input/index.js';
 
 	let productsInventory: ProductInterface[] = $derived(inventory.products);
+	let updateValue = $state(0);
 
-	let products: ProductRow[] = $derived(
+	let products = $derived(
 		productsInventory.map((p) => ({
 			id: p.id,
 			name: p.name,
 			category: p.category,
-			price: p.price,
+			minimumStock: p.minimumStock,
 			stock: p.stock
 		}))
 	);
@@ -28,7 +29,7 @@
 	const columns = [
 		{ title: 'ID', key: 'id' },
 		{ title: 'Nombre', key: 'name' },
-		{ title: 'Precio', key: 'price' },
+		{ title: 'Mínimo', key: 'minimumStock' },
 		{ title: 'Stock', key: 'stock' }
 	];
 
@@ -50,7 +51,7 @@
 
 	onMount(async () => {
 		try {
-			const fetchedProducts = await productController.getAll();
+			const fetchedProducts = await productController.searchLowStock();
 			inventory.products = fetchedProducts;
 		} catch (e: any) {
 			toast('Algo ha salido mal', {
@@ -63,6 +64,8 @@
 		}
 	});
 </script>
+
+<Toaster />
 
 <div class="px-8">
 	<h3 class="font-semiboldc mt-8 bg-zinc-500/15 p-4 text-lg">Lista de Productos con Stock Bajo</h3>
@@ -92,7 +95,7 @@
 					<Table.Row>
 						<Table.Cell class="p-4">{product.id}</Table.Cell>
 						<Table.Cell class="p-4">{product.name}</Table.Cell>
-						<Table.Cell class="p-4">{product.price}</Table.Cell>
+						<Table.Cell class="p-4">{product.minimumStock}</Table.Cell>
 						<Table.Cell class="p-4 text-red-700">{product.stock}</Table.Cell>
 						<Table.Cell
 							><Dialog.Root>
@@ -108,9 +111,14 @@
 										>
 										<Dialog.Description>
 											<div class="grid grid-cols-3 gap-4">
-												<Input class="col-span-2" />
-												<Button class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
-													>Guardar</Button
+												<Input class="col-span-2" bind:value={updateValue} />
+												<Button
+													class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
+													onclick={() => {
+														productController.updateStock(product.id, updateValue, false);
+														product.stock += updateValue;
+														updateValue = 0;
+													}}>Guardar</Button
 												>
 											</div>
 										</Dialog.Description>

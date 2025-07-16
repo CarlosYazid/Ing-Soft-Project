@@ -31,6 +31,18 @@ export const productController = {
 	},
 
 	/**
+	 * Fetches products with low stock from the backend.
+	 */
+	async searchLowStock(): Promise<ProductInterface[]> {
+		try {
+			const response: BackendProduct[] = await api.get(`${PRODUCTS_BASE_PATH}/search/low-stock`);
+			return response.map(mapBackendProductToProduct);
+		} catch (error: any) {
+			throw new Error('Error fetching low-stock products:', error);
+		}
+	},
+
+	/**
 	 * Fetches a single product by its ID, mapping it to the frontend's ProductInterface.
 	 * @param id The ID of the product to fetch.
 	 * @returns A promise that resolves to the ProductInterface.
