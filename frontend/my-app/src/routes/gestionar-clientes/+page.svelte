@@ -163,7 +163,7 @@
 		callbackOnTrue={confirmedDelete}
 		callbackOnFalse={canceledDelete}
 		title={'¿Está seguro que desea eliminar el producto?'}
-		description={'Esta acción no se puede deshacer. El producto será eliminado permanentemente.'}
+		description={'Esta acción no se puede deshacer. El cliente será eliminado permanentemente.'}
 		btnClass={'bg-red-700 hover:bg-red-300 hover:text-red-700'}
 		action={'Eliminar'}
 	/>
@@ -173,7 +173,7 @@
 	<ConfirmDialog
 		callbackOnTrue={confirmedEdit}
 		callbackOnFalse={canceledEdit}
-		title={'¿Está seguro que desea editar el producto?'}
+		title={'¿Está seguro que desea editar el cliente?'}
 		description={''}
 		btnClass={'bg-blue-700 hover:bg-blue-300 hover:text-blue-700'}
 		action={'Editar'}
