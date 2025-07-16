@@ -12,8 +12,8 @@
 	import * as Dialog from '$lib/components/ui/dialog/index.js';
 	import { Input } from '$lib/components/ui/input/index.js';
 
-	let productsInventory: ProductInterface[] = $derived(inventory.products);
-	let updateValue = $state(0);
+	let productsInventory: ProductInterface[] = $derived(inventory.lowStockProducts);
+	let updateValue: number = $state(0);
 
 	let products = $derived(
 		productsInventory.map((p) => ({
@@ -52,7 +52,7 @@
 	onMount(async () => {
 		try {
 			const fetchedProducts = await productController.searchLowStock();
-			inventory.products = fetchedProducts;
+			inventory.lowStockProducts = fetchedProducts;
 		} catch (e: any) {
 			toast('Algo ha salido mal', {
 				description: e.message || 'No se han podido cargar los productos',
@@ -111,13 +111,14 @@
 										>
 										<Dialog.Description>
 											<div class="grid grid-cols-3 gap-4">
-												<Input class="col-span-2" bind:value={updateValue} />
+												<Input class="col-span-2" type="number" min="0" bind:value={updateValue} />
 												<Button
 													class="bg-blue-700 hover:bg-blue-300 hover:text-blue-700"
 													onclick={() => {
 														productController.updateStock(product.id, updateValue, false);
-														product.stock += updateValue;
+														inventory.addStockLowerStockProductById(product.id, updateValue);
 														updateValue = 0;
+														inventory.clearLowerStockProducts();
 													}}>Guardar</Button
 												>
 											</div>

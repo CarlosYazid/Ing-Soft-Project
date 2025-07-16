@@ -1,52 +1,47 @@
 import type { ProductInterface } from '$lib/types';
 
 class Inventory {
-	#products: ProductInterface[] = $state([]);
-	#editProduct: ProductInterface | null = $state(null);
-	#deleteProduct: ProductInterface | null = $state(null);
+	products: ProductInterface[] = $state([]);
+	editProduct: ProductInterface | null = $state(null);
+	deleteProduct: ProductInterface | null = $state(null);
+	lowStockProducts: ProductInterface[] = $state([]);
 
 	addProduct(product: ProductInterface) {
-		this.#products.push(product);
+		this.products.push(product);
 	}
 
 	removeProductById(id: number) {
-		this.#products = this.#products.filter((p) => p.id !== id);
+		this.products = this.products.filter((p) => p.id !== id);
 	}
 
 	findProductById(id: number): ProductInterface | null {
-		return this.#products.find((p) => p.id === id) || null;
+		return this.products.find((p) => p.id === id) || null;
+	}
+
+	removeLowerStockProductById(id: number) {
+		this.lowStockProducts = this.lowStockProducts.filter((p) => p.id !== id);
+	}
+
+	findLowerStockProductById(id: number): ProductInterface | null {
+		return this.lowStockProducts.find((p) => p.id === id) || null;
+	}
+
+	clearLowerStockProducts() {
+		this.lowStockProducts = this.lowStockProducts.filter((p) => p.stock < p.minimumStock);
+	}
+
+	addStockLowerStockProductById(id: number, stock: number): void {
+		if (this.lowStockProducts.find((p) => p.id === id)) {
+			this.lowStockProducts.find((p) => p.id === id)!.stock += stock;
+		}
 	}
 
 	clearEditProduct() {
-		this.#editProduct = null;
+		this.editProduct = null;
 	}
 
 	clearDeleteProduct() {
-		this.#deleteProduct = null;
-	}
-
-	get products() {
-		return this.#products;
-	}
-
-	set products(p: ProductInterface[]) {
-		this.#products = p;
-	}
-
-	get editProduct(): ProductInterface | null {
-		return this.#editProduct;
-	}
-
-	get deleteProduct(): ProductInterface | null {
-		return this.#deleteProduct;
-	}
-
-	set editProduct(p: ProductInterface) {
-		this.#editProduct = p;
-	}
-
-	set deleteProduct(p: ProductInterface) {
-		this.#deleteProduct = p;
+		this.deleteProduct = null;
 	}
 }
 
