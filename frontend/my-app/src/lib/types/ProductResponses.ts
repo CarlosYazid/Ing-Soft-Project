@@ -51,13 +51,6 @@ export interface BackendProduct extends BackendBaseProduct {
 	 * o 'Date' si la parseas. Sugiero 'string' inicialmente y parsear si es necesario en el cliente.
 	 */
 	expiration_date: string;
-}
 
-/**
- * @interface ProductListResponse
- * @description Define la estructura para una respuesta que contiene una lista de productos,
- * útil para endpoints de paginación o listado general.
- */
-export interface ProductListResponse {
-	products: Product[];
+	minimum_stock: number;
 }

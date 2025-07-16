@@ -113,6 +113,23 @@ export async function putFormData<T = any>(path: string, formData: FormData): Pr
 
 	return response.json();
 }
+/**
+ * Realiza una petición PUT sin cuerpo, enviando todos los datos mediante la URL.
+ * Útil para endpoints que extraen parámetros directamente de la ruta.
+ */
+export async function putUrl<T = any>(path: string): Promise<T> {
+	const response = await fetch(`${BASE_URL}${path}`, {
+		method: 'PUT',
+		mode: 'cors'
+	});
+	if (!response.ok) {
+		const errorData = await response.json().catch(() => ({ message: response.statusText }));
+		throw new Error(
+			`HTTP error! Status: ${response.status}, Details: ${JSON.stringify(errorData)}`
+		);
+	}
+	return response.json();
+}
 
 /**
  * Realiza una petición DELETE.
@@ -142,7 +159,8 @@ export const api = {
 	post,
 	putJson,
 	putFormData,
-	delete: del // 'delete' es una palabra reservada en JS, por eso usamos 'del' como nombre de función y lo mapeamos.
+	delete: del, // 'delete' es una palabra reservada en JS, por eso usamos 'del' como nombre de función y lo mapeamos.
+	putUrl
 };
 
 // Si necesitas un lugar para configurar headers globales como tokens de autorización:

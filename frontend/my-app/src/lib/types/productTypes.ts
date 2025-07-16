@@ -58,6 +58,7 @@ export interface ConsumibleProduct extends BaseProductInterface {
 export interface ProductInterface extends ConsumibleProduct {
 	/** El costo de adquisición del producto. Se tipa como number para consistencia. */
 	cost: number;
+	minimumStock: number;
 }
 
 /**
@@ -132,4 +133,6 @@ export interface ProductFormInput {
 	img: File | null;
 	/** La fecha de expiración, como string. */
 	expirationDate: string;
+
+	minimumStock: string;
 }

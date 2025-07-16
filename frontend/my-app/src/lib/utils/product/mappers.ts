@@ -41,6 +41,7 @@ export function mapBackendProductToProduct(backendProduct: BackendProduct): Prod
 		cost: backendProduct.cost,
 		expirationDate: new Date(backendProduct.expiration_date),
 		quantity: 0,
-		quantityService: 0
+		quantityService: 0,
+		minimumStock: backendProduct.minimum_stock
 	};
 }

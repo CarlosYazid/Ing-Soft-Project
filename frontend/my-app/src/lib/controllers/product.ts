@@ -58,18 +58,12 @@ export const productController = {
 		const dataToSend: Record<string, any> = {
 			name: productData.name,
 			price: productData.price,
-			category: productData.category,
-			stock: productData.stock,
 			description: productData.description,
 			cost: productData.cost
 		};
 
-		/* Definir en prox entrega 
-		if (productData.expirationDate instanceof Date) {
-			dataToSend.expiration_date = productData.expirationDate.toISOString();
-		} else if (productData.expirationDate) {
-			dataToSend.expiration_date = productData.expirationDate;
-		} */
+		/* category: productData.category, Está pailas de momento*/
+
 		try {
 			if (
 				productData.img &&
@@ -79,12 +73,10 @@ export const productController = {
 			) {
 				// Archivo válido, subir
 				dataToSend.image_url = await this.uploadProductImage(productData.id, productData.img);
-			} else if (typeof productData.img === 'string') {
-				// Ya es una URL, solo asignar
-				dataToSend.image_url = productData.img;
 			}
-
 			const response: BackendProduct = await api.putJson(`${PRODUCTS_BASE_PATH}/${id}`, dataToSend);
+
+			await this.updateStock(productData.id, productData.stock, true);
 
 			return mapBackendProductToProduct(response);
 		} catch (error: any) {
@@ -103,6 +95,44 @@ export const productController = {
 			}
 			throw new Error(
 				`An unexpected error occurred while updating product ${id}. Please try again.`
+			);
+		}
+	},
+
+	/**
+	 * Actualiza el stock de un producto.
+	 * @param id      El ID del producto a actualizar.
+	 * @param stock   La cantidad de stock a aplicar.
+	 * @param replace Si es true, reemplaza el stock; si es false, suma al stock existente.
+	 * @returns       Una promesa que resuelve el producto actualizado en la interfaz ProductInterface.
+	 * @throws        Un Error con mensaje amigable si falla la petición.
+	 */
+	async updateStock(id: number, stock: number, replace: boolean): Promise<ProductInterface> {
+		try {
+			// Llamada PUT al endpoint /product/stock/{id}/{stock}/{replace}
+			const response: BackendProduct = await api.putUrl(
+				`${PRODUCTS_BASE_PATH}/stock/${id}/${stock}/${replace}`
+			);
+
+			// Mapeamos la respuesta al interfaz de frontend
+			return mapBackendProductToProduct(response);
+		} catch (error: any) {
+			console.error(`Error updating stock for product ${id}:`, error);
+
+			// 404 Not Found
+			if (error.message.includes('Status: 404')) {
+				throw new Error(`Product with ID ${id} not found for stock update.`);
+			}
+
+			// Errores con detalles del backend
+			if (error instanceof Error && error.message.includes('Details: ')) {
+				const details = error.message.split('Details: ')[1] || 'Unknown server error';
+				throw new Error(`Failed to update stock: ${details}`);
+			}
+
+			// Error genérico
+			throw new Error(
+				`An unexpected error occurred while updating stock for product ${id}. Please try again.`
 			);
 		}
 	},
@@ -192,12 +222,9 @@ export const productController = {
 				short_description: productData.description,
 				stock: productData.stock,
 				type: 'Papelería_general',
-				updated_at: '2023-01-01T00:00:00Z'
-
-				/* expiration_date:
-						productData.expirationDate instanceof Date
-							? productData.expirationDate.toISOString()
-							: productData.expirationDate */
+				updated_at: '2023-01-01T00:00:00Z',
+				expiration_date: productData.expirationDate,
+				minimum_stock: productData.minimumStock
 			};
 
 			// 2. Realizar la petición POST inicial para crear el producto

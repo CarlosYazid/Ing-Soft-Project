@@ -10,10 +10,8 @@
 	import { toast, Toaster } from 'svelte-sonner';
 	import { productController } from '$lib/controllers';
 
-	let productsInventory: ProductInterface[] = $derived(inventory.products);
-
-	let products: ProductRow[] = $derived(
-		productsInventory.map((p) => ({
+	let products: ProductRow[] = $derived.by(() =>
+		inventory.products.map((p) => ({
 			id: p.id,
 			name: p.name,
 			category: p.category,
@@ -66,7 +64,7 @@
 	const columns = [
 		{ title: 'ID', key: 'id' },
 		{ title: 'Nombre', key: 'name' },
-		{ title: 'Categoría', key: 'category' },
+		/* { title: 'Categoría', key: 'category' }, */
 		{ title: 'Precio', key: 'price' },
 		{ title: 'Stock', key: 'stock' }
 	];
@@ -126,7 +124,7 @@
 
 <div class="px-8">
 	<h3 class="font-semiboldc mt-8 bg-zinc-500/15 p-4 text-lg">Lista de Productos Actuales</h3>
-	{#key productsInventory}
+	{#key products}
 		<Table.Root>
 			<Table.Caption>Productos Actuales en la Base de Datos</Table.Caption>
 			<Table.Header class="bg-zinc-500/10">
@@ -147,7 +145,7 @@
 					<Table.Row>
 						<Table.Cell class="p-4">{product.id}</Table.Cell>
 						<Table.Cell class="p-4">{product.name}</Table.Cell>
-						<Table.Cell class="p-4">{product.category}</Table.Cell>
+						<!-- <Table.Cell class="p-4">{product.category}</Table.Cell> -->
 						<Table.Cell class="p-4">{product.price}</Table.Cell>
 						<Table.Cell class="p-4">{product.stock}</Table.Cell>
 						<Table.Cell class="flex w-full justify-end gap-2"

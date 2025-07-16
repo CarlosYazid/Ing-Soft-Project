@@ -37,7 +37,6 @@
 	const df = new DateFormatter('en-US', {
 		dateStyle: 'long'
 	});
-	$inspect(stringExpirationDate);
 
 	// Tipado
 	import type { ProductFormInput, ProductInterface } from '$lib/types';
@@ -75,7 +74,8 @@
 			category: (formData.get('category') as string) || '',
 			stock: (formData.get('stock') as string) || '',
 			img: (formData.get('picture') as File) || null,
-			expirationDate: '' // Se controla desde otro lugar
+			expirationDate: stringExpirationDate,
+			minimumStock: (formData.get('minimumStock') as string) || ''
 		};
 
 		return data;
@@ -110,7 +110,8 @@
 			category: formData.category,
 			stock: parseInt(formData.stock, 10),
 			img: formData.img,
-			expirationDate: formData.expirationDate
+			expirationDate: formData.expirationDate,
+			minimumStock: parseInt(formData.minimumStock, 10)
 		};
 
 		// 3. Procesar el producto (añadir o editar)
@@ -283,8 +284,8 @@
 			</div>
 
 			<div class="grid gap-2">
-				<Label for="stock">Cantidad mínima en inventario permitida</Label>
-				<Input name="stock" type="text" placeholder="20" value={product?.stock} />
+				<Label for="minimumStock">Cantidad mínima en inventario permitida</Label>
+				<Input name="minimumStock" type="text" placeholder="20" value={product?.minimumStock} />
 			</div>
 
 			<div class="grid gap-2">
