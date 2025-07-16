@@ -127,9 +127,6 @@
 				inventory.addProduct(newProductData);
 				showDialog = true;
 			}
-
-			//Actualizamos el estado global
-			inventory.products = await productController.getAll();
 		} catch (error) {
 			console.error('Error al guardar el producto:', error);
 			alert('Hubo un error al guardar el producto. Por favor, intenta de nuevo.');
