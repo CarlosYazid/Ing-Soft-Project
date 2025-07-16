@@ -66,6 +66,10 @@
 					{
 						title: 'Gestionar Clientes',
 						url: '/gestionar-clientes'
+					},
+					{
+						title: 'Lista de Reposición',
+						url: '/lista-reposicion'
 					}
 				]
 			}

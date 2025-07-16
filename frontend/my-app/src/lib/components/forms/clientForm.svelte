@@ -118,7 +118,11 @@
 		<Button type="submit" class="bg-blue-600 hover:bg-blue-700">
 			{#if current}Actualizar{:else}Registrar{/if}
 		</Button>
-		<Button type="button" class="bg-gray-500 hover:bg-gray-600" onclick={handleCancel}>
+		<Button
+			type="button"
+			class="bg-red-700 hover:bg-red-300 hover:text-red-700"
+			onclick={handleCancel}
+		>
 			Cancelar
 		</Button>
 	</div>
