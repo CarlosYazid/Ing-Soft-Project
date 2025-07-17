@@ -71,7 +71,8 @@ export const productController = {
 			name: productData.name,
 			price: productData.price,
 			description: productData.description,
-			cost: productData.cost
+			cost: productData.cost,
+			minimum_stock: productData.minimumStock
 		};
 
 		/* category: productData.category, Está pailas de momento*/
