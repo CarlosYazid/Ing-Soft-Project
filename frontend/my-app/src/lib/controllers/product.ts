@@ -265,7 +265,7 @@ export const productController = {
 
 			return mapBackendProductToProduct(createdProductBackend);
 		} catch (error: any) {
-			throw new Error(`Error en el proceso de creación del producto: ${error.message}`);
+			throw new Error(error);
 		}
 	}
 };

@@ -50,9 +50,7 @@ async function post(path: string, data: any): Promise<any> {
 	});
 	if (!response.ok) {
 		const errorData = await response.json().catch(() => ({ message: response.statusText }));
-		throw new Error(
-			`HTTP error! Status: ${response.status}, Details: ${JSON.stringify(errorData)}`
-		);
+		throw new Error(errorData.detail);
 	}
 	return response.json();
 }

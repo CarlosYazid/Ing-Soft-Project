@@ -118,18 +118,24 @@
 		try {
 			if (product) {
 				// Lógica para editar producto
-				productController.updateById(product.id, newProductData);
+				await productController.updateById(product.id, newProductData);
 				inventory.clearEditProduct();
 				showDialog = true;
 			} else {
 				// Lógica para añadir un nuevo producto
-				productController.create(newProductData);
+				await productController.create(newProductData);
 				inventory.addProduct(newProductData);
 				showDialog = true;
 			}
 			toast('Operación realizada exitosamente');
 		} catch (error) {
-			toast.error('Hubo un error al guardar el producto. Por favor, intenta de nuevo.');
+			toast.error('Hubo un error al guardar el producto. Por favor, intenta de nuevo.', {
+				description: error instanceof Error ? error.message : 'Error',
+				action: {
+					label: 'Aceptar',
+					onClick: () => goto('/gestionar-productos')
+				}
+			});
 		}
 	}
 
