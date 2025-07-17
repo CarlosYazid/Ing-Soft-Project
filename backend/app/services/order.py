@@ -3,6 +3,7 @@ from fastapi import HTTPException
 from models import OrderBasePlusID, OrderStatus
 from core import SETTINGS
 from db import get_db_client
+from utils import OrderUtils
 
 class OrderService:
     
