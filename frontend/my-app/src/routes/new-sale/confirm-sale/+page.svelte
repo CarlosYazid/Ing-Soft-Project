@@ -20,6 +20,9 @@
 	let selectedPhone = $derived(cartStore.client?.phone);
 	let buscarDocumento = $state('');
 
+	let valorPagado: number = $state(0);
+	let valorADevolver: number = $derived(valorPagado - parseInt(cartStore.recalculateTotal()));
+
 	let filteredClients: client[] = $derived(
 		buscarDocumento.trim()
 			? [...clients].filter((c) =>
@@ -232,6 +235,14 @@
 						{/each}
 					</Table.Body>
 				</Table.Root>
+			</div>
+			<div class="mt-4">
+				<div class="mb-4 grid gap-2">
+					<Label>Valor pagado por el cliente:</Label>
+					<Input placeholder="$" bind:value={valorPagado} />
+				</div>
+
+				<span class="mt-4">Valor a devolver: ${valorADevolver}</span>
 			</div>
 			<div>
 				<Button onclick={canceledSale2} class="bg-red-700 hover:bg-red-300 hover:text-red-700"
