@@ -119,6 +119,7 @@
 														inventory.addStockLowerStockProductById(product.id, updateValue);
 														updateValue = 0;
 														inventory.clearLowerStockProducts();
+														toast('Cantidad actualizada correctamente');
 													}}>Guardar</Button
 												>
 											</div>

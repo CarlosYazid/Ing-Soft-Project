@@ -118,7 +118,7 @@ async function addServicesToOrder(orderId: number, services: service[]) {
 // Cambiar status a completada
 async function markOrderAsCompleted(orderId: number) {
 	try {
-		await api.putJson(`${ORDER_BASE_PATH}/status/${orderId}`, { status: 'Completada' });
+		await api.putUrl(`${ORDER_BASE_PATH}/status/${orderId}/${'Completada'}`);
 	} catch (error) {
 		console.error(`Error al marcar como completada la orden ${orderId}:`, error);
 		throw new Error('No se pudo completar la orden');
@@ -139,6 +139,10 @@ async function generateInvoice(orderId: number, taxRate = 0.19): Promise<string>
 	}
 }
 
+function delay(ms: number) {
+	return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
 // Método combinado para crear orden con todo el flujo
 async function createOrderWithItems(
 	orderData: Partial<order>,
@@ -154,13 +158,14 @@ async function createOrderWithItems(
 		// Asociar servicios
 		await addServicesToOrder(newOrder.id, services);
 
-		setTimeout(async () => {
-			// Cambiar status a completada
-			await markOrderAsCompleted(newOrder.id);
+		// Espera un momento
+		await delay(3000);
 
-			// Generar factura
-			/* await generateInvoice(newOrder.id); */
-		}, 3000);
+		// Cambiar status a completada
+		await markOrderAsCompleted(newOrder.id);
+
+		// Generar factura
+		/* await generateInvoice(newOrder.id); */
 
 		return newOrder;
 	} catch (error) {

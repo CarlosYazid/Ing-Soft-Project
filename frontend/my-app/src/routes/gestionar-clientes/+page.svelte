@@ -10,6 +10,7 @@
 	import type { client } from '$lib';
 	import { clientController } from '$lib';
 	import { cartStore, clientStore } from '$lib/store';
+	import { toast, Toaster } from 'svelte-sonner';
 
 	import { SquarePen, Trash2 } from '@lucide/svelte';
 	import ConfirmDialog from '$lib/components/common/ConfirmDialog.svelte';
@@ -17,7 +18,13 @@
 	let clients: client[] = $derived(clientStore.clients);
 
 	onMount(async () => {
-		clientStore.clients = await clientController.getAllClients();
+		try {
+			clientStore.clients = await clientController.getAllClients();
+		} catch (error) {
+			toast.error('Algo ha salido mal', {
+				description: 'No se han podido cargar los clientes'
+			});
+		}
 	});
 
 	let selectedDocumentid = $derived(cartStore.client?.documentid);
@@ -30,10 +37,6 @@
 			? [...clients].filter((c) => c.name.toLowerCase().startsWith(buscarNombre.toLowerCase()))
 			: clients
 	);
-
-	onMount(async () => {
-		clients = await clientController.getAllClients();
-	});
 
 	function buildClientFromForm(
 		id: number,
@@ -78,11 +81,16 @@
 
 	function confirmedDelete() {
 		eliminar = false;
-		//Lógica delete
-		if (clientStore.deleteClient) {
-			clientController.deleteClientById(clientStore.deleteClient.id);
-			clientStore.removeClientById(clientStore.deleteClient.id);
-			clientStore.clearDeleteClient();
+		try {
+			//Lógica delete
+			if (clientStore.deleteClient) {
+				clientController.deleteClientById(clientStore.deleteClient.id);
+				clientStore.removeClientById(clientStore.deleteClient.id);
+				clientStore.clearDeleteClient();
+			}
+			toast('Cliente elminado con éxito');
+		} catch (error) {
+			toast.error('Ha ocurrido un error inesperado, vuelve intentarlo más tarde');
 		}
 	}
 
@@ -91,6 +99,8 @@
 		clientStore.clearDeleteClient();
 	}
 </script>
+
+<Toaster />
 
 <div class="mt-4 flex justify-end">
 	<Button

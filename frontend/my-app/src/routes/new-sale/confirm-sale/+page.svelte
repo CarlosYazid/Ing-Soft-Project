@@ -32,7 +32,22 @@
 		confirmar = true;
 	}
 
-	function confirmedSale2() {
+	async function confirmedSale2() {
+		// Crear la orden
+		const orderForm: order = {
+			id: 0,
+			client_id: cartStore.client?.id || cartStore.DEFAULT_CLIENT_ID,
+			employee_id: cartStore.DEFAULT_EMPLOYEE_ID,
+			status: 'Pendiente',
+			total_price: parseFloat(cartStore.recalculateTotal())
+		};
+
+		cartStore.currentOrder = orderForm;
+
+		await orderController.createOrderWithItems(orderForm, cartStore.products, cartStore.services);
+
+		cartStore.clearCart();
+
 		confirmar = false;
 		goto('/gracias');
 	}

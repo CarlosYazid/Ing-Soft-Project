@@ -127,9 +127,9 @@
 				inventory.addProduct(newProductData);
 				showDialog = true;
 			}
+			toast('Operación realizada exitosamente');
 		} catch (error) {
-			console.error('Error al guardar el producto:', error);
-			alert('Hubo un error al guardar el producto. Por favor, intenta de nuevo.');
+			toast.error('Hubo un error al guardar el producto. Por favor, intenta de nuevo.');
 		}
 	}
 
@@ -138,6 +138,8 @@
 	let isFormValid = $state(false);
 	let formErrors = $state('');
 </script>
+
+<Toaster />
 
 <form onsubmit={handleSubmit} id="form" class="mx-auto max-w-4xl p-6" enctype="multipart/form-data">
 	<!-- Contenedor de dos columnas con línea divisoria -->

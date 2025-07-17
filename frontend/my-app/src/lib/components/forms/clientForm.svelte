@@ -54,6 +54,7 @@
 			}
 			clientStore.clients = await clientController.getAllClients();
 			cartStore.client = saved;
+			toast('Operación realizada exitosamente');
 		} catch (err) {
 			console.error(err);
 			toast.error('Error al guardar el cliente. Intenta de nuevo.');
@@ -63,6 +64,7 @@
 	}
 
 	function handleCancel() {
+		setTimeout(() => {}, 1000);
 		goto(
 			clientStore.addingClient || clientStore.editClient
 				? '/gestionar-clientes'

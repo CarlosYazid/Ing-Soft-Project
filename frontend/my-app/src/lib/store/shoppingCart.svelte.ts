@@ -1,4 +1,4 @@
-import type { ProductInterface, service, client } from '$lib/types';
+import type { ProductInterface, service, client, order } from '$lib/types';
 
 class Cart {
 	products: ProductInterface[] = $state([]);
@@ -9,6 +9,7 @@ class Cart {
 	serviceSelected: service | null = $state(null);
 	DEFAULT_EMPLOYEE_ID: number = 8;
 	DEFAULT_CLIENT_ID: number = 5;
+	currentOrder: order | null = $state(null);
 
 	addProduct(product: ProductInterface) {
 		this.products.push(product);

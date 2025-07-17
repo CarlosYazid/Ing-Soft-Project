@@ -47,11 +47,16 @@
 
 	function confirmedDelete() {
 		eliminar = false;
-		//Lógica delete
-		if (inventory.deleteProduct) {
-			productController.deleteById(inventory.deleteProduct.id);
-			inventory.removeProductById(inventory.deleteProduct.id);
-			inventory.clearDeleteProduct();
+		try {
+			//Lógica delete
+			if (inventory.deleteProduct) {
+				productController.deleteById(inventory.deleteProduct.id);
+				inventory.removeProductById(inventory.deleteProduct.id);
+				inventory.clearDeleteProduct();
+			}
+			toast('Se ha elminado el producto correctamente');
+		} catch (error) {
+			toast.error('Ha ocurrido un error inesperado, vuelve a intentarlo más tarde');
 		}
 	}
 
@@ -100,7 +105,7 @@
 			const fetchedProducts = await productController.getAll();
 			inventory.products = fetchedProducts;
 		} catch (e: any) {
-			toast('Algo ha salido mal', {
+			toast.error('Algo ha salido mal', {
 				description: e.message || 'No se han podido cargar los productos',
 				action: {
 					label: 'Aceptar',

@@ -5,35 +5,36 @@
 
 	import { goto } from '$app/navigation';
 
-	async function realizarVenta() {
-		// Crear la orden
-		const orderForm: order = {
-			id: 0,
-			client_id: cartStore.client?.id || cartStore.DEFAULT_CLIENT_ID,
-			employee_id: cartStore.DEFAULT_EMPLOYEE_ID,
-			status: 'Pendiente',
-			total_price: parseFloat(cartStore.recalculateTotal())
-		};
-
-		// Enviar Orden a DB, asocia productos y servicios, luego marca como completada
-		await orderController.createOrderWithItems(orderForm, cartStore.products, cartStore.services);
-
-		cartStore.clearCart();
-	}
-
 	//Lógica barra de carga
 	import { onMount } from 'svelte';
 	import { Progress } from '$lib/components/ui/progress/index.js';
 
-	let value = $state(13);
+	/* let value = $state(13);
 
 	onMount(() => {
 		const timer = setTimeout(() => (value = 80), 2000);
 		return () => clearTimeout(timer);
-	});
+	}); */
 </script>
 
-{#await realizarVenta()}
+<div
+	class="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-100 to-green-300 p-6"
+>
+	<div class="max-w-md rounded-2xl bg-white p-8 text-center shadow-2xl">
+		<h1 class="mb-4 text-4xl font-extrabold text-green-700">¡Felicidades por tu compra!</h1>
+		<p class="mb-8 text-gray-600">
+			Gracias por confiar en nosotros. Tu pedido se ha procesado correctamente.
+		</p>
+		<button
+			onclick={() => goto('/')}
+			class="rounded-xl bg-green-600 px-6 py-2 font-semibold text-white shadow-md transition hover:bg-green-700"
+		>
+			Continuar
+		</button>
+	</div>
+</div>
+
+<!-- {#await orderController.createOrderWithItems(cartStore.currentOrder!, cartStore.products, cartStore.services)}
 	<div
 		class="flex animate-pulse flex-col items-center space-y-4 rounded-2xl bg-gray-600 p-6 shadow-2xl"
 	>
@@ -86,4 +87,4 @@
 			</button>
 		</div>
 	</div>
-{/await}
+{/await} -->

@@ -29,6 +29,7 @@
 	serviceStore.addingService = true;
 </script>
 
+<Toaster />
 <ServiceForm />
 
 <div class="grid grid-cols-[repeat(auto-fit,minmax(300px,375px))] justify-center gap-4 px-10">
