@@ -21,9 +21,9 @@
 	{#await orderController.createOrderWithItems(cartStore.currentOrder!, cartStore.products, cartStore.services)}
 		<div class="flex min-h-screen items-center justify-center">
 			<div
-				class="flex animate-pulse flex-col items-center space-y-4 rounded-2xl bg-gray-600 p-6 shadow-2xl"
+				class="flex animate-pulse flex-col items-center space-y-4 rounded-2xl bg-gray-700 p-6 shadow-2xl"
 			>
-				<p class="text-lg font-medium text-gray-700">Realizando venta, por favor espera...</p>
+				<p class="text-lg font-medium text-white">Realizando venta, por favor espera...</p>
 				<Progress {value} max={100} class="w-60" />
 			</div>
 		</div>

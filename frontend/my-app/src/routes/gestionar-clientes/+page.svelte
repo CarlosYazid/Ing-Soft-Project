@@ -34,8 +34,12 @@
 
 	let filteredClients: client[] = $derived(
 		buscarNombre.trim()
-			? [...clients].filter((c) => c.name.toLowerCase().startsWith(buscarNombre.toLowerCase()))
-			: clients
+			? [...clients].filter(
+					(c) =>
+						c.name.toLowerCase().startsWith(buscarNombre.toLowerCase()) &&
+						c.name !== 'DefaultClient'
+				)
+			: clients.filter((c) => c.name !== 'DefaultClient')
 	);
 
 	function buildClientFromForm(
@@ -88,7 +92,7 @@
 				clientStore.removeClientById(clientStore.deleteClient.id);
 				clientStore.clearDeleteClient();
 			}
-			toast('Cliente elminado con éxito');
+			toast('Cliente eliminado con éxito');
 		} catch (error) {
 			toast.error('Ha ocurrido un error inesperado, vuelve intentarlo más tarde');
 		}
@@ -172,7 +176,7 @@
 	<ConfirmDialog
 		callbackOnTrue={confirmedDelete}
 		callbackOnFalse={canceledDelete}
-		title={'¿Está seguro que desea eliminar el producto?'}
+		title={'¿Está seguro de que desea eliminar el cliente?'}
 		description={'Esta acción no se puede deshacer. El cliente será eliminado permanentemente.'}
 		btnClass={'bg-red-700 hover:bg-red-300 hover:text-red-700'}
 		action={'Eliminar'}
@@ -183,7 +187,7 @@
 	<ConfirmDialog
 		callbackOnTrue={confirmedEdit}
 		callbackOnFalse={canceledEdit}
-		title={'¿Está seguro que desea editar el cliente?'}
+		title={'¿Está seguro de que desea editar el cliente?'}
 		description={''}
 		btnClass={'bg-blue-700 hover:bg-blue-300 hover:text-blue-700'}
 		action={'Editar'}

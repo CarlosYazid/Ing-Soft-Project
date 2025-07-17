@@ -25,10 +25,12 @@
 
 	let filteredClients: client[] = $derived(
 		buscarDocumento.trim()
-			? [...clients].filter((c) =>
-					c.documentid.toString().toLowerCase().startsWith(buscarDocumento.toLowerCase())
+			? [...clients].filter(
+					(c) =>
+						c.documentid.toString().toLowerCase().startsWith(buscarDocumento.toLowerCase()) &&
+						c.name !== 'DefaultClient'
 				)
-			: clients
+			: clients.filter((c) => c.name !== 'DefaultClient')
 	);
 
 	function confirm() {
@@ -57,6 +59,7 @@
 
 	onMount(async () => {
 		clients = await clientController.getAllClients();
+		cartStore.client = null;
 	});
 
 	function buildClientFromForm(
@@ -78,7 +81,9 @@
 
 <div class="grid grid-cols-1 justify-center gap-6 p-8">
 	<div class="flex justify-center">
-		<h3 class="text-2xl font-bold">Cliente Seleccionado</h3>
+		<h3 class="text-2xl font-bold">
+			{selectedName ? 'Cliente Seleccionado' : 'Selecciona un cliente'}
+		</h3>
 		<div class="grid grid-cols-3 gap-3 px-8">
 			<div class="">
 				<Label for="id">Documento de Identificacion</Label>
@@ -95,13 +100,20 @@
 		</div>
 	</div>
 
-	<div class="flex justify-center">
+	<div class="flex justify-center gap-4">
 		<Button
 			onclick={() => {
 				confirm();
 			}}
 			size="lg"
 			class="bg-green-700 hover:bg-green-300 hover:text-green-700">Finalizar Venta</Button
+		>
+		<Button
+			onclick={() => {
+				goto('/new-sale');
+			}}
+			size="lg"
+			class="bg-red-700 hover:bg-red-300 hover:text-red-700">Volver a la venta</Button
 		>
 	</div>
 
