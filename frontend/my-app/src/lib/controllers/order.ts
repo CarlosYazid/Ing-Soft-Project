@@ -118,7 +118,7 @@ async function addServicesToOrder(orderId: number, services: service[]) {
 // Cambiar status a completada
 async function markOrderAsCompleted(orderId: number) {
 	try {
-		await api.putJson(`${ORDER_BASE_PATH}/${orderId}`, { status: 'Completada' });
+		await api.putJson(`${ORDER_BASE_PATH}/status/${orderId}`, { status: 'Completada' });
 	} catch (error) {
 		console.error(`Error al marcar como completada la orden ${orderId}:`, error);
 		throw new Error('No se pudo completar la orden');

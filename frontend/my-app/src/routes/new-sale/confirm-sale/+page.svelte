@@ -32,21 +32,8 @@
 		confirmar = true;
 	}
 
-	async function confirmedSale2() {
-		// Crear la orden
-		const orderForm: order = {
-			id: 0,
-			client_id: cartStore.client?.id || cartStore.DEFAULT_CLIENT_ID,
-			employee_id: cartStore.DEFAULT_EMPLOYEE_ID,
-			status: 'Pendiente',
-			total_price: parseFloat(cartStore.recalculateTotal())
-		};
-
-		// Enviar Orden a DB, asocia productos y servicios, luego marca como completada
-		await orderController.createOrderWithItems(orderForm, cartStore.products, cartStore.services);
-
+	function confirmedSale2() {
 		confirmar = false;
-		cartStore.clearCart();
 		goto('/gracias');
 	}
 
