@@ -165,7 +165,7 @@ async function createOrderWithItems(
 		await markOrderAsCompleted(newOrder.id);
 
 		// Generar factura
-		/* await generateInvoice(newOrder.id); */
+		await generateInvoice(newOrder.id);
 
 		return newOrder;
 	} catch (error) {

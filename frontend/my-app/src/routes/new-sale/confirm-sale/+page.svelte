@@ -44,10 +44,6 @@
 
 		cartStore.currentOrder = orderForm;
 
-		await orderController.createOrderWithItems(orderForm, cartStore.products, cartStore.services);
-
-		cartStore.clearCart();
-
 		confirmar = false;
 		goto('/gracias');
 	}

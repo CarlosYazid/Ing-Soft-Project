@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui/button/index.js';
-	import { inventory, serviceStore } from '$lib/store';
+	import { inventory, serviceStore, cartStore } from '$lib/store';
 	import { productController, serviceController } from '$lib/controllers';
 
 	import { onMount } from 'svelte';
@@ -8,6 +8,7 @@
 	onMount(async () => {
 		inventory.products = await productController.getAll();
 		serviceStore.services = await serviceController.getAllServices();
+		cartStore.clearCart();
 	});
 </script>
 

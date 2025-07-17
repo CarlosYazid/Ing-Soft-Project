@@ -31,10 +31,6 @@
 	let orderProducts: ProductInterface[] = $derived(cartStore.products);
 	let orderServices: service[] = $derived(cartStore.services);
 	let totalStore: string = $derived.by(() => cartStore.recalculateTotal());
-	$inspect(serviceStore.services).with(console.trace);
-	$inspect(inventory.products).with(console.trace);
-	$inspect(orderProducts);
-	$inspect(orderServices);
 </script>
 
 <div class="mt-4 flex justify-end">
