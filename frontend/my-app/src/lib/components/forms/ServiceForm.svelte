@@ -65,10 +65,23 @@
 	}
 
 	function handleCancel() {
-		serviceStore.addingService = false;
 		serviceStore.clearEditService();
 		serviceStore.clearProductsToAdd();
-		goto('/gestionar-servicios');
+		if (serviceStore.addingService) {
+			toast('Se perderán los cambios no guardados', {
+				description: '¿Está seguro de que desea continuar?',
+				action: {
+					label: 'Continuar',
+					onClick: () => {
+						serviceStore.addingService = false;
+						goto('/gestionar-servicios');
+					}
+				}
+			});
+		} else {
+			serviceStore.addingService = false;
+			goto('/gestionar-servicios');
+		}
 	}
 </script>
 

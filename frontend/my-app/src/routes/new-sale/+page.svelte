@@ -12,6 +12,7 @@
 	import type { ProductInterface, service } from '$lib';
 	import ServiceOverView from '$lib/components/service/ServiceOverView.svelte';
 	import ServiceCardOrdenSummary from '$lib/components/service/ServiceCardOrdenSummary.svelte';
+	import { toast, Toaster } from 'svelte-sonner';
 
 	let confirmar = $state(false);
 
@@ -21,7 +22,11 @@
 
 	function confirmedSale() {
 		confirmar = false;
-		goto('/new-sale/confirm-sale');
+		if (orderProducts.length === 0 && orderServices.length === 0) {
+			toast.error('No se puede realizar una compra sin productos ni servicios asociados');
+		} else {
+			goto('/new-sale/confirm-sale');
+		}
 	}
 
 	function canceledSale() {
@@ -32,6 +37,8 @@
 	let orderServices: service[] = $derived(cartStore.services);
 	let totalStore: string = $derived.by(() => cartStore.recalculateTotal());
 </script>
+
+<Toaster />
 
 <div class="mt-4 flex justify-end">
 	<Button
