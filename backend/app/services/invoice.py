@@ -1,6 +1,5 @@
 from fastapi import HTTPException
 from weasyprint import HTML
-from os import remove
 
 from models import Invoice, InvoiceItem, Email, File
 from crud import OrderCrud, ProductCrud, ServiceCrud, UserCrud
@@ -173,8 +172,3 @@ class InvoiceService:
 
         if not bool(response.data):
             raise HTTPException(status_code=500, detail="Failed to update product with invoice URL")
-        
-        try:
-            remove(file_path)
-        except:
-            pass
