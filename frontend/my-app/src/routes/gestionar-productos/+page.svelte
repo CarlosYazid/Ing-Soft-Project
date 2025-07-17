@@ -54,7 +54,7 @@
 				inventory.removeProductById(inventory.deleteProduct.id);
 				inventory.clearDeleteProduct();
 			}
-			toast('Se ha elminado el producto correctamente');
+			toast('Se ha eliminado el producto correctamente');
 		} catch (error) {
 			toast.error('Ha ocurrido un error inesperado, vuelve a intentarlo más tarde');
 		}
