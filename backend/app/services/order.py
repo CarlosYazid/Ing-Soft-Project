@@ -45,8 +45,11 @@ class OrderService:
         """Update inventory after an order is placed."""
         
         from crud import OrderCrud, ProductCrud
-        
-        order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
+
+        if (await OrderUtils.exist_order_products_in_orders(order.id)):
+            order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
+        else:
+            order_products = []
 
         for order_product in order_products:
             await ProductCrud.update_stock(order_product.product_id, -order_product.quantity, False)
