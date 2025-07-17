@@ -14,4 +14,5 @@ async def generate_invoice(invoice_request: InvoiceRequest, background_tasks: Ba
         InvoiceService.send_invoice_email,
         invoice=invoice
     )
+    await InvoiceService.upload_invoice(invoice)
     return invoice

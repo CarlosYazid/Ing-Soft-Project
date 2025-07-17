@@ -1,6 +1,5 @@
 from fastapi import HTTPException
 from weasyprint import HTML
-from os import remove
 
 from models import Invoice, InvoiceItem, Email, File
 from crud import OrderCrud, ProductCrud, ServiceCrud, UserCrud
@@ -9,7 +8,6 @@ from services import EmailService
 from db import get_db_client
 from utils import OrderUtils
 
-
 class InvoiceService:
     
     @classmethod
@@ -17,7 +15,6 @@ class InvoiceService:
         """Generate an invoice and send it via email."""
         invoice = await cls.generate_invoice(order_id, tax_rate)
         await cls.generate_invoice_pdf(invoice)
-        await cls.upload_invoice(invoice)
         return invoice
     
     
@@ -145,6 +142,11 @@ class InvoiceService:
         )
 
         EmailService.send_email(email)
+        
+        try:
+            remove(file_path)
+        except:
+            pass
     
     @classmethod
     async def upload_invoice(cls, invoice : Invoice):
@@ -175,8 +177,3 @@ class InvoiceService:
 
         if not bool(response.data):
             raise HTTPException(status_code=500, detail="Failed to update product with invoice URL")
-
-        try:
-            remove(file_path)
-        except:
-            pass
