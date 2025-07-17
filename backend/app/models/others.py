@@ -9,7 +9,7 @@ from enum import Enum
 from pathlib import Path
 import os
 
-from models import UserBase
+from models import Client
 from core import SETTINGS
 
 
@@ -262,7 +262,7 @@ class InvoiceItem(BaseModel):
 class Invoice(BaseModel):
     number: int = Field(..., description="Invoice number") # Id of order
     date: datetime = Field(..., description="Date of the invoice")
-    client: UserBase = Field(..., description="Client associated with the invoice")
+    client: Client = Field(..., description="Client associated with the invoice")
     items: list[InvoiceItem] = Field(default_factory=list, description="List of items in the invoice")
     tax_rate: float = Field(0.0, description="Tax rate applied to the invoice")
 

@@ -1,10 +1,13 @@
 from fastapi import HTTPException
 from weasyprint import HTML
+from os import remove
 
 from models import Invoice, InvoiceItem, Email, File
 from crud import OrderCrud, ProductCrud, ServiceCrud, UserCrud
 from core import SETTINGS
 from services import EmailService
+from db import get_db_client
+from utils import OrderUtils
 
 
 class InvoiceService:
@@ -14,6 +17,7 @@ class InvoiceService:
         """Generate an invoice and send it via email."""
         invoice = await cls.generate_invoice(order_id, tax_rate)
         await cls.generate_invoice_pdf(invoice)
+        await cls.upload_invoice(invoice)
         return invoice
     
     
@@ -21,9 +25,17 @@ class InvoiceService:
     async def generate_invoice(cls, order_id: int, tax_rate : float) -> Invoice:
         """Generate an invoice for a client."""
         order = await OrderCrud.read_order(order_id)
-        client = await UserCrud.read_client_base(order.client_id)
-        order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
-        order_services = await OrderCrud.read_orders_services_by_order_id(order_id)
+        client = await UserCrud.read_client(order.client_id)
+
+        if (await OrderUtils.exist_order_products_in_orders(order.id)):
+            order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
+        else:
+            order_products = []
+        
+        if (await OrderUtils.exist_order_services_in_orders(order.id)):
+            order_services = await OrderCrud.read_orders_services_by_order_id(order_id)
+        else:
+            order_services = []
 
         invoice_items = []
         
@@ -134,3 +146,37 @@ class InvoiceService:
 
         EmailService.send_email(email)
     
+    @classmethod
+    async def upload_invoice(cls, invoice : Invoice):
+
+        file_path = SETTINGS.INVOICES_PATH / f"{invoice.client.id}/invoice_{invoice.number}.pdf"
+        filename = f"invoices/{invoice.client.id}/invoice_{invoice.number}.pdf"
+        file = File(path=file_path, name=f"Factura-{invoice.number}.pdf")
+
+        client = await get_db_client()
+
+        try:
+            response = await client.storage.from_(SETTINGS.bucket_name).remove([filename])
+
+        except:
+            pass
+
+        response = await client.storage.from_(SETTINGS.bucket_name).upload(
+            path=filename,
+            file=file.content,
+            file_options={"content-type": file.type.value})
+
+        if not bool(response):
+            raise HTTPException(status_code=500, detail="Failed to upload invoice")
+
+        invoice_url = f"{SETTINGS.db_url}/storage/v1/object/public/{SETTINGS.bucket_name}/{filename}"
+        
+        response = await client.table(SETTINGS.order_table).update({"invoice_link": invoice_url}).eq("id", invoice.number).execute()
+
+        if not bool(response.data):
+            raise HTTPException(status_code=500, detail="Failed to update product with invoice URL")
+
+        try:
+            remove(file_path)
+        except:
+            pass
