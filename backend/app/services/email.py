@@ -12,10 +12,9 @@ class EmailService:
 
     @classmethod
     def _ensure_session(cls):
-        if cls._session is None:
-            cls._session = smtplib.SMTP(SETTINGS.smtp_host, SETTINGS.smtp_port)
-            cls._session.starttls()
-            cls._session.login(SETTINGS.smtp_comp_email, SETTINGS.smtp_comp_password.get_secret_value())
+        cls._session = smtplib.SMTP(SETTINGS.smtp_host, SETTINGS.smtp_port)
+        cls._session.starttls()
+        cls._session.login(SETTINGS.smtp_comp_email, SETTINGS.smtp_comp_password.get_secret_value())
 
     @staticmethod
     def _format_addresses(addresses):
@@ -34,7 +33,6 @@ class EmailService:
         cls._ensure_session()
         
         mime_msg = email.to_Mime()
-        cls._session.connect(SETTINGS.smtp_host, SETTINGS.smtp_port)
         cls._session.send_message(mime_msg)
     
 
