@@ -22,11 +22,19 @@
 		<div class="flex items-center justify-between gap-4">
 			<div class="grid grid-cols-1 gap-2">
 				<p class="text-3xl font-bold">{Service.name}</p>
-				<p class="text-base text-gray-500">Precio fijo: $ {Service.price}</p>
+				<p class="text-base text-gray-500">
+					Precio fijo: ${Service.price}
+				</p>
 			</div>
 			<div class="grid grid-cols-1 gap-2">
 				<p class="text-xl font-semibold">Precio Total</p>
-				<p class="text-lg font-semibold">${Service.price}</p>
+				<p class="text-lg font-semibold">
+					${Service.products?.reduce(
+						(acc: number, p: ProductInterface) =>
+							acc + p.quantityService! * p.price + p.quantityService! * Service.price,
+						0
+					)}
+				</p>
 			</div>
 			<Button
 				onclick={() => {

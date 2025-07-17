@@ -68,8 +68,8 @@
 		</div>
 		<h3 class="font-semiboldc mt-8 bg-zinc-500/5 text-lg">Lista de Servicios Seleccionados</h3>
 		<div class="mt-4 grid grid-cols-1 gap-4">
-			{#each orderServices as orderService (orderService.id)}
-				<ServiceCardOrdenSummary Service={orderService} />
+			{#each orderServices as orderService, i (orderService.id)}
+				<ServiceCardOrdenSummary bind:Service={orderServices[i]} />
 			{:else}
 				<p>Aún no se ha registrado ningún servicio</p>
 			{/each}
