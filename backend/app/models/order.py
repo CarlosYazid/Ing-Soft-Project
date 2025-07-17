@@ -135,6 +135,7 @@ class Order(OrderCreate):
     Order model for the API response.
     """
     id: int = Field(..., description="Order's unique identifier")
+    invoice_link: str = = Field(..., description="Invoice link to PDF")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
@@ -146,7 +147,8 @@ class Order(OrderCreate):
                                                   "status": "Pendiente",
                                                   "employee_id": 1,
                                                   "created_at": "2023-01-01T00:00:00Z",
-                                                  "updated_at": "2023-01-01T00:00:00Z"
+                                                  "updated_at": "2023-01-01T00:00:00Z",
+                                                  "invoice_link": "https://example.com/invoice.pdf"
                                               }
                                           },
                                           json_encoders={
