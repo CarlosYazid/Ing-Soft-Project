@@ -1,4 +1,4 @@
-import type { ProductInterface, service, client, order } from '$lib/types';
+import type { ProductInterface, service, client, order, OrderWithInvoice } from '$lib/types';
 
 class Cart {
 	products: ProductInterface[] = $state([]);
@@ -10,6 +10,8 @@ class Cart {
 	DEFAULT_EMPLOYEE_ID: number = 8;
 	DEFAULT_CLIENT_ID: number = 5;
 	currentOrder: order | null = $state(null);
+	lastOrder: OrderWithInvoice | null = $state(null);
+	finishedOrder: boolean = $state(false);
 
 	addProduct(product: ProductInterface) {
 		this.products.push(product);
@@ -35,6 +37,7 @@ class Cart {
 		this.products = [];
 		this.services = [];
 		this.client = null;
+		this.currentOrder = null;
 	}
 
 	recalculateTotal() {

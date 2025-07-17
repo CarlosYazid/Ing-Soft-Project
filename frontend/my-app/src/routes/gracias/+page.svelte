@@ -37,7 +37,11 @@
 					Gracias por confiar en nosotros. Tu pedido se ha procesado correctamente.
 				</p>
 				<button
-					onclick={() => goto('/')}
+					onclick={() => {
+						cartStore.finishedOrder = true;
+						cartStore.currentOrder = value;
+						goto('/');
+					}}
 					class="rounded-xl bg-green-600 px-6 py-2 font-semibold text-white shadow-md transition hover:bg-green-700"
 				>
 					Continuar

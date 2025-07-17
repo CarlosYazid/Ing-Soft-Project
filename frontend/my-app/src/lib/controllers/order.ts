@@ -1,5 +1,5 @@
 // src/lib/controllers/orderController.ts
-import type { ProductInterface, service, order } from '$lib/types';
+import type { ProductInterface, service, order, OrderWithInvoice } from '$lib/types';
 import { api } from '$lib/http/api';
 
 const ORDER_BASE_PATH = '/order';
@@ -16,6 +16,19 @@ function toOrder(data: any): order {
 		status: data.status,
 		employee_id: data.employee_id,
 		total_price: data.total_price
+	};
+}
+
+function toOrderWithInvoice(data: any): OrderWithInvoice {
+	return {
+		id: data.id,
+		client_id: data.client_id,
+		status: data.status,
+		employee_id: data.employee_id,
+		total_price: data.total_price,
+		created_at: data.created_at,
+		updated_at: data.updated_at,
+		invoice_link: data.invoice_link
 	};
 }
 
@@ -38,10 +51,10 @@ async function createOrder(order: Partial<order>): Promise<order> {
 	}
 }
 
-async function getOrderById(id: number): Promise<order> {
+async function getOrderById(id: number): Promise<OrderWithInvoice> {
 	try {
 		const result = await api.get(`${ORDER_BASE_PATH}/${id}`);
-		return toOrder(result);
+		return toOrderWithInvoice(result);
 	} catch (error: any) {
 		console.error(`Error al obtener la orden ${id}:`, error);
 		throw new Error('No se pudo obtener la orden');
