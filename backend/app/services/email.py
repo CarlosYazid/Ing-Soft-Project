@@ -32,8 +32,9 @@ class EmailService:
             raise HTTPException(detail="Expected an instance of Email model", status_code=400)
 
         cls._ensure_session()
-
+        
         mime_msg = email.to_Mime()
+        cls._session.connect(SETTINGS.smtp_host, SETTINGS.smtp_port)
         cls._session.send_message(mime_msg)
     
 
