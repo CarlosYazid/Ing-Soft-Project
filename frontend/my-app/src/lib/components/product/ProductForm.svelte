@@ -71,7 +71,7 @@
 			description: (formData.get('description') as string) || '',
 			cost: (formData.get('cost') as string) || '',
 			price: (formData.get('price') as string) || '',
-			category: (formData.get('category') as string) || '',
+			category: /* (formData.get('category') as string) ||  */ 'Papelería',
 			stock: (formData.get('stock') as string) || '',
 			img: (formData.get('picture') as File) || null,
 			expirationDate: stringExpirationDate,
@@ -200,7 +200,7 @@
 
 		<!-- Columna derecha -->
 		<div class="w-1/2 space-y-6 pl-6">
-			<div class="grid gap-2">
+			<!-- <div class="grid gap-2">
 				<Label for="category">Categoría</Label>
 				<div class="">
 					<Popover.Root bind:open>
@@ -243,10 +243,10 @@
 					</Popover.Root>
 				</div>
 				<Input class="hidden" bind:value name="category" />
-			</div>
+			</div> -->
 
 			<!-- Espacio reservado para el input reactivo -->
-			<div class="h-14">
+			<!-- <div class="h-14">
 				<div class="mt-4">
 					{#if value === 'Comestible'}
 						<Label for="ExpirationDate" class="mb-1.5">Fecha de Expiración</Label>
@@ -276,7 +276,7 @@
 					{/if}
 				</div>
 			</div>
-
+ -->
 			<div class="grid gap-2">
 				<Label for="stock">Cantidad a ingresar</Label>
 				<Input name="stock" type="text" placeholder="20" value={product?.stock} />
