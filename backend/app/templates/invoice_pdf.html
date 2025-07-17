@@ -86,8 +86,8 @@
       <tr>
         <td>{{ item.quantity }}</td>
         <td class="description">{{ item.name.capitalize() }}</td>
-        <td>{{ item.unit_price | round(2) }} €</td>
-        <td>{{ (item.quantity * item.unit_price) | round(2) }} €</td>
+        <td>{{ item.unit_price | round(2) }} $</td>
+        <td>{{ (item.quantity * item.unit_price) | round(2) }} $</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -98,17 +98,17 @@
     <tr>
       <td style="width: 70%;"></td>
       <td>Subtotal:</td>
-      <td style="text-align: right;">{{ invoice.subtotal | round(2) }} €</td>
+      <td style="text-align: right;">{{ invoice.subtotal | round(2) }} $</td>
     </tr>
     <tr>
       <td></td>
       <td>Impuesto ({{ invoice.tax_rate * 100 }} %):</td>
-      <td style="text-align: right;">{{ invoice.tax_amount | round(2) }} €</td>
+      <td style="text-align: right;">{{ invoice.tax_amount | round(2) }} $</td>
     </tr>
     <tr class="total-due">
       <td></td>
       <td>Total debido:</td>
-      <td style="text-align: right;">{{ invoice.total | round(2) }} €</td>
+      <td style="text-align: right;">{{ invoice.total | round(2) }} $</td>
     </tr>
   </table>
 
