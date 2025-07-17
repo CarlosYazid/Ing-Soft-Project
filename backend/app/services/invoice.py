@@ -142,6 +142,11 @@ class InvoiceService:
         )
 
         EmailService.send_email(email)
+        
+        try:
+            remove(file_path)
+        except:
+            pass
     
     @classmethod
     async def upload_invoice(cls, invoice : Invoice):
