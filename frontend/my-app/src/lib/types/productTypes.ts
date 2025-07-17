@@ -59,6 +59,7 @@ export interface ProductInterface extends ConsumibleProduct {
 	/** El costo de adquisición del producto. Se tipa como number para consistencia. */
 	cost: number;
 	minimumStock: number;
+	shortDescription?: string;
 }
 
 /**

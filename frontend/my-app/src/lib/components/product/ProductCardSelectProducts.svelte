@@ -46,14 +46,14 @@
 		</h5>
 
 		<p class="mb-3 font-normal text-gray-700 dark:text-gray-400">
-			{product.description}
+			{product.shortDescription!}
 		</p>
 		<p class="mb-3 font-semibold text-gray-900 dark:text-white">
 			Precio: ${product.price}
 		</p>
 	</div>
 
-	<div class="flex items-end justify-center">
+	<div class="flex h-full items-end justify-center">
 		{#if serviceStore.editService || serviceStore.addingService}
 			{#if isAdded}
 				<Button
