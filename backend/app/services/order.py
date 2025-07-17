@@ -52,4 +52,3 @@ class OrderService:
             await ProductCrud.update_stock(order_product.product_id, -order_product.quantity, False)
         
         return True
-

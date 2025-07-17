@@ -304,6 +304,9 @@ class OrderCrud:
         # Check if the order service exists before attempting to delete
         if not await OrderUtils.exist_order_service(order_service_id):
             raise HTTPException(detail="Order service not found", status_code=404)
+        
+        if await OrderUtils.order_service_in_order_completed(order_service_id):
+            raise HTTPException(detail="Order service in order completed", status_code=404)
 
         response = await client.table(SETTINGS.order_service_table).delete().eq("id", order_service_id).execute()
 
@@ -435,6 +438,9 @@ class OrderCrud:
         # Check if the order product exists before attempting to delete
         if not await OrderUtils.exist_order_product(order_product_id):
             raise HTTPException(detail="Order product not found", status_code=404)
+
+        if await OrderUtils.order_product_in_order_completed(order_product_id):
+            raise HTTPException(detail="Order product in order completed", status_code=404)
 
         response = await client.table(SETTINGS.order_product_table).delete().eq("id", order_product_id).execute()
 

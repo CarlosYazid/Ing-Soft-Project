@@ -63,6 +63,13 @@ async def update_order(request: Request, _id: int, fields: dict):
     """
     return await OrderCrud.update_order(_id, fields)
 
+@router.put('/status/{_id}')
+async def update_order_status(request: Request, order_id: int, status: OrderStatus):
+    """
+    Update status of a order
+    """
+    return await OrderCrud.update_order_status(order_id, status)
+
 @router.delete("/{_id}")
 async def delete_order(request: Request, _id: int):
     """
