@@ -47,7 +47,7 @@ class OrderService:
         
         from crud import OrderCrud, ProductCrud
 
-        if (await OrderUtils.exist_order_products_in_orders(order.id)):
+        if (await OrderUtils.exist_order_products_in_orders(order_id)):
             order_products = await OrderCrud.read_orders_products_by_order_id(order_id)
         else:
             order_products = []
