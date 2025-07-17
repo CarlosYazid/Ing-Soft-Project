@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field, ConfigDict
 from datetime import datetime
 from enum import Enum
-
+from typing import Optional
 
 class OrderStatus(str, Enum):
     """
@@ -135,7 +135,7 @@ class Order(OrderCreate):
     Order model for the API response.
     """
     id: int = Field(..., description="Order's unique identifier")
-    invoice_link: str = Field(..., description="Invoice link to PDF")
+    invoice_link: Optional[str] = Field(..., description="Invoice link to PDF")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
