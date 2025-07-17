@@ -86,7 +86,12 @@ async function addProductsToOrder(orderId: number, products: ProductInterface[])
 	}));
 
 	try {
-		if (products) await Promise.all(payloads.map((p) => api.post(`${ORDER_PRODUCTS_PATH}/`, p)));
+		if (products)
+			await Promise.all(
+				payloads.map((p) => {
+					if (p.quantity > 0) api.post(`${ORDER_PRODUCTS_PATH}/`, p);
+				})
+			);
 	} catch (error) {
 		console.error('Error al asociar productos a la orden:', error);
 		throw new Error('No se pudieron asociar los productos a la orden');
@@ -103,6 +108,7 @@ async function addServicesToOrder(orderId: number, services: service[]) {
 
 	try {
 		await Promise.all(payloads.map((s) => api.post(`${ORDER_SERVICES_PATH}/`, s)));
+		await Promise.all(services.map((s) => addProductsToOrder(orderId, s.products!)));
 	} catch (error) {
 		console.error('Error al asociar servicios a la orden:', error);
 		throw new Error('No se pudieron asociar los servicios a la orden');
@@ -116,6 +122,20 @@ async function markOrderAsCompleted(orderId: number) {
 	} catch (error) {
 		console.error(`Error al marcar como completada la orden ${orderId}:`, error);
 		throw new Error('No se pudo completar la orden');
+	}
+}
+
+async function generateInvoice(orderId: number, taxRate = 0.19): Promise<string> {
+	try {
+		const payload = {
+			order_id: orderId,
+			tax_rate: taxRate
+		};
+		const result = await api.post('/invoice/generate', payload);
+		return result as string;
+	} catch (error: any) {
+		console.error(`Error al generar la factura de la orden ${orderId}:`, error);
+		throw new Error('No se pudo generar ni enviar la factura digital');
 	}
 }
 
@@ -134,8 +154,13 @@ async function createOrderWithItems(
 		// Asociar servicios
 		await addServicesToOrder(newOrder.id, services);
 
-		// Cambiar status a completada
-		await markOrderAsCompleted(newOrder.id);
+		setTimeout(async () => {
+			// Cambiar status a completada
+			await markOrderAsCompleted(newOrder.id);
+
+			// Generar factura
+			/* await generateInvoice(newOrder.id); */
+		}, 3000);
 
 		return newOrder;
 	} catch (error) {

@@ -206,13 +206,13 @@
 						<Table.Row>
 							<Table.Head>Servicio</Table.Head>
 							<Table.Head>Precio</Table.Head>
+							<Table.Head>Cantidad</Table.Head>
 						</Table.Row>
 					</Table.Header>
 					<Table.Body>
 						{#each cartStore.services as orderService (orderService.id)}
 							<Table.Row>
 								<Table.Cell>{orderService.name}</Table.Cell>
-								<!-- <Table.Cell>{orderService.pro}</Table.Cell> -->
 								<Table.Cell
 									>{orderService
 										.products!.reduce(
@@ -223,6 +223,12 @@
 											0
 										)
 										.toLocaleString()}</Table.Cell
+								>
+								<Table.Cell
+									>{orderService.products?.reduce(
+										(acc, p) => acc + p.quantityService!,
+										0
+									)}</Table.Cell
 								>
 							</Table.Row>
 						{/each}
