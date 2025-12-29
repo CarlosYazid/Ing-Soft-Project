@@ -1,54 +1,42 @@
-from pydantic import BaseModel, Field, ConfigDict
+from __future__ import annotations
+from fastapi import UploadFile
 from typing import Optional
 from datetime import datetime
 
-class ProductBase(BaseModel):
+from pydantic import BaseModel, Field, ConfigDict
+from sqlmodel import Field as FieldDB, SQLModel, Relationship
+
+class Product(SQLModel, table=True):
     """
-    Base model for product schemas.
+    Product model for the database.
     """
+    id: Optional[int] = FieldDB(primary_key=True, index=True)
+    name: str = FieldDB(..., description="Product's name")
+    short_description: Optional[str] = FieldDB(None, description="Short description of the product")
+    price: float = FieldDB(..., description="Product's price")
+    cost: float = FieldDB(..., description="Product's cost")
+    stock: int = FieldDB(..., description="Available stock of the product")
+    minimum_stock: int = FieldDB(..., description="Minimum stock level of the product")
+    image_key: Optional[str] = FieldDB(None, description="Key of the product image")
+    expiration_date: Optional[datetime] = FieldDB(None, description="Expiration date of the consumable product")
+    created_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the product was created")
+    updated_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the product was last updated")
+
+    service_inputs: list["ServiceInput"] = Relationship(back_populates="product")
+    product_categories: list["ProductCategory"] = Relationship(back_populates="product")
+
+class ProductCreate(BaseModel):
+    
     name: str = Field(..., description="Product's name")
     short_description: Optional[str] = Field(None, description="Short description of the product")
-    price: float = Field(..., description="Product's price")
-    stock: int = Field(..., description="Available stock of the product")
-    minimum_stock: int = Field(..., description="Minimum stock level of the product")
-    image_url: Optional[str] = Field(None, description="URL of the product image")
-    
-
-
-
-class ProductBasePlusID(ProductBase):
-    """
-    Base model for product schemas with ID.
-    """
-    id: int = Field(..., description="Product's unique identifier")
-    
-    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "id": 1,
-                                                  "name": "Ejemplo de producto de papelería",
-                                                  "short_description": "Este es un producto de papelería de ejemplo.",
-                                                  "price": 9.99,
-                                                  "stock": 50,
-                                                  "minimum_stock" : 10,
-                                                  "image_url": "https://example.com/image.jpg",
-                                              }
-                                          })
-
-
-class ProductCreate(ProductBase):
-    """
-    Product model for the API request.
-    """
-    description: Optional[str] = Field(None, description="Product's description")
-    cost: float = Field(..., description="Cost of the product")
-    created_at: datetime = Field(..., description="Timestamp when the product was created")
-    updated_at: datetime = Field(..., description="Timestamp when the product was last updated")
+    price: float = Field(..., description="Product's price", gt = 0)
+    image: UploadFile = Field(..., description="Image of the product")
+    cost: float = Field(..., description="Product's cost", gt = 0)
+    stock: int = Field(..., description="Available stock of the product", gt = 0)
+    minimum_stock: int = Field(..., description="Minimum stock level of the product", gt = 0)
     expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
     
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
                                                   "name": "Ejemplo de producto de papelería",
@@ -56,25 +44,29 @@ class ProductCreate(ProductBase):
                                                   "price": 9.99,
                                                   "stock": 50,
                                                   "minimum_stock" : 7,
-                                                  "description": "Descripción detallada del producto de papelería de ejemplo.",
-                                                  "cost": 5.00,
-                                                  "created_at": "2023-01-01T00:00:00Z",
-                                                  "updated_at": "2023-01-01T00:00:00Z",
-                                                  "image_url": "https://example.com/image.jpg",
+                                                  "expiration_date": "2023-12-31T00:00:00Z"
                                               }
                                           },
                                           json_encoders={
                                               datetime: lambda v: v.isoformat()
                                           })
+    
 
-class Product(ProductCreate):
+class ProductRead(BaseModel):
     """
     Product model for the API response.
     """
     id: int = Field(..., description="Product's unique identifier")
-    
+    name: str = Field(..., description="Product's name")
+    short_description: Optional[str] = Field(None, description="Short description of the product")
+    price: float = Field(..., description="Product's price")
+    cost: float = Field(..., description="Product's cost")
+    stock: int = Field(..., description="Available stock of the product")
+    minimum_stock: int = Field(..., description="Minimum stock level of the product")
+    image_key: Optional[str] = Field(None, description="URL of the product image")
+    expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
+
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
@@ -82,158 +74,117 @@ class Product(ProductCreate):
                                                   "short_description": "Este es un producto de papelería de ejemplo.",
                                                   "price": 9.99,
                                                   "stock": 50,
-                                                  "minimum_stock" : 20,
-                                                  "description": "Descripción detallada del producto de papelería de ejemplo.",
-                                                  "cost": 5.00,
-                                                  "created_at": "2023-01-01T00:00:00Z",
-                                                  "updated_at": "2023-01-01T00:00:00Z",
+                                                  "minimum_stock" : 7,
                                                   "image_url": "https://example.com/image.jpg",
+                                                  "expiration_date": "2023-12-31T00:00:00Z"
                                               }
                                           },
                                           json_encoders={
                                               datetime: lambda v: v.isoformat()
                                           })
-
-class ProductCategoryBase(BaseModel):
-    """
-    Base model for product category schemas.
-    """
-    product_id: int = Field(..., description="ID of the product")
-    category_id: int = Field(..., description="ID of the category")
-
-    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "name": "Papelería"
-                                              }
-                                          })
-
-class ProductCategoryCreate(ProductCategoryBase):
-    """
-    Product category model for the API request.
-    """
-    created_at: datetime = Field(default=datetime.now(), description="Timestamp when the product category was created")
     
+
+class ProductUpdate(BaseModel):
+    """
+    Product model for the API request.
+    """
+    id: int = Field(..., description="Product's unique identifier")
+    name: Optional[str] = Field(None, description="Product's name")
+    short_description: Optional[str] = Field(None, description="Short description of the product")
+    price: Optional[float] = Field(None, description="Product's price", gt = 0)
+    cost: Optional[float] = Field(None, description="Product's cost", gt = 0)
+    minimum_stock: Optional[int] = Field(None, description="Minimum stock level of the product", gt = 0)
+    expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
+    updated_at: datetime = Field(default_factory=datetime.now(), description="Timestamp when the product was last updated")
+
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
-                                                  "product_id": 1,
-                                                  "category_id": 1
+                                                  "name": "Ejemplo de producto de papelería",
+                                                  "short_description": "Este es un producto de papelería de ejemplo.",
+                                                  "price": 9.99,
+                                                  "cost": 5.99,
+                                                  "stock": 50,
+                                                  "minimum_stock" : 7,
+                                                  "expiration_date": "2023-12-31T00:00:00Z",
+                                                  "updated_at" : "2023-12-31T00:00:00Z"
                                               }
                                           },
                                           json_encoders={
                                               datetime: lambda v: v.isoformat()
                                           })
-
-class ProductCategory(ProductCategoryCreate):
-    """
-    Product category model for the API response.
-    """
-    id: int = Field(..., description="Product category's unique identifier")
     
-    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "id": 1,
-                                                  "product_id": 1,
-                                                  "category_id": 1,
-                                                  "created_at": "2023-01-01T00:00:00Z"
-                                              }
-                                          },
-                                          json_encoders={
-                                              datetime: lambda v: v.isoformat()
-                                          })
+class ProductCategory(SQLModel, table=True):
+    """
+    ProductCategory model for the database.
+    """
+    product_id: int = FieldDB(foreign_key="product.id", primary_key=True)
+    category_id: int = FieldDB(foreign_key="category.id", primary_key=True)
 
-class ProductCategoryPlusID(ProductCategoryBase):
-    """
-    Product category model with ID for the API response.
-    """
-    id: int = Field(..., description="Product category's unique identifier")
-    
-    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "id": 1,
-                                                  "product_id": 1,
-                                                  "category_id": 1,
-                                                  "created_at": "2023-01-01T00:00:00Z"
-                                              }
-                                          },
-                                          json_encoders={
-                                              datetime: lambda v: v.isoformat()
-                                          })
+    product: "Product" = Relationship(back_populates="product_categories")
+    category: "Category" = Relationship(back_populates="product_categories")
 
-class CategoryBase(BaseModel):
+class Category(SQLModel, table=True):
     """
-    Base model for category schemas.
+    Category model for the database.
     """
-    name: str = Field(..., description="Category's name")
-    
-    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "name": "Papelería"
-                                              }
-                                          })
+    id: Optional[int] = FieldDB(primary_key=True, index=True)
+    name: str = FieldDB(..., description="Category's name")
+    description: str = FieldDB(..., description="Category's description")
+    created_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the category was created")
+    updated_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the category was last updated")
 
-class CategoryCreate(CategoryBase):
+    product_categories: list["ProductCategory"] = Relationship(back_populates="category")
+
+class CategoryCreate(BaseModel):
     """
     Category model for the API request.
     """
-    description: str = Field(None, description="Category's description")
-    created_at: datetime = Field(default=datetime.now(), description="Timestamp when the category was created")
-    
+    name: str = Field(..., description="Category's name")
+    description: str = Field(..., description="Category's description")
+
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
-                                                  "name": "Papelería",
-                                                  "created_at": "2023-01-01T00:00:00Z"
+                                                  "name": "Ejemplo de categoría",
+                                                  "description": "Descripción de la categoría de ejemplo."
                                               }
-                                          },
-                                          json_encoders={
-                                              datetime: lambda v: v.isoformat()
                                           })
-class Category(CategoryCreate):
+
+class CategoryRead(BaseModel):
     """
     Category model for the API response.
     """
     id: int = Field(..., description="Category's unique identifier")
-    
+    name: str = Field(..., description="Category's name")
+    description: str = Field(..., description="Category's description")
+
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
-                                                  "name": "Papelería",
-                                                  "description": "Categoría de productos de papelería.",
-                                                  "created_at": "2023-01-01T00:00:00Z"
+                                                  "name": "Ejemplo de categoría",
+                                                  "description": "Descripción de la categoría de ejemplo."
                                               }
-                                          },
-                                          json_encoders={
-                                              datetime: lambda v: v.isoformat()
                                           })
 
-class CategoryPlusID(CategoryBase):
+class CategoryUpdate(BaseModel):
     """
-    Category model with ID for the API response.
+    Category model for the API request.
     """
     id: int = Field(..., description="Category's unique identifier")
-    
+    name: Optional[str] = Field(None, description="Category's name")
+    description: Optional[str] = Field(None, description="Category's description")
+    update_at: datetime = Field(default_factory=datetime.now(), description="Timestamp when the category was last updated")
+
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
                                           json_schema_extra={
                                               "example": {
-                                                  "id": 1,
-                                                  "name": "Papelería",
-                                                  "created_at": "2023-01-01T00:00:00Z"
+                                                  "name": "Ejemplo de categoría",
+                                                  "description": "Descripción de la categoría de ejemplo.",
+                                                  "update_at": "2023-12-31T00:00:00Z"
                                               }
-                                          },
-                                          json_encoders={
-                                              datetime: lambda v: v.isoformat()
                                           })

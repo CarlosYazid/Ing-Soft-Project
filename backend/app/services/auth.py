@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 import jwt
 
-from db import get_db_client
+#from db import get_db_client
 from core import SETTINGS
 
 
@@ -29,9 +29,10 @@ class AuthService:
         except jwt.InvalidTokenError:
             raise HTTPException(detail="Invalid token", status_code=401) from jwt.InvalidTokenError
 
+    """
+
     @classmethod
     async def sign_up(cls, email: str, password: str):
-        """Sign up a new user."""
         
         client = await get_db_client()
         
@@ -49,10 +50,11 @@ class AuthService:
             )
         except Exception as e:
             raise HTTPException(detail=f"Sign up failed: {str(e)}", status_code=400) from e
+        
 
     @classmethod
     async def sign_in(cls, email: str, password: str):
-        """Sign in an existing user."""
+        Sign in an existing user.
         
         client = await get_db_client()
         
@@ -94,6 +96,8 @@ class AuthService:
         except Exception as e:
             raise HTTPException(detail=f"Sign in failed: {str(e)}", status_code=401) from e
 
+    
+
     @classmethod
     async def sign_out(self):
         
@@ -115,7 +119,7 @@ class AuthService:
 
     @classmethod
     async def reset_password(cls, email: str):
-        """Reset password for a user."""
+        
         
         client = await get_db_client()
         
@@ -128,7 +132,6 @@ class AuthService:
     
     @classmethod
     async def update_password(self, new_password: str):
-        """Update password for the authenticated user."""
         
         client = await get_db_client()
         
@@ -143,4 +146,4 @@ class AuthService:
         return RedirectResponse(
             url=SETTINGS.sign_in_redirect_url,
             status_code=303
-        )
+        )"""

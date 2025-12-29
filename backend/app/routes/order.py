@@ -1,67 +1,57 @@
 from fastapi import APIRouter, Request, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from models import OrderCreate, OrderStatus, OrderServiceCreate, OrderProductCreate
+from models import OrderRead, OrderUpdate, OrderCreate, OrderStatus, OrderService, OrderProduct
 from crud import OrderCrud
 from services import AuthService, OrderService
+from db import get_db_session
 
 
 router = APIRouter(prefix="/order")
 
-@router.post("/")
-async def create_order(request: Request, order: OrderCreate):
+@router.post("/", response_model=OrderRead)
+async def create_order(request: Request,
+                       order: OrderCreate,
+                       db_session: AsyncSession = Depends(get_db_session)):
     """
     Create a new order.
     """
-    return await OrderCrud.create_order(order)
+    return await OrderCrud.create_order(db_session, order)
 
-@router.get("/all")
-async def read_all_orders(request: Request):
+@router.get("/all", response_model=list[OrderRead])
+async def read_all_orders(request: Request,
+                          db_session: AsyncSession = Depends(get_db_session)):
     """
     Retrieve all orders.
     """
-    return await OrderCrud.read_all_orders()
+    return await OrderCrud.read_all_orders(db_session)
 
-@router.get("/base/all")
-async def read_all_orders_base(request: Request):
-    """
-    Retrieve all orders in base format.
-    """
-    return await OrderCrud.read_all_orders_base()
-
-@router.get("/{_id}")
-async def read_order(request: Request, _id: int):
+@router.get("/{_id}", response_model=OrderRead)
+async def read_order(request: Request,
+                     _id: int,
+                     db_session: AsyncSession = Depends(get_db_session)):
     """
     Retrieve an order by ID.
     """
-    return await OrderCrud.read_order(_id)
+    return await OrderCrud.read_order(db_session, _id)
 
-@router.get("/")
-async def read_order_2(request: Request, id: int):
+@router.get("/", response_model=OrderRead)
+async def read_order_2(request: Request,
+                       id: int,
+                       db_session: AsyncSession = Depends(get_db_session)):
     """
     Retrieve an order by ID.
     """
-    return await OrderCrud.read_order(id)
+    return await OrderCrud.read_order(db_session, id)
 
-@router.get("/base/{_id}")
-async def read_order_base(request: Request, _id: int):
-    """
-    Get an order base by ID.
-    """
-    return await OrderCrud.read_order_base(_id)
-
-@router.get("/base/")
-async def read_order_base_2(request: Request, id: int):
-    """
-    Get an order base by ID.
-    """
-    return await OrderCrud.read_order_base(id)
-
-@router.put("/{_id}")
-async def update_order(request: Request, _id: int, fields: dict):
+@router.put("/", response_model=OrderRead)
+async def update_order(request: Request,
+                       fields : OrderUpdate,
+                       db_session: AsyncSession = Depends(get_db_session)):
     """
     Update an existing order by ID.
     """
-    return await OrderCrud.update_order(_id, fields)
+    return await OrderCrud.update_order(db_session, fields)
 
 @router.put('/status/{order_id}/{status}')
 async def update_order_status(request: Request, order_id: int, status: OrderStatus):
@@ -71,7 +61,7 @@ async def update_order_status(request: Request, order_id: int, status: OrderStat
     return await OrderCrud.update_order_status(order_id, status)
 
 @router.put('/status/')
-async def update_order_status(request: Request, order_id: int, status: OrderStatus):
+async def update_order_status_2(request: Request, order_id: int, status: OrderStatus):
     """
     Update status of a order
     """
@@ -92,7 +82,7 @@ async def delete_order_2(request: Request, id: int):
     return await OrderCrud.delete_order(id)
 
 @router.post("/service/")
-async def create_order_service(request: Request, order_service: OrderServiceCreate):
+async def create_order_service(request: Request, order_service: OrderService):
     """
     Create a new order service.
     """
@@ -149,7 +139,7 @@ async def delete_order_service_2(request: Request, id: int):
 
 
 @router.post("/product/")
-async def create_order_product(request: Request, order_product: OrderProductCreate):
+async def create_order_product(request: Request, order_product: OrderProduct):
     """
     Create a new order product.
     """

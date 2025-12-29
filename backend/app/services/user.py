@@ -1,153 +1,196 @@
-from fastapi import HTTPException
 from datetime import date
 
-from models import UserBase, EmployeeRole
-from db import get_db_client
-from core import SETTINGS
+from fastapi import HTTPException
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
+
+
+from models import Employee, Client, EmployeeRole
 
 class UserService:
     
-    FIELDS_USER_BASE = set(UserBase.model_fields.keys())
-    
     @classmethod
-    async def search_employees_by_name(cls, name: str) -> list[UserBase]:
+    async def search_employees_by_name(cls, db_session: AsyncSession,  name: str) -> list[Employee]:
         """Search employees by name."""
-
-        client = await get_db_client()
+        
+        try:
             
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").execute()
+            response = await db_session.exec(select(Employee).where(Employee.name.ilike(f"%{name}%")))
+            employees = list(response.all())
 
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given name", status_code=404)
+            if employees:
+                raise HTTPException(detail="No employees found with the given name", status_code=404)
 
-        return [UserBase.model_validate(employee) for employee in response.data]
+            return employees
+        
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
 
     @classmethod
-    async def search_employees_by_birthday(cls, birthday: date) -> list[UserBase]:
+    async def search_employees_by_birthday(cls, db_session: AsyncSession, birthday: date) -> list[Employee]:
         """Search employees by birthday."""
 
-        client = await get_db_client()
+        try:
+            response = await db_session.exec(select(Employee).where(Employee.birth_date == birthday))
+            employees = list(response.all())
 
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("birth_date", birthday.isoformat()).execute()
+            if not employees:
+                raise HTTPException(detail="No employees found with the given birthday", status_code=404)
 
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given birthday", status_code=404)
+            return employees
 
-        return [UserBase.model_validate(employee) for employee in response.data]
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
 
     @classmethod
-    async def search_employees_by_status(cls, status: bool) -> list[UserBase]:
+    async def search_employees_by_status(cls,  db_session: AsyncSession, status: bool) -> list[Employee]:
         """Search employees by status."""
 
-        client = await get_db_client()
+        try:
+            response = await db_session.exec(select(Employee).where(Employee.status == status))
+            employees = list(response.all())
 
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("state", status).execute()
+            if not employees:
+                raise HTTPException(detail="No employees found with the given status", status_code=404)
 
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given status", status_code=404)
+            return employees
 
-        return [UserBase.model_validate(employee) for employee in response.data]
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
 
     @classmethod
-    async def search_employees_by_role(cls, role: EmployeeRole) -> list[UserBase]:
+    async def search_employees_by_role(cls, db_session: AsyncSession, role: EmployeeRole) -> list[Employee]:
         """Search employees by role."""
 
-        client = await get_db_client()
+        try:
+            
+            response = await db_session.exec(select(Employee).where(Employee.role == role.capitalize()))
+            employees = list(response.all())
+            
+            if not employees:
+                raise HTTPException(detail="No employees found with the given role", status_code=404)
 
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("role", role.capitalize()).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given role", status_code=404)
-
-        return [UserBase.model_validate(employee) for employee in response.data]
+            return employees
+        
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
     
     @classmethod
-    async def search_employees_by_name_and_role(cls, name: str, role: EmployeeRole) -> list[UserBase]:
+    async def search_employees_by_name_and_role(cls, db_session: AsyncSession, name: str, role: EmployeeRole) -> list[Employee]:
         """Search employees by name and role."""
+        
+        try:
 
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("role", role.capitalize()).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given name and role", status_code=404)
-
-        return [UserBase.model_validate(employee) for employee in response.data]
+            response = await db_session.exec(select(Employee).where(Employee.name.ilike(f"%{name}%")).where(Employee.role == role.capitalize()))
+            employees = list(response.all())
+            
+            if not employees:
+                raise HTTPException(detail="No employees found with the given name and role", status_code=404)
+            
+            return employees
+        
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
     
     @classmethod
-    async def search_employees_by_name_and_status(cls, name: str, status: bool) -> list[UserBase]:
+    async def search_employees_by_name_and_status(cls, db_session: AsyncSession, name: str, status: bool) -> list[Employee]:
         """Search employees by name and status."""
 
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("state", status).execute()
+            response = await db_session.exec(select(Employee).where(Employee.name.ilike(f"%{name}%")).where(Employee.status == status))
+            employees = list(response.all())
 
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given name and status", status_code=404)
+            if not employees:
+                raise HTTPException(detail="No employees found with the given name and status", status_code=404)
 
-        return [UserBase.model_validate(employee) for employee in response.data]
+            return employees
+
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
     
     @classmethod
-    async def search_employees_by_name_and_birthday(cls, name: str, birthday: date) -> list[UserBase]:
+    async def search_employees_by_name_and_birthday(cls, db_session: AsyncSession, name: str, birthday: date) -> list[Employee]:
         """Search employees by name and birthday."""
 
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("birth_date", birthday.isoformat()).execute()
+            response = await db_session.exec(select(Employee).where(Employee.name.ilike(f"%{name}%")).where(Employee.birth_date == birthday))
+            employees = list(response.all())
 
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given name and birthday", status_code=404)
+            if not employees:
+                raise HTTPException(detail="No employees found with the given name and birthday", status_code=404)
 
-        return [UserBase.model_validate(employee) for employee in response.data]
+            return employees
+
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
     
     @classmethod
-    async def search_employees_by_role_and_status(cls, role: EmployeeRole, status: bool) -> list[UserBase]:
+    async def search_employees_by_role_and_status(cls, db_session: AsyncSession, role: EmployeeRole, status: bool) -> list[Employee]:
         """Search employees by role and status."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("role", role.capitalize()).eq("state", status).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found with the given role and status", status_code=404)
-
-        return [UserBase.model_validate(employee) for employee in response.data]
+        
+        try:
+            
+            response = await db_session.exec(select(Employee).where(Employee.role == role.capitalize()).where(Employee.status == status))
+            employees = list(response.all())
+            
+            if not employees:
+                raise HTTPException(detail="No employees found with the given role and status", status_code=404)
+        
+            return employees
+    
+        except Exception as e:
+            raise HTTPException(detail="Employee search failed", status_code=500) from e
     
     @classmethod
-    async def search_clients_by_name(cls, name: str) -> list[UserBase]:
+    async def search_clients_by_name(cls, db_session: AsyncSession, name: str) -> list[Client]:
         """Search clients by name."""
+        
+        try:
 
-        client = await get_db_client()
+            response = await db_session.exec(select(Client).where(Client.name.ilike(f"%{name}%")))
+            clients = list(response.all())
 
-        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").execute()
+            if not clients:
+                raise HTTPException(detail="No clients found with the given name", status_code=404)
 
-        if not bool(response.data):
-            raise HTTPException(detail="No clients found with the given name", status_code=404)
-
-        return [UserBase.model_validate(client) for client in response.data]
+            return clients
+        
+        except Exception as e:
+            raise HTTPException(detail="Client search failed", status_code=500) from e
+        
     
     @classmethod
-    async def search_clients_by_status(cls, status: bool) -> list[UserBase]:
+    async def search_clients_by_status(cls, db_session: AsyncSession, status: bool) -> list[Client]:
         """Search clients by status."""
+        
+        try:
+            
+            response = await db_session.exec(select(Client).where(Client.status == status))
+            clients = list(response.all())
 
-        client = await get_db_client()
+            if not clients:
+                raise HTTPException(detail="No clients found with the given status", status_code=404)
 
-        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("state", status).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No clients found with the given status", status_code=404)
-
-        return [UserBase.model_validate(client) for client in response.data]
+            return clients
+        
+        except Exception as e:
+            raise HTTPException(detail="Client search failed", status_code=500) from e
 
     @classmethod
-    async def search_clients_by_name_and_status(cls, name: str, status: bool) -> list[UserBase]:
+    async def search_clients_by_name_and_status(cls, db_session: AsyncSession, name: str, status: bool) -> list[Client]:
         """Search clients by name and status."""
 
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).ilike("name", f"%{name}%").eq("state", status).execute()
+            response = await db_session.exec(select(Client).where(Client.name.ilike(f"%{name}%")).where(Client.status == status))
+            clients = list(response.all())
 
-        if not bool(response.data):
-            raise HTTPException(detail="No clients found with the given name and status", status_code=404)
+            if not clients:
+                raise HTTPException(detail="No clients found with the given name and status", status_code=404)
 
-        return [UserBase.model_validate(client) for client in response.data]
+            return clients
+
+        except Exception as e:
+            raise HTTPException(detail="Client search failed", status_code=500) from e

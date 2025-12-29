@@ -1,525 +1,547 @@
 from fastapi import HTTPException
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from db import get_db_client
-from models import UserBase, Employee, Client, EmployeeCreate, ClientCreate
-from core import SETTINGS
+from models import ClientCreate, ClientUpdate, Client, EmployeeCreate, EmployeeUpdate, Employee
 from utils import UserUtils
 
 class UserCrud:
     """CRUD operations for users"""
     
-    EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE = {"created_at"}
-    ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE = set(EmployeeCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE
-
-    EXCLUDED_FIELDS_FOR_UPDATE_CLIENT = {"created_at"}
-    ALLOWED_FIELDS_FOR_UPDATE_CLIENT = set(ClientCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE_CLIENT
-
-    FIELDS_USER_BASE = set(UserBase.model_fields.keys())
-
+    EXCLUDED_FIELDS_FOR_UPDATE_USER = {"id", "documentid"}
 
     @classmethod
-    async def create_employee(cls, employee : EmployeeCreate) -> Employee:
+    async def create_employee(cls, db_session : AsyncSession, employee : EmployeeCreate) -> Employee:
         """Create a new employee."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.employee_table).insert(employee.model_dump(mode="json")).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Employee creation failed", status_code=500)
         
-        return Employee.model_validate(response.data[0])
+        try:
+            
+            async with db_session.begin():
+                
+                new_employee = Employee(**employee.model_dump(exclude_unset=True))
+                
+                db_session.add(new_employee)
+                await db_session.refresh(new_employee)
+                
+            return new_employee
+        
+        except Exception as e:
+            raise HTTPException(detail="Employee creation failed", status_code=500) from e
 
     @classmethod
-    async def read_all_employees(cls) -> list[Employee]:
+    async def read_all_employees(cls, db_session : AsyncSession) -> list[Employee]:
         """Retrieve all employees."""
 
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.employee_table).select("*").execute()
+            response = await db_session.exec(select(Employee))
+            employees = list(response.all())
+            
+            if not employees:
+                raise HTTPException(detail="No employees found", status_code=404)
 
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found", status_code=404)
+            return employees
 
-        return [Employee.model_validate(employee) for employee in response.data]
-    
-    @classmethod
-    async def read_all_employees_base(cls) -> list[UserBase]:
-        """Retrieve all employees."""
-        
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).execute()
-        
-        if not bool(response.data):
-            raise HTTPException(detail="No employees found", status_code=404)
-        
-        return [UserBase.model_validate(employee) for employee in response.data]
+        except Exception as e:
+            raise HTTPException(detail="Employees retrieval failed", status_code=500) from e
 
     @classmethod
-    async def read_employee(cls, employee_id: int) -> Employee:
+    async def read_employee(cls, db_session: AsyncSession, employee_id: int) -> Employee:
         """Retrieve an employee by ID."""
+        
+        try:
 
-        client = await get_db_client()
+            response = await db_session.exec(select(Employee).where(Employee.id == employee_id))
+            employee = response.first()
+            
+            if employee is None:
+                raise HTTPException(detail="Employee not found", status_code=404)
 
-        response = await client.table(SETTINGS.employee_table).select("*").eq("id", employee_id).execute()
+            return employee
 
-        if not bool(response.data):
-
-            raise HTTPException(detail="Employee not found", status_code=404)
-
-        return Employee.model_validate(response.data[0])
+        except Exception as e:
+            raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
 
     @classmethod
-    async def read_employee_base(cls, employee_id: int) -> UserBase:
-        """Retrieve a user by ID."""
-        
-        client = await get_db_client()
-        
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("id", employee_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Employee not found", status_code=404)
-
-        return UserBase.model_validate(response.data[0])
-
-    @classmethod
-    async def read_employee_by_email(cls, email: str) -> Employee:
+    async def read_employee_by_email(cls, db_session: AsyncSession, email: str) -> Employee:
         """Retrieve an employee by email."""
+        
+        try:
+        
+            response = await db_session.exec(select(Employee).where(Employee.email == email))
+            employee = response.first()
+            
+            if employee is None:
+                raise HTTPException(detail="Employee not found", status_code=404)
+            
+            return employee
 
-        client = await get_db_client()
+        except Exception as e:
+            raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
 
-        response = await client.table(SETTINGS.employee_table).select("*").eq("email", email).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Employee not found", status_code=404)
-
-        return Employee.model_validate(response.data[0])
     
     @classmethod
-    async def read_employee_base_by_email(cls, email: str) -> UserBase:
-        """Retrieve a user by email."""
-        
-        client = await get_db_client()
-        
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("email", email).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Employee not found", status_code=404)
-
-        return UserBase.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_employee_by_documentid(cls, document_id: int) -> Employee:
+    async def read_employee_by_documentid(cls, db_session: AsyncSession, document_id: int) -> Employee:
         """Retrieve an employee by document ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.employee_table).select("*").eq("documentid", document_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Employee not found", status_code=404)
-
-        return Employee.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_employee_base_by_documentid(cls, documentid: str) -> UserBase:
-        """Retrieve a user by document ID."""
-        client = await get_db_client()
         
-        response = await client.table(SETTINGS.employee_table).select(*cls.FIELDS_USER_BASE).eq("documentid", documentid).execute()
+        try:
 
-        if not bool(response.data):
-            raise HTTPException(detail="Employee not found", status_code=404)
+            response = await db_session.exec(select(Employee).where(Employee.documentid == document_id))
+            employee = response.first()
+        
+            if employee is None:
+                raise HTTPException(detail="Employee not found", status_code=404)
 
-        return UserBase.model_validate(response.data[0])
+            return employee
+
+        except Exception as e:
+            raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
+    
 
     @classmethod
-    async def update_employee(cls, _id: int, fields: dict) -> Employee:
+    async def update_employee(cls, db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee."""
         
-        if not await UserUtils.exist_employee(_id):
+        if fields.id is None:
+            raise HTTPException(detail="Employee ID is required", status_code=400)
+        
+        if not await UserUtils.exist_employee(db_session, fields.id):
             raise HTTPException(detail="Employee not found", status_code=404)
         
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE):
-            raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE), status_code=400)
+        try:
 
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
-            raise HTTPException(detail="Update attribute of employee", status_code=400)
+            async with db_session.begin():
 
-        client = await get_db_client()
+                response = await db_session.exec(select(Employee).where(Employee.id == fields.id))
+                employee = response.one()
 
-        response = await client.table(SETTINGS.employee_table).update(fields).eq("id", _id).execute()
+                for key, value in fields.model_dump(exclude_unset=True).items():
+                
+                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                        continue
+                
+                    setattr(employee, key, value)
 
-        if not bool(response.data):
-            raise HTTPException(detail="Employee update failed", status_code=500)
+                db_session.add(employee)
+                await db_session.refresh(employee)
 
-        return Employee.model_validate(response.data[0])
+            return employee
+
+        except Exception as e:
+            raise HTTPException(detail="Employee update failed", status_code=500) from e
 
     @classmethod
-    async def update_employee_by_email(cls, email: str, fields: dict) -> Employee:
+    async def update_employee_by_email(cls, db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee by email."""
+        
+        if fields.email is None:
+            raise HTTPException(detail="Employee email is required", status_code=400)
 
-        if not await UserUtils.exist_employee_by_email(email):
+        if not await UserUtils.exist_employee_by_email(db_session, fields.email):
             raise HTTPException(detail="Employee not found", status_code=404)
         
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE):
-            raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE), status_code=400)
+        try:
+            
+            async with db_session.begin():
+            
+                response = await db_session.exec(select(Employee).where(Employee.email == fields.email))
+                employee = response.one()
+            
+                for key, value in fields.model_dump(exclude_unset=True).items():
+                
+                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                        continue
+                    if key == "email":
+                        continue
 
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
-            raise HTTPException(detail="Update attribute of employee", status_code=400)
+                    setattr(employee, key, value)
+            
+                db_session.add(employee)
+                await db_session.refresh(employee)
+            
+            return employee
+        
+        except Exception as e:
+            raise HTTPException(detail="Employee update failed", status_code=500) from e
 
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.employee_table).update(fields).eq("email", email).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Employee update failed", status_code=500)
-
-        return Employee.model_validate(response.data[0])
     
     @classmethod
-    async def update_employee_by_documentid(cls, document_id: int, fields: dict) -> Employee:
+    async def update_employee_by_documentid(cls, db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee by document ID."""
+        
+        if fields.documentid is None:
+            raise HTTPException(detail="Employee document ID is required", status_code=400)
 
-        if not await UserUtils.exist_employee_by_documentid(document_id):
+        if not await UserUtils.exist_employee_by_documentid(db_session, fields.documentid):
             raise HTTPException(detail="Employee not found", status_code=404)
+        
+        try:
+            
+            async with db_session.begin():
+            
+                response = await db_session.exec(select(Employee).where(Employee.documentid == fields.documentid))
+                employee = response.one()
 
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE):
-            raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_EMPLOYEE), status_code=400)
+                for key, value in fields.model_dump(exclude_unset=True).items():
 
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_EMPLOYEE):
-            raise HTTPException(detail="Update fields are invalid", status_code=400)
+                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                        continue
+                    
+                    setattr(employee, key, value)
 
-        client = await get_db_client()
+                db_session.add(employee)
+                await db_session.refresh(employee)
 
-        response = await client.table(SETTINGS.employee_table).update(fields).eq("documentid", document_id).execute()
+            return employee
 
-        if not bool(response.data):
-            raise HTTPException(detail="Employee update failed", status_code=500)
-
-        return Employee.model_validate(response.data[0])
+        except Exception as e:
+            raise HTTPException(detail="Employee update failed", status_code=500) from e
     
     @classmethod
-    async def delete_employee(cls, employee_id: int) -> bool:
+    async def delete_employee(cls, db_session: AsyncSession, employee_id: int) -> bool:
         """Delete an employee by ID."""
         
-        if not await UserUtils.exist_employee(employee_id):
+        if not await UserUtils.exist_employee(db_session, employee_id):
             raise HTTPException(detail="Employee not found", status_code=404)
 
         # check if the employee have any orders
         from utils import OrderUtils
         
-        if await OrderUtils.exist_orders_by_employee_id(employee_id):
+        if await OrderUtils.exist_orders_by_employee(db_session, employee_id):
             raise HTTPException(detail="Cannot delete employee with active orders", status_code=400)
 
-        client = await get_db_client()
+        try:
+            
+            async with db_session.begin():
 
-        response = await client.table(SETTINGS.employee_table).delete().eq("id", employee_id).execute()
+                response = await db_session.exec(select(Employee).where(Employee.id == employee_id))
 
-        if not bool(response.data):
-            raise HTTPException(detail="Employee deletion failed", status_code=500)
+                db_session.delete(response.one())
+                
+            return True
 
-        return bool(response.data)
+        except Exception as e:
+            raise HTTPException(detail="Employee deletion failed", status_code=500) from e
     
     @classmethod
-    async def delete_employee_by_email(cls, email: str) -> bool:
+    async def delete_employee_by_email(cls, db_session: AsyncSession, email: str) -> bool:
         """Delete an employee by email."""
         
-        if not await UserUtils.exist_employee_by_email(email):
+        if not await UserUtils.exist_employee_by_email(db_session, email):
             raise HTTPException(detail="Employee not found", status_code=404)
         
-        id_ = await UserUtils.translate_email_by_employee_id(email)
+        id_ = await UserUtils.translate_email_by_employee_id(db_session, email)
         
         # check if the employee have any orders
         from utils import OrderUtils
         
-        if await OrderUtils.exist_orders_by_employee_id(id_):
+        if await OrderUtils.exist_orders_by_employee(db_session, id_):
             raise HTTPException(detail="Cannot delete employee with active orders", status_code=400)
 
-        client = await get_db_client()
+        try:
+            
+            async with db_session.begin():
 
-        response = await client.table(SETTINGS.employee_table).delete().eq("email", email).execute()
+                response = await db_session.exec(select(Employee).where(Employee.email == email))
 
-        if not bool(response.data):
-            raise HTTPException(detail="Employee deletion failed", status_code=500)
+                db_session.delete(response.one())
 
-        return bool(response.data)
+            return True
+
+        except Exception as e:
+            raise HTTPException(detail="Employee deletion failed", status_code=500) from e
 
     @classmethod
-    async def delete_employee_by_documentid(cls, document_id: int) -> bool:
+    async def delete_employee_by_documentid(cls, db_session: AsyncSession, document_id: int) -> bool:
         """Delete an employee by document ID."""
         
-        if not await UserUtils.exist_employee_by_documentid(document_id):
+        if not await UserUtils.exist_employee_by_documentid(db_session, document_id):
             raise HTTPException(detail="Employee not found", status_code=404)
 
-        id_ = await UserUtils.translate_documentid_by_employee_id(document_id)
+        id_ = await UserUtils.translate_documentid_by_employee_id(db_session, document_id)
 
         # check if the employee have any orders
         from utils import OrderUtils
         
-        if await OrderUtils.exist_orders_by_employee_id(id_):
+        if await OrderUtils.exist_orders_by_employee(db_session, id_):
             raise HTTPException(detail="Cannot delete employee with active orders", status_code=400)
 
-        client = await get_db_client()
+        try:
+            
+            async with db_session.begin():
 
-        response = await client.table(SETTINGS.employee_table).delete().eq("documentid", document_id).execute()
+                response = await db_session.exec(select(Employee).where(Employee.documentid == document_id))
 
-        if not bool(response.data):
-            raise HTTPException(detail="Employee deletion failed", status_code=500)
-
-        return bool(response.data)
-
+                db_session.delete(response.one())
+                
+            return True
+        
+        except Exception as e:
+            raise HTTPException(detail="Employee deletion failed", status_code=500) from e
+        
     @classmethod
-    async def create_client(cls, client_: ClientCreate) -> Client:
+    async def create_client(cls, db_session: AsyncSession, client_: ClientCreate) -> Client:
         """Create a new client."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.client_table).insert(client_.model_dump(mode="json")).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Client creation failed", status_code=500)
         
-        return Client.model_validate(response.data[0])
+        try:
+            
+            async with db_session.begin():
+                
+                client = Client(**client_.model_dump(exclude_unset=True))
+                
+                db_session.add(client)
+                await db_session.refresh(client)
+                
+            return client
+        
+        except Exception as e:
+            raise HTTPException(detail="Client creation failed", status_code=500) from e
+
     
     @classmethod
-    async def read_all_clients(cls) -> list[Client]:
-        """Retrieve all clients."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.client_table).select("*").execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No clients found", status_code=404)
-
-        return [Client.model_validate(client) for client in response.data]
-    
-    @classmethod
-    async def read_all_clients_base(cls) -> list[UserBase]:
+    async def read_all_clients(cls, db_session: AsyncSession) -> list[Client]:
         """Retrieve all clients."""
         
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).execute()
+            response = await db_session.exec(select(Client))
+            clients = list(response.all())
 
-        if not bool(response.data):
-            raise HTTPException(detail="No clients found", status_code=404)
+            if not clients:
+                raise HTTPException(detail="No clients found", status_code=404)
 
-        return [UserBase.model_validate(client) for client in response.data]
+            return clients
+        
+        except Exception as e:
+            raise HTTPException(detail="Clients retrieval failed", status_code=500) from e
     
     @classmethod
-    async def read_client(cls, client_id: int) -> Client:
-        """Retrieve a client by ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.client_table).select("*").eq("id", client_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Client not found", status_code=404)
-
-        return Client.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_client_base(cls, client_id: int) -> UserBase:
+    async def read_client(cls, db_session: AsyncSession, client_id: int) -> Client:
         """Retrieve a client by ID."""
         
-        client = await get_db_client()
-        
-        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("id", client_id).execute()
+        try:
 
-        if not bool(response.data):
-            raise HTTPException(detail="Client not found", status_code=404)
+            response = await db_session.exec(select(Client).where(Client.id == client_id))
+            client = response.first()
 
-        return UserBase.model_validate(response.data[0])
+            if client is None:
+                raise HTTPException(detail="Client not found", status_code=404)
+
+            return client
+
+        except Exception as e:
+            raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
     @classmethod
-    async def read_client_by_email(cls, email: str) -> Client:
+    async def read_client_by_email(cls, db_session: AsyncSession, email: str) -> Client:
         """Retrieve a client by email."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.client_table).select("*").eq("email", email).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Client not found", status_code=404)
-
-        return Client.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_client_base_by_email(cls, email: str) -> UserBase:
-        """Retrieve a client by email."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("email", email).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Client not found", status_code=404)
-
-        return UserBase.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_client_by_documentid(cls, document_id: int) -> Client:   
-        """Retrieve a client by document ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.client_table).select("*").eq("documentid", document_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Client not found", status_code=404)
-
-        return Client.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_client_base_by_documentid(cls, documentid: str) -> UserBase:
-        """Retrieve a client by document ID."""
         
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.client_table).select(*cls.FIELDS_USER_BASE).eq("documentid", documentid).execute()
+            response = await db_session.exec(select(Client).where(Client.email == email))
+            client = response.first()
 
-        if not bool(response.data):
-            raise HTTPException(detail="Client not found", status_code=404)
+            if client is None:
+                raise HTTPException(detail="Client not found", status_code=404)
 
-        return UserBase.model_validate(response.data[0])
+            return client
+
+        except Exception as e:
+            raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
     @classmethod
-    async def update_client(cls, _id: int, fields: dict) -> Client:
+    async def read_client_by_documentid(cls, db_session: AsyncSession, document_id: int) -> Client:   
+        """Retrieve a client by document ID."""
+        try:
+
+            response = await db_session.exec(select(Client).where(Client.documentid == document_id))
+            client = response.first()
+
+            if client is None:
+                raise HTTPException(detail="Client not found", status_code=404)
+
+            return client
+
+        except Exception as e:
+            raise HTTPException(detail="Client retrieval failed", status_code=500) from e
+    
+    @classmethod
+    async def update_client(cls, db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client."""
+        
+        if fields.id is None:
+            raise HTTPException(detail="Client ID is required", status_code=400)
 
-        if not await UserUtils.exist_client(_id):
+        if not await UserUtils.exist_client(db_session, fields.id):
             raise HTTPException(detail="Client not found", status_code=404)
 
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT):
-            raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT), status_code=400)
+        try:
+            
+            async with db_session.begin():
 
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
-            raise HTTPException(detail="Update attribute of client", status_code=400)
-        
-        client = await get_db_client()
+                response = await db_session.exec(select(Client).where(Client.id == fields.id))
+                client = response.one()
 
-        response = await client.table(SETTINGS.client_table).update(fields).eq("id", _id).execute()
+                for key, value in fields.model_dump(exclude_unset=True).items():
 
-        if not bool(response.data):
-            raise HTTPException(detail="Client update failed", status_code=500)
+                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                        continue
+                
+                    setattr(client, key, value)
 
-        return Client.model_validate(response.data[0])
+                db_session.add(client)
+                await db_session.refresh(client)
+
+            return client
+
+        except Exception as e:
+            raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @classmethod
-    async def update_client_by_email(cls, email: str, fields: dict) -> Client:
+    async def update_client_by_email(cls, db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client by email."""
-
-        if not await UserUtils.exist_client_by_email(email):
-            raise HTTPException(detail="Client not found", status_code=404)
-
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT):
-            raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT), status_code=400)
-
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
-            raise HTTPException(detail="Update attribute of client", status_code=400)
         
-        client = await get_db_client()
+        if fields.email is None:
+            raise HTTPException(detail="Client email is required", status_code=400)
 
-        response = await client.table(SETTINGS.client_table).update(fields).eq("email", email).execute()
+        if not await UserUtils.exist_client_by_email(db_session, fields.email):
+            raise HTTPException(detail="Client not found", status_code=404)
+        
+        try:
+            
+            async with db_session.begin():
+            
+                response = await db_session.exec(select(Client).where(Client.email == fields.email))
+                client = response.one()
 
-        if not bool(response.data):
-            raise HTTPException(detail="Client update failed", status_code=500)
+                for key, value in fields.model_dump(exclude_unset=True).items():
 
-        return Client.model_validate(response.data[0])
+                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                        continue
+                
+                    setattr(client, key, value)
+
+                db_session.add(client)
+                await db_session.refresh(client)
+
+            return client
+        
+        except Exception as e:
+            raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @classmethod
-    async def update_client_by_documentid(cls, document_id: int, fields: dict) -> Client:
+    async def update_client_by_documentid(cls, db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client by document ID."""
+        
+        if fields.documentid is None:
+            raise HTTPException(detail="Client document ID is required", status_code=400)
 
-        if not await UserUtils.exist_client_by_documentid(document_id):
+        if not await UserUtils.exist_client_by_documentid(db_session, fields.documentid):
             raise HTTPException(detail="Client not found", status_code=404)
         
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT):
-            raise HTTPException(detail="Cannot update fields: " + ", ".join(cls.EXCLUDED_FIELDS_FOR_UPDATE_CLIENT), status_code=400)
+        try:
+            
+            async with db_session.begin():
 
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE_CLIENT):
-            raise HTTPException(detail="Update fields are invalid", status_code=400)
+                response = await db_session.exec(select(Client).where(Client.documentid == fields.documentid))
+                client = response.one()
+
+                for key, value in fields.model_dump(exclude_unset=True).items():
+
+                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                        continue
+                    
+                    setattr(client, key, value)
+
+                db_session.add(client)
+                await db_session.refresh(client)
+
+            return client
         
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.client_table).update(fields).eq("documentid", document_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Client update failed", status_code=500)
-
-        return Client.model_validate(response.data[0])
+        except Exception as e:
+            raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @classmethod
-    async def delete_client(cls, client_id: int) -> bool:
+    async def delete_client(cls, db_session: AsyncSession, client_id: int) -> bool:
         """Delete a client by ID."""
         
         # check if the client exists
-        if not await UserUtils.exist_client(client_id):
+        if not await UserUtils.exist_client(db_session, client_id):
             raise HTTPException(detail="Client not found", status_code=404)
         
         from utils import OrderUtils
         
-        if await OrderUtils.exist_order_by_client_id(client_id):
+        if await OrderUtils.exist_order_by_client(db_session, client_id):
             raise HTTPException(detail="Cannot delete client with active orders", status_code=400)
         
-        client = await get_db_client()
+        try:
+            
+            async with db_session.begin():
+            
+                response = await db_session.exec(select(Client).where(Client.id == client_id))
+                client = response.one()
 
-        response = await client.table(SETTINGS.client_table).delete().eq("id", client_id).execute()
+                db_session.delete(client)
 
-        if not bool(response.data):
-            raise HTTPException(detail="Failed delete client", status_code=500)
-
-        return bool(response.data)
+            return True
+        
+        except Exception as e:
+            raise HTTPException(detail="Client deletion failed", status_code=500) from e
     
     @classmethod
-    async def delete_client_by_email(cls, email: str) -> bool:
+    async def delete_client_by_email(cls, db_session: AsyncSession, email: str) -> bool:
         """Delete a client by email."""
         
         # check if the client exists
-        if not await UserUtils.exist_client_by_email(email):
+        if not await UserUtils.exist_client_by_email(db_session, email):
             raise HTTPException(detail="Client not found", status_code=404)
         
         from utils import OrderUtils
         
-        _id = await UserUtils.translate_email_by_client_id(email)
+        _id = await UserUtils.translate_email_by_client_id(db_session, email)
 
-        if await OrderUtils.exist_order_by_client_id(_id):
+        if await OrderUtils.exist_order_by_client(db_session, _id):
             raise HTTPException(detail="Cannot delete client with active orders", status_code=400)
 
-        client = await get_db_client()
+        try:
+            
+            async with db_session.begin():
 
-        response = await client.table(SETTINGS.client_table).delete().eq("email", email).execute()
+                response = await db_session.exec(select(Client).where(Client.email == email))
+                client = response.one()
 
-        if not bool(response.data):
-            raise HTTPException(detail="Failed delete client", status_code=500)
+                db_session.delete(client)
 
-        return bool(response.data)
+            return True
+        
+        except Exception as e:
+            raise HTTPException(detail="Client deletion failed", status_code=500) from e
       
     @classmethod
-    async def delete_client_by_documentid(cls, document_id: int) -> bool:
+    async def delete_client_by_documentid(cls, db_session: AsyncSession, document_id: int) -> bool:
         """Delete a client by document ID."""
-
         
         # check if the client exists
-        if not await UserUtils.exist_client_by_documentid(document_id):
+        if not await UserUtils.exist_client_by_documentid(db_session, document_id):
             raise HTTPException(detail="Client not found", status_code=404)
         
         from utils import OrderUtils
         
-        _id = await UserUtils.translate_documentid_by_client_id(document_id)
+        _id = await UserUtils.translate_documentid_by_client_id(db_session, document_id)
         
-        if await OrderUtils.exist_order_by_client_id(_id):
+        if await OrderUtils.exist_order_by_client(db_session, _id):
             raise HTTPException(detail="Cannot delete client with active orders", status_code=400)
         
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.client_table).delete().eq("documentid", document_id).execute()
+            async with db_session.begin():
 
-        if not bool(response.data):
-            raise HTTPException(detail="Failed delete client", status_code=500)
+                response = await db_session.exec(select(Client).where(Client.documentid == document_id))
+                client = response.one()
+            
+                db_session.delete(client)
 
-        return bool(response.data)
+            return True
+
+        except Exception as e:
+            raise HTTPException(detail="Client deletion failed", status_code=500) from e
