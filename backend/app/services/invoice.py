@@ -5,14 +5,16 @@ from models import Invoice, InvoiceItem, Email, File
 from crud import OrderCrud, ProductCrud, ServiceCrud, UserCrud
 from core import SETTINGS
 from services import EmailService
-from db import get_db_client
+#from db import get_db_client
 from utils import OrderUtils
 
 class InvoiceService:
+   
+   """
     
     @classmethod
     async def workflow(cls, order_id: int, tax_rate: float):
-        """Generate an invoice and send it via email."""
+        
         invoice = await cls.generate_invoice(order_id, tax_rate)
         await cls.generate_invoice_pdf(invoice)
         return invoice
@@ -20,7 +22,7 @@ class InvoiceService:
     
     @classmethod
     async def generate_invoice(cls, order_id: int, tax_rate : float) -> Invoice:
-        """Generate an invoice for a client."""
+        
         order = await OrderCrud.read_order(order_id)
         client = await UserCrud.read_client(order.client_id)
 
@@ -66,7 +68,7 @@ class InvoiceService:
     
     @classmethod
     async def generate_invoice_pdf(cls, invoice: Invoice) -> str:
-        """Generate a PDF invoice from an Invoice object."""
+        
         template = SETTINGS.jinja_env.get_template("invoice_pdf.html")
         html = template.render(
             invoice={
@@ -100,7 +102,7 @@ class InvoiceService:
 
     @classmethod
     async def generate_email_invoice(cls, invoice: Invoice) -> str:
-        """Generate an invoice PDF and send it via email."""
+        
         template = SETTINGS.jinja_env.get_template("invoice_email.html")
         return template.render(
             invoice= {
@@ -123,7 +125,7 @@ class InvoiceService:
         
     @classmethod
     async def send_invoice_email(cls, invoice: Invoice):
-        """Send the generated invoice PDF to the client via email."""
+        
         
         subject = f"Factura #{invoice.number}"
         body = await cls.generate_email_invoice(invoice)
@@ -177,3 +179,5 @@ class InvoiceService:
 
         if not bool(response.data):
             raise HTTPException(status_code=500, detail="Failed to update product with invoice URL")
+
+"""

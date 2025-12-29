@@ -21,7 +21,7 @@ async def create_product(request: Request,
     return await ProductCrud.create_product(db_session, storage_client, product)
 
 @router.get("/all", response_model = list[ProductRead])
-async def read_all_products(request: Request, db_session: AsyncSession):
+async def read_all_products(request: Request, db_session: AsyncSession = Depends(get_session)):
     return await ProductCrud.read_all_products(db_session)
 
 @router.get("/{_id}", response_model = ProductRead)
@@ -32,11 +32,11 @@ async def read_product(request: Request, _id: int, db_session: AsyncSession = De
     return await ProductCrud.read_product(db_session, _id)
 
 @router.get("/", response_model = ProductRead)
-async def read_product_2(request: Request, id: int):
+async def read_product_2(request: Request, id: int, db_session: AsyncSession = Depends(get_session):
     """
     Retrieve a product by ID.
     """
-    return await ProductCrud.read_product(id)
+    return await ProductCrud.read_product(db_session, id)
 
 @router.put("/", response_model = ProductRead)
 async def update_product(request: Request,

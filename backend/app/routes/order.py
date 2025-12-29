@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Request, Depends
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio import AsyncSession
 
 from models import OrderRead, OrderUpdate, OrderCreate, OrderStatus, OrderService, OrderProduct
 from crud import OrderCrud
-from services import AuthService, OrderService
-from db import get_db_session
+from services import AuthService, OrderService as OrderServiceService
+from db import get_session
 
 
 router = APIRouter(prefix="/order")
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/order")
 @router.post("/", response_model=OrderRead)
 async def create_order(request: Request,
                        order: OrderCreate,
-                       db_session: AsyncSession = Depends(get_db_session)):
+                       db_session: AsyncSession = Depends(get_session)):
     """
     Create a new order.
     """
@@ -20,7 +20,7 @@ async def create_order(request: Request,
 
 @router.get("/all", response_model=list[OrderRead])
 async def read_all_orders(request: Request,
-                          db_session: AsyncSession = Depends(get_db_session)):
+                          db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve all orders.
     """
@@ -29,7 +29,7 @@ async def read_all_orders(request: Request,
 @router.get("/{_id}", response_model=OrderRead)
 async def read_order(request: Request,
                      _id: int,
-                     db_session: AsyncSession = Depends(get_db_session)):
+                     db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve an order by ID.
     """
@@ -38,7 +38,7 @@ async def read_order(request: Request,
 @router.get("/", response_model=OrderRead)
 async def read_order_2(request: Request,
                        id: int,
-                       db_session: AsyncSession = Depends(get_db_session)):
+                       db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve an order by ID.
     """
@@ -47,178 +47,191 @@ async def read_order_2(request: Request,
 @router.put("/", response_model=OrderRead)
 async def update_order(request: Request,
                        fields : OrderUpdate,
-                       db_session: AsyncSession = Depends(get_db_session)):
+                       db_session: AsyncSession = Depends(get_session)):
     """
     Update an existing order by ID.
     """
     return await OrderCrud.update_order(db_session, fields)
 
-@router.put('/status/{order_id}/{status}')
-async def update_order_status(request: Request, order_id: int, status: OrderStatus):
+@router.put('/status/{order_id}/{status}', response_model=OrderRead)
+async def update_order_status(request: Request,
+                              order_id: int,
+                              status: OrderStatus,
+                              db_session: AsyncSession = Depends(get_session)):
     """
     Update status of a order
     """
-    return await OrderCrud.update_order_status(order_id, status)
+    return await OrderCrud.update_order_status(db_session, order_id, status)
 
-@router.put('/status/')
-async def update_order_status_2(request: Request, order_id: int, status: OrderStatus):
+@router.put('/status/', response_model=OrderRead)
+async def update_order_status_2(request: Request,
+                                order_id: int,
+                                status: OrderStatus,
+                                db_session: AsyncSession = Depends(get_session)):
     """
     Update status of a order
     """
-    return await OrderCrud.update_order_status(order_id, status)
+    return await OrderCrud.update_order_status(db_session, order_id, status)
 
 @router.delete("/{_id}")
-async def delete_order(request: Request, _id: int):
+async def delete_order(request: Request,
+                       _id: int,
+                       db_session: AsyncSession = Depends(get_session)):
     """
     Delete an order by ID.
     """
-    return await OrderCrud.delete_order(_id)
+    return await OrderCrud.delete_order(db_session, _id)
 
-@router.delete("/")
-async def delete_order_2(request: Request, id: int):
+@router.delete("/", response_model=OrderRead)
+async def delete_order_2(request: Request,
+                         id: int,
+                         db_session: AsyncSession = Depends(get_session)):
     """
     Delete an order by ID.
     """
-    return await OrderCrud.delete_order(id)
+    return await OrderCrud.delete_order(db_session, id)
 
-@router.post("/service/")
-async def create_order_service(request: Request, order_service: OrderService):
+@router.post("/service/", response_model=OrderService)
+async def create_order_service(request: Request,
+                               order_service: OrderService,
+                               db_session: AsyncSession = Depends(get_session)):
     """
     Create a new order service.
     """
-    return await OrderCrud.create_order_service(order_service)
+    return await OrderCrud.create_order_service(db_session, order_service)
 
-@router.get("/service/{order_service_id}")
-async def read_order_service(request: Request, order_service_id: int):
-    """
-    Retrieve an order service by ID.
-    """
-    return await OrderCrud.read_order_service(order_service_id)
-
-@router.get("/service/")
-async def read_order_service_2(request: Request, order_service_id: int):
-    """
-    Retrieve an order service by ID.
-    """
-    return await OrderCrud.read_order_service(order_service_id)
-
-@router.get("/service/order/{order_id}")
-async def read_orders_services_by_order_id(request: Request, order_id: int):
+@router.get("/service/order/{order_id}", response_model=list[OrderService])
+async def read_orders_services_by_order(request: Request,
+                                        order_id: int,
+                                        db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve order services by order ID.
     """
-    return await OrderCrud.read_orders_services_by_order_id(order_id)
+    return await OrderCrud.read_orders_services_by_order(db_session, order_id)
 
-@router.get("/service/order/")
-async def read_orders_services_by_order_id_2(request: Request, order_id: int):
+@router.get("/service/order/", response_model=list[OrderService])
+async def read_orders_services_by_order_2(request: Request,
+                                          order_id: int,
+                                          db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve order services by order ID.
     """
-    return await OrderCrud.read_orders_services_by_order_id(order_id)
+    return await OrderCrud.read_orders_services_by_order(db_session, order_id)
 
-@router.put("/service/{_id}")
-async def update_order_service(request: Request, _id: int, fields: dict):
-    """
-    Update an existing order service by ID.
-    """
-    return await OrderCrud.update_order_service(_id, fields)
-
-@router.delete("/service/{_id}")
-async def delete_order_service(request: Request, _id: int):
+@router.delete("/service/{_id}", response_model=OrderService)
+async def delete_order_service(request: Request, 
+                               _id: int,
+                               db_session: AsyncSession = Depends(get_session)):
     """
     Delete an order service by ID.
     """
-    return await OrderCrud.delete_order_service(_id)
+    return await OrderCrud.delete_order_service(db_session, _id)
 
-@router.delete("/service/")
-async def delete_order_service_2(request: Request, id: int):
+@router.delete("/service/", response_model=OrderService)
+async def delete_order_service_2(request: Request,
+                                 id: int,
+                                 db_session: AsyncSession = Depends(get_session)):
     """
     Delete an order service by ID.
     """
-    return await OrderCrud.delete_order_service(id)
+    return await OrderCrud.delete_order_service(db_session, id)
 
-
-@router.post("/product/")
-async def create_order_product(request: Request, order_product: OrderProduct):
+@router.post("/product/", response_model=OrderProduct)
+async def create_order_product(request: Request,
+                               order_product: OrderProduct,
+                               db_session: AsyncSession = Depends(get_session)):
     """
     Create a new order product.
     """
-    return await OrderCrud.create_order_product(order_product)
+    return await OrderCrud.create_order_product(db_session, order_product)
 
-@router.get("/product/{_id}")
-async def read_order_product(request: Request, _id: int):
+@router.get("/product/{_id}", response_model=OrderProduct)
+async def read_order_product(request: Request,
+                             _id: int,
+                             db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve an order product by ID.
     """
-    return await OrderCrud.read_order_product(_id)
+    return await OrderCrud.read_order_product(db_session, _id)
 
-@router.get("/product/")
-async def read_order_product_2(request: Request, id: int):
+@router.get("/product/", response_model=OrderProduct)
+async def read_order_product_2(request: Request,
+                               id: int,
+                               db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve an order product by ID.
     """
-    return await OrderCrud.read_order_product(id)
-
-@router.put("/product/{_id}")
-async def update_order_product(request: Request, _id: int, fields: dict):
-    """
-    Update an existing order product by ID.
-    """
-    return await OrderCrud.update_order_product(_id, fields)
+    return await OrderCrud.read_order_product(db_session, id)
 
 @router.delete("/product/{_id}")
-async def delete_order_product(request: Request, _id: int):
+async def delete_order_product(request: Request,
+                               order_product: OrderProduct,
+                               db_session: AsyncSession = Depends(get_session)):
     """
     Delete an order product by ID.
     """
-    return await OrderCrud.delete_order_product(_id)
+    return await OrderCrud.delete_order_product(db_session, order_product)
 
 @router.delete("/product/")
-async def delete_order_product_2(request: Request, id: int):
+async def delete_order_product_2(request: Request,
+                                 order_product: OrderProduct,
+                                 db_session: AsyncSession = Depends(get_session)):
     """
     Delete an order product by ID.
     """
-    return await OrderCrud.delete_order_product(id)
+    return await OrderCrud.delete_order_product(db_session, order_product)
 
 
-@router.get("/product/order/{order_id}")
-async def read_orders_products_by_order_id(request: Request, order_id: int):
+@router.get("/product/order/{order_id}", response_model=list[OrderProduct])
+async def read_orders_products_by_order(request: Request,
+                                        order_id: int,
+                                        db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve order products by order ID.
     """
-    return await OrderCrud.read_orders_products_by_order_id(order_id)
+    return await OrderCrud.read_orders_products_by_order(db_session, order_id)
 
 @router.get("/product/order/")
-async def read_order_products_by_order_id_2(request: Request, order_id: int):
+async def read_order_products_by_order_2(request: Request,
+                                         order_id: int,
+                                         db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve order products by order ID.
     """
-    return await OrderCrud.read_orders_products_by_order_id(order_id)
+    return await OrderCrud.read_orders_products_by_order(db_session, order_id)
 
-@router.get("/client/{client_id}")
-async def search_orders_by_client_id(request: Request, client_id: int):
+@router.get("/client/{client_id}", response_model=list[OrderRead])
+async def search_orders_by_client_id(request: Request,
+                                     client_id: int,
+                                     db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve orders by client ID.
     """
-    return await OrderService.search_orders_by_client_id(client_id)
+    return await OrderServiceService.search_orders_by_client(db_session, client_id)
 
-@router.get("/client/")
-async def search_orders_by_client_id_2(request: Request, client_id: int):
+@router.get("/client/", response_model=list[OrderRead])
+async def search_orders_by_client_id_2(request: Request,
+                                       client_id: int,
+                                       db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve orders by client ID.
     """
-    return await OrderService.search_orders_by_client_id(client_id)
+    return await OrderServiceService.search_orders_by_client(db_session, client_id)
 
-@router.get("/status/{status}")
-async def search_orders_by_status(request: Request, status: OrderStatus):
+@router.get("/status/{status}", response_model=list[OrderRead])
+async def search_orders_by_status(request: Request,
+                                  status: OrderStatus,
+                                  db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve orders by status.
     """
-    return await OrderService.search_orders_by_status(status)
+    return await OrderServiceService.search_orders_by_status(db_session, status)
 
-@router.get("/status/")
-async def search_orders_by_status_2(request: Request, status: OrderStatus):
+@router.get("/status/", response_model=list[OrderRead])
+async def search_orders_by_status_2(request: Request,
+                                    status: OrderStatus,
+                                    db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve orders by status.
     """
-    return await OrderService.search_orders_by_status(status)
+    return await OrderServiceService.search_orders_by_status(db_session, status)

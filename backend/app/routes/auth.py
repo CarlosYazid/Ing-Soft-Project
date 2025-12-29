@@ -6,6 +6,8 @@ from services import AuthService
 
 router = APIRouter(prefix="/auth")
 
+"""
+
 @router.post("/sign-up")
 async def sign_up(form_data: OAuth2PasswordRequestForm = Depends()):
     return await AuthService.sign_up(form_data.username, form_data.password)
@@ -18,3 +20,4 @@ async def sign_in(form_data: OAuth2PasswordRequestForm = Depends(), response: Re
 async def sign_out(response: Response):
     return await AuthService.sign_out()
 
+"""
