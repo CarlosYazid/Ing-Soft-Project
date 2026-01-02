@@ -238,7 +238,7 @@ class ProductCrud:
             raise HTTPException(detail="Failed to retrieve product categories", status_code=500) from e
 
     @classmethod
-    async def delete_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> None:
+    async def delete_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> bool:
         """Delete a product category by ID."""
 
         # Check if the category exists before attempting to delete

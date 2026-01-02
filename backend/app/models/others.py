@@ -75,6 +75,7 @@ class PaymentCreate(BaseModel):
     
 class PaymentUpdate(BaseModel):
 
+    id: int = Field(..., description="Payment's unique identifier", gt = 0)
     amount: Optional[float] = Field(None, description="Amount paid", gt = 0)
     method: Optional[PaymentMethod] = Field(None, description="Payment method used")
     status: Optional[PaymentStatus] = Field(None, description="Current status of the payment")

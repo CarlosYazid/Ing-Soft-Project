@@ -4,10 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 import jwt
 
-#from db import get_db_client
 from core import SETTINGS
-
-
 class AuthService:
     """Service for handling authentication operations."""
     SECURITY_SCHEME = OAuth2PasswordBearer(tokenUrl=SETTINGS.sign_in_redirect_url)

@@ -6,7 +6,6 @@ from crud import OrderCrud
 from services import AuthService, OrderService as OrderServiceService
 from db import get_session
 
-
 router = APIRouter(prefix="/order")
 
 @router.post("/", response_model=OrderRead)
@@ -118,24 +117,6 @@ async def read_orders_services_by_order_2(request: Request,
     """
     return await OrderCrud.read_orders_services_by_order(db_session, order_id)
 
-@router.delete("/service/{_id}", response_model=OrderService)
-async def delete_order_service(request: Request, 
-                               _id: int,
-                               db_session: AsyncSession = Depends(get_session)):
-    """
-    Delete an order service by ID.
-    """
-    return await OrderCrud.delete_order_service(db_session, _id)
-
-@router.delete("/service/", response_model=OrderService)
-async def delete_order_service_2(request: Request,
-                                 id: int,
-                                 db_session: AsyncSession = Depends(get_session)):
-    """
-    Delete an order service by ID.
-    """
-    return await OrderCrud.delete_order_service(db_session, id)
-
 @router.post("/product/", response_model=OrderProduct)
 async def create_order_product(request: Request,
                                order_product: OrderProduct,
@@ -144,24 +125,6 @@ async def create_order_product(request: Request,
     Create a new order product.
     """
     return await OrderCrud.create_order_product(db_session, order_product)
-
-@router.get("/product/{_id}", response_model=OrderProduct)
-async def read_order_product(request: Request,
-                             _id: int,
-                             db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve an order product by ID.
-    """
-    return await OrderCrud.read_order_product(db_session, _id)
-
-@router.get("/product/", response_model=OrderProduct)
-async def read_order_product_2(request: Request,
-                               id: int,
-                               db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve an order product by ID.
-    """
-    return await OrderCrud.read_order_product(db_session, id)
 
 @router.delete("/product/{_id}")
 async def delete_order_product(request: Request,

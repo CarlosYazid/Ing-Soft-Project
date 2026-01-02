@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, Depends
 from botocore.client import BaseClient
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio import AsyncSession
 
 from models import PaymentCreate, PaymentRead, PaymentUpdate, PaymentMethod, PaymentStatus
 from crud import PaymentCrud

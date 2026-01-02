@@ -64,9 +64,6 @@ class PaymentCrud:
     @classmethod
     async def update_payment(cls, db_session: AsyncSession, fields: PaymentUpdate) -> Payment:
         """Update an existing payment."""
-        
-        if fields.id is None:
-            raise HTTPException(detail="Payment ID is required", status_code=400)
 
         # check if payment exists
         if not await PaymentUtils.exist_payment(db_session, fields.id):

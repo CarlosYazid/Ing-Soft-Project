@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     BACKEND_DIR: Path = Path(__file__).resolve().parent.parent.parent
     FRONTEND_DIR: Path = BACKEND_DIR.parent / "frontend"
     STATIC_DIR: Path = FRONTEND_DIR / "my-app" / "static"
+    port: int = 8000
 
     # Database
     db_url: str = Field(..., alias="database_url")

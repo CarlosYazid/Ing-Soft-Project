@@ -32,7 +32,7 @@ class OrderCrud:
                 
                 from services import OrderService
                 
-                await OrderService.update_inventory(db_session, new_order.id)
+                await OrderService.update_inventory(db_session, 0 if new_order.id is None else new_order.id)
 
             return new_order
         
@@ -121,7 +121,7 @@ class OrderCrud:
 
                 from services import OrderService
 
-                await OrderService.update_inventory(db_session, order.id)
+                await OrderService.update_inventory(db_session, 0 if order.id is None else order.id)
 
             return order
         
@@ -151,7 +151,7 @@ class OrderCrud:
 
                 from services import OrderService
 
-                await OrderService.update_inventory(db_session, order.id)
+                await OrderService.update_inventory(db_session, 0 if order.id is None else order.id)
 
             return order
         
@@ -171,10 +171,10 @@ class OrderCrud:
             raise HTTPException(detail="Cannot delete a completed order", status_code=400)
         
         # Delete all order products associated
-        cls.delete_order_products_by_order(db_session, order_id)
+        await cls.delete_order_products_by_order(db_session, order_id)
         
         # Delete all order services associated
-        cls.delete_order_services_by_order(db_session, order_id)
+        await cls.delete_order_services_by_order(db_session, order_id)
         
         try:
             
@@ -262,33 +262,13 @@ class OrderCrud:
             raise HTTPException(detail="Failed to retrieve orders for service", status_code=500) from e
     
     @classmethod
-    async def read_orders_services_ids_by_order(cls, db_session: AsyncSession, order_id: int) -> list[int]:
-        """Retrieve service IDs associated with an order."""
-        
-        if not await OrderUtils.exist_order(db_session, order_id):
-            raise HTTPException(detail="Order not found", status_code=404)
-        
-        try:
-            
-            response = await db_session.exec(select(OrderService.id).where(OrderService.order_id == order_id))
-            order_services = list(response.all())
-
-            if not order_services:
-                raise HTTPException(detail="No services found for this order", status_code=404)
-
-            return order_services
-        
-        except Exception as e:
-            raise HTTPException(detail="Failed to retrieve services for order", status_code=500) from e
-    
-    @classmethod
-    async def delete_orders_services_by_order(cls, db_session: AsyncSession, order_id: int) -> list[OrderService]:
+    async def delete_order_services_by_order(cls, db_session: AsyncSession, order_id: int) -> bool:
         """Retrieve all orders for a specific service."""
         
-        from utils import OrderUtils
+        from utils import ServiceUtils
         
         # Ensure the service_id exists before retrieving orders
-        if not await OrderUtils.exist_service(db_session, order_id):
+        if not await ServiceUtils.exist_service(db_session, order_id):
             raise HTTPException(detail="Service not found", status_code=404)
 
         try:
@@ -301,17 +281,22 @@ class OrderCrud:
             raise HTTPException(detail="Failed to retrieve orders for service", status_code=500) from e
     
     @classmethod
-    async def delete_order_service(cls, db_session: AsyncSession, order_service_id: int) -> bool:
-        """Delete an order service by ID."""
+    async def delete_order_service(cls, db_session: AsyncSession, order_service: OrderService):
+        
+        from utils import OrderUtils
+        
+        if not await OrderUtils.exist_order(db_session, order_service.order_id):
+            raise HTTPException(detail="Order not found", status_code=404)
         
         try:
             
             async with db_session.begin():
 
-                await db_session.exec(delete(OrderService).where(OrderService.id == order_service_id))
-                
-            return True
-        
+                response = await db_session.exec(select(OrderService).where(OrderService.order_id == order_service.order_id).where(OrderService.service_id == order_service.service_id))
+                order_service = response.one()
+
+                await db_session.delete(order_service)
+            
         except Exception as e:
             raise HTTPException(detail="Failed to delete order service", status_code=500) from e
     
@@ -333,6 +318,8 @@ class OrderCrud:
         if not await ProductUtils.exist_product(db_session, order_product.product_id):
             raise HTTPException(detail="Product not found", status_code=404)
         
+        from models import Product
+        
         try:
             
             async with db_session.begin():
@@ -343,7 +330,7 @@ class OrderCrud:
                 response = await db_session.exec(select(Product.price).where(Product.id == order_product.product_id))
                 price_product = response.one()
 
-                order.total += order_product.quantity * price_product
+                order.total_price = (order_product.quantity * price_product) + order.total_price
 
                 db_session.add(order)
                 db_session.add(order_product)
@@ -354,23 +341,6 @@ class OrderCrud:
         
         except Exception as e:
             raise HTTPException(detail="Failed to add product to order", status_code=500) from e
-    
-    @classmethod
-    async def read_order_product(cls, db_session: AsyncSession, order_product_id: int) -> OrderProduct:
-        """Retrieve an order product by ID."""
-        
-        try:
-            
-            response = await db_session.exec(select(OrderProduct).where(OrderProduct.id == order_product_id))
-            order_product = response.first()
-            
-            if order_product is None:
-                raise HTTPException(detail="Order product not found", status_code=404)
-            
-            return order_product
-        
-        except Exception as e:
-            raise HTTPException(detail="Failed to retrieve order product", status_code=500) from e
     
     @classmethod
     async def read_orders_products_by_order(cls, db_session: AsyncSession, order_id: int) -> list[OrderProduct]:
