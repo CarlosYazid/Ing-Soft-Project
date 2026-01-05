@@ -42,4 +42,4 @@ async def root():
     return { "status" : "Ok" }
 
 if __name__ == "__main__":
-    run("main:app", host="127.0.0.1", port=8000, reload=True)
+    run("main:app", host=SETTINGS.port, port=8000, reload=True)
