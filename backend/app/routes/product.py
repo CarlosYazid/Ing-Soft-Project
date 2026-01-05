@@ -17,11 +17,16 @@ async def create_product(request: Request,
                          product: ProductCreate,
                          storage_client: BaseClient = Depends(get_e2_client),
                          db_session: AsyncSession = Depends(get_session)):
-    
+    """
+    Create a product
+    """
     return await ProductCrud.create_product(db_session, storage_client, product)
 
 @router.get("/all", response_model = list[ProductRead])
 async def read_all_products(request: Request, db_session: AsyncSession = Depends(get_session)):
+    """
+    Retrieve all products
+    """
     return await ProductCrud.read_all_products(db_session)
 
 @router.get("/{_id}", response_model = ProductRead)
@@ -53,7 +58,9 @@ async def update_image(request: Request,
                        image: UploadFile = File(..., title="photo_product"),
                        storage_client: BaseClient = Depends(get_e2_client),
                        db_session: AsyncSession = Depends(get_session)):
-    """ Update the image of a product by ID."""
+    """
+    Update the image of a product by ID.
+    """
     return await ProductCrud.update_image(db_session, storage_client, _id, image)
 
 @router.put("/image/", response_model = ProductRead)
@@ -62,7 +69,9 @@ async def update_image_2(request: Request,
                          image: UploadFile = File(..., title="photo_product"),
                          storage_client: BaseClient = Depends(get_e2_client),
                          db_session: AsyncSession = Depends(get_session)):
-    """ Update the image of a product by ID."""
+    """
+    Update the image of a product by ID.
+    """
     return await ProductCrud.update_image(db_session, storage_client, id, image)
 
 @router.put("/stock/{_id}/{stock}/{replace}", response_model = ProductRead)
@@ -300,14 +309,16 @@ async def search_products_by_cost_range_2(request: Request,
     return await ProductService.search_products_by_cost_range(db_session, min_cost, max_cost)
 
 @router.get("/search/low-stock", response_model = list[ProductRead])
-async def search_low_stock_products(request: Request, db_session: AsyncSession = Depends(get_session)):
+async def search_low_stock_products(request: Request,
+                                    db_session: AsyncSession = Depends(get_session)):
     """
     Search products with low stock.
     """
     return await ProductService.search_low_stock_products(db_session)
 
 @router.get("/search/expired", response_model = list[ProductRead])
-async def search_expired_products(request: Request, db_session: AsyncSession = Depends(get_session)):
+async def search_expired_products(request: Request,
+                                  db_session: AsyncSession = Depends(get_session)):
     """
     Search expired products.
     """

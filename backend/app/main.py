@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     await init_db()
     yield
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan)   
 
 # Middleware configuration
 app.add_middleware(
