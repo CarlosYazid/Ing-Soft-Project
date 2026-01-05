@@ -14,12 +14,11 @@ class ProductCrud:
     async def create_product(cls, db_session: AsyncSession, storage_client: BaseClient, product: ProductCreate) -> Product:
         """Create a new product."""
         
-        image_url = None
+        image_key = None
         
         if product.image:
 
             image_key = await ProductUtils.upload_image(storage_client, product.image)
-        
             
         try:
             
@@ -29,16 +28,15 @@ class ProductCrud:
             async with db_session.begin():
             
                 new_product = Product(**product_data)
-                
                 db_session.add(new_product)
-                await db_session.refresh(new_product)
-                
+
+            await db_session.refresh(new_product)    
             return new_product
         
         except Exception as e:
 
-            if image_url:
-                await ProductUtils.delete_image(storage_client, image_url)
+            if image_key:
+                await ProductUtils.delete_image(storage_client, image_key)
 
             raise HTTPException(status_code=500, detail="Service creation failed") from e
         
@@ -69,7 +67,7 @@ class ProductCrud:
             response = await db_session.exec(select(Product).where(Product.id == product_id))
             product = response.first()
             
-            if not product:
+            if product is None:
                 raise HTTPException(detail="Product not found", status_code=404)
             
             return product
@@ -87,24 +85,24 @@ class ProductCrud:
         
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Product).where(Product.id == fields.id))
-                product = response.one()
-
-                for key, value in fields.model_dump(exclude_unset=True).items():
+            response = await db_session.exec(select(Product).where(Product.id == fields.id))
+            product = response.one()
+            
+            for key, value in fields.model_dump(exclude_unset=True).items():
                     
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
+                    continue
                     
-                    setattr(product, key, value)
+                setattr(product, key, value)
 
-                db_session.add(product)
-                await db_session.refresh(product)
+            db_session.add(product)
+            await db_session.commit()
                 
+            await db_session.refresh(product)
             return product
             
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Product update failed", status_code=500) from e
     
     @classmethod
@@ -115,11 +113,11 @@ class ProductCrud:
         if not await ProductUtils.exist_product(db_session, product_id):
             raise HTTPException(detail="Product not found", status_code=404)
         try:
+            
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            product = response.one()
 
             async with db_session.begin():
-
-                response = await db_session.exec(select(Product).where(Product.id == product_id))
-                product = response.one()
 
                 if replace:
                     product.stock = new_stock
@@ -130,8 +128,8 @@ class ProductCrud:
                     product.stock = 0
 
                 db_session.add(product)
-                await db_session.refresh(product)
             
+            await db_session.refresh(product)
             return product
         
         except Exception as e:
@@ -146,13 +144,13 @@ class ProductCrud:
             raise HTTPException(detail="Product not found", status_code=404)
         
         try:
+            
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            product = response.one()
 
             async with db_session.begin():
 
-                response = await db_session.exec(select(Product).where(Product.id == product_id))
-                product = response.one()
-
-                if product.image_key:
+                if not product.image_key is None:
                     await ProductUtils.delete_image(storage_client, product.image_key)
 
                 image_key = await ProductUtils.upload_image(storage_client, image)
@@ -160,8 +158,8 @@ class ProductCrud:
                 product.image_key = image_key
 
                 db_session.add(product)
-                await db_session.refresh(product)
 
+            await db_session.refresh(product)
             return product
     
         except Exception as e:
@@ -183,19 +181,24 @@ class ProductCrud:
         
         try:
 
-            async with db_session.begin():
+            image_key = None
 
-                response = await db_session.exec(select(Product).where(Product.id == product_id))
-                product = response.one()
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            product = response.one()
 
-                if product.image_key:
-                    await ProductUtils.delete_image(storage_client, product.image_key)
+            if not product.image_key is None:
+                image_key = product.image_key
 
-                await db_session.delete(product)
+            await db_session.delete(response.one())
+            await db_session.commit()
             
+            if not image_key is None:
+                await ProductUtils.delete_image(storage_client, image_key)
+
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Product deletion failed", status_code=500) from e
     
     @classmethod
@@ -213,8 +216,8 @@ class ProductCrud:
             async with db_session.begin():
 
                 db_session.add(product_category)
-                await db_session.refresh(product_category)
             
+            await db_session.refresh(product_category)
             return product_category
         
         except Exception as e:
@@ -246,17 +249,16 @@ class ProductCrud:
             raise HTTPException(detail="Product Category not found", status_code=404)
         
         try:
+            
+            response = await db_session.exec(select(ProductCategory).where(ProductCategory.product_id == product_category.product_id, ProductCategory.category_id == product_category.category_id))
 
-            async with db_session.begin():
-
-                response = await db_session.exec(select(ProductCategory).where(ProductCategory.product_id == product_category.product_id, ProductCategory.category_id == product_category.category_id))
-                product_category = response.one()
-
-                await db_session.delete(product_category)
-
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
             return True
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Product category deletion failed", status_code=500) from e
 
     @classmethod
@@ -268,10 +270,9 @@ class ProductCrud:
             async with db_session.begin():
 
                 new_category = Category(**category.model_dump(exclude_unset=True))
-
                 db_session.add(new_category)
-                await db_session.refresh(new_category)
             
+            await db_session.refresh(new_category)
             return new_category
         
         except Exception as e:
@@ -303,7 +304,7 @@ class ProductCrud:
             response = await db_session.exec(select(Category).where(Category.id == category_id))
             category = response.first()
 
-            if not category:
+            if category is None:
                 raise HTTPException(detail="Category not found", status_code=404)
 
             return category
@@ -320,25 +321,25 @@ class ProductCrud:
             raise HTTPException(detail="Category not found", status_code=404)
         
         try:
+            
+            response = await db_session.exec(select(Category).where(Category.id ==fields.id))
+            category = response.one()
 
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Category).where(Category.id ==fields.id))
-                category = response.one()
-
-                for key, value in fields.model_dump(exclude_unset=True).items():
+            for key, value in fields.model_dump(exclude_unset=True).items():
                     
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
+                    continue
 
-                    setattr(category, key, value)
+                setattr(category, key, value)
 
-                db_session.add(category)
-                await db_session.refresh(category)
-
+            db_session.add(category)
+            await db_session.commit()
+                
+            await db_session.refresh(category)
             return category
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to update category", status_code=500) from e
     
     @classmethod
@@ -351,14 +352,13 @@ class ProductCrud:
         
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Category).where(Category.id == category_id))
-                category = response.one()
-
-                await db_session.delete(category)
+            response = await db_session.exec(select(Category).where(Category.id == category_id))
+            
+            await db_session.delete(response.one())
+            await db_session.commit()
             
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to delete category", status_code=500) from e

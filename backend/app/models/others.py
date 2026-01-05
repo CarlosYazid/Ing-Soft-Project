@@ -2,8 +2,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-from typing import Optional
-from datetime import datetime
+from typing import Optional, TYPE_CHECKING
+from datetime import datetime, date
 from enum import Enum
 from pathlib import Path
 import os
@@ -11,8 +11,11 @@ import os
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
 from sqlmodel import SQLModel, Field as FieldDB, Relationship
 
-from models import Client
 from core import SETTINGS
+
+if TYPE_CHECKING:
+    from models.user import Client
+
 
 class PaymentMethod(str, Enum):
     """
@@ -41,13 +44,13 @@ class Payment(SQLModel, table=True):
     amount: float = FieldDB(..., description="Amount paid")
     method: PaymentMethod = FieldDB(..., description="Payment method used")
     status: PaymentStatus = FieldDB(..., description="Current status of the payment")
-    due_date: Optional[datetime] = FieldDB(None, description="Due date for the credit payment")
+    due_date: Optional[date] = FieldDB(None, description="Due date for the credit payment")
     interest_rate: Optional[float] = FieldDB(None, description="Interest rate applied to the credit")
     account_number: Optional[str] = FieldDB(None, description="Account number for the bank transfer")
-    created_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the payment was created")
-    updated_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the payment was last updated")
+    created_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the payment was created")
+    updated_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the payment was last updated")
 
-    client: Client = Relationship(back_populates="payments")
+    client: 'Client' = Relationship(back_populates="payments", sa_relationship_kwargs={"lazy": "selectin"})
 
 class PaymentCreate(BaseModel):
     
@@ -55,7 +58,7 @@ class PaymentCreate(BaseModel):
     amount: float = Field(..., description="Amount paid", gt = 0)
     method: PaymentMethod = Field(default=PaymentMethod.CASH, description="Payment method used")
     status: PaymentStatus = Field(default=PaymentStatus.PENDING, description="Current status of the payment")
-    due_date: Optional[datetime] = Field(None, description="Due date for the credit payment")
+    due_date: Optional[date] = Field(None, description="Due date for the credit payment")
     interest_rate: Optional[float] = Field(None, description="Interest rate applied to the credit", gt = 0)
     account_number: Optional[str] = Field(None, description="Account number for the bank transfer", gt = 0)
     
@@ -67,7 +70,7 @@ class PaymentCreate(BaseModel):
                                                   "amount": 1000.00,
                                                   "method": "Crédito_en_tiempo",
                                                   "status": "Pendiente",
-                                                  "due_date": "2023-01-01T00:00:00Z",
+                                                  "due_date": "2023-01-01",
                                                   "interest_rate": 0.05,
                                                   "account_number": "1234567890"
                                               }
@@ -78,10 +81,10 @@ class PaymentUpdate(BaseModel):
     amount: Optional[float] = Field(None, description="Amount paid", gt = 0)
     method: Optional[PaymentMethod] = Field(None, description="Payment method used")
     status: Optional[PaymentStatus] = Field(None, description="Current status of the payment")
-    due_date: Optional[datetime] = Field(None, description="Due date for the credit payment")
+    due_date: Optional[date] = Field(None, description="Due date for the credit payment")
     interest_rate: Optional[float] = Field(None, description="Interest rate applied to the credit", gt = 0)
     account_number: Optional[str] = Field(None, description="Account number for the bank transfer", gt = 0)
-    updated_at: datetime = Field(default=datetime.now(), description="Timestamp when the payment was last updated")
+    updated_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the payment was last updated")
 
     model_config : ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,
@@ -90,7 +93,7 @@ class PaymentUpdate(BaseModel):
                                                   "amount": 1000.00,
                                                   "method": "Crédito_en_tiempo",
                                                   "status": "Pendiente",
-                                                  "due_date": "2023-01-01T00:00:00Z",
+                                                  "due_date": "2023-01-01",
                                                   "interest_rate": 0.05,
                                                   "account_number": "1234567890",
                                                   "updated_at": "2023-01-01T00:00:00Z"
@@ -104,7 +107,7 @@ class PaymentRead(BaseModel):
     amount: float = Field(..., description="Amount paid")
     method: PaymentMethod = Field(..., description="Payment method used")
     status: PaymentStatus = Field(..., description="Current status of the payment")
-    due_date: Optional[datetime] = Field(None, description="Due date for the credit payment")
+    due_date: Optional[date] = Field(None, description="Due date for the credit payment")
     interest_rate: Optional[float] = Field(None, description="Interest rate applied to the credit")
     account_number: Optional[str] = Field(None, description="Account number for the bank transfer")
 
@@ -267,7 +270,7 @@ class InvoiceItem(BaseModel):
 class Invoice(BaseModel):
     number: int = Field(..., description="Invoice number") # Id of order
     date: datetime = Field(..., description="Date of the invoice")
-    client: Client = Field(..., description="Client associated with the invoice")
+    client: 'Client' = Field(..., description="Client associated with the invoice")
     items: list[InvoiceItem] = Field(default_factory=list, description="List of items in the invoice")
     tax_rate: float = Field(0.0, description="Tax rate applied to the invoice")
 

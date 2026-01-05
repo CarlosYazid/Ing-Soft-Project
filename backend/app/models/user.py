@@ -1,10 +1,13 @@
-from __future__ import annotations
-from typing import Optional
-from datetime import datetime
+from typing import Optional, TYPE_CHECKING
+from datetime import datetime, date
 from enum import Enum
 
 from pydantic import BaseModel, EmailStr, ConfigDict, Field
 from sqlmodel import SQLModel, Relationship, Field as FieldDB
+
+if TYPE_CHECKING:
+    from models.order import Order
+    from models.others import Payment
 
 class Client(SQLModel, table = True):
     
@@ -14,11 +17,11 @@ class Client(SQLModel, table = True):
     phone: Optional[str] = FieldDB(None, description="Client's phone number", index = True)
     name: str = FieldDB(..., description="Client's name")
     status : bool = FieldDB(default=True, description="Is the client active?")
-    created_at: datetime = FieldDB(default_factory=datetime.now, description="Timestamp when the client was created")
-    updated_at: datetime = FieldDB(default_factory=datetime.now, description="Timestamp when the client was last updated")
+    created_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the client was created")
+    updated_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the client was last updated")
     
-    orders: list["Order"] = Relationship(back_populates="client")
-    payments: list["Payment"] = Relationship(back_populates="client")
+    orders: Optional[list['Order']] = Relationship(back_populates="client", sa_relationship_kwargs={"lazy": "selectin"})
+    payments: Optional[list['Payment']] = Relationship(back_populates="client", sa_relationship_kwargs={"lazy": "selectin"})
 
 
 class ClientCreate(BaseModel):
@@ -46,7 +49,7 @@ class ClientUpdate(BaseModel):
     phone: Optional[str] = Field(None, description="Client's phone number")
     name: Optional[str] = Field(None, description="Client's name")
     status: Optional[bool] = Field(None, description="Is the client active?")
-    updated_at: datetime = Field(default_factory=datetime.now, description="Timestamp when the client was last updated")
+    updated_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the client was last updated")
     
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                             json_schema_extra={
@@ -92,14 +95,14 @@ class Employee(SQLModel, table = True):
     email: EmailStr = FieldDB(..., description="Employee's email address", index = True)
     phone: Optional[str] = FieldDB(None, description="Employee's phone number", index = True)
     role: EmployeeRole = FieldDB(..., description="Employee's role")
-    birth_date: datetime = FieldDB(..., description="Employee's birth date")
+    birth_date: date = FieldDB(..., description="Employee's birth date")
     first_name: str = FieldDB(..., description="Employee's first name")
     last_name: str = FieldDB(..., description="Employee's last name")
     status : bool = FieldDB(default=True, description="Is the employee active?")
-    created_at: datetime = FieldDB(default_factory=datetime.now, description="Timestamp when the employee was created")
-    updated_at: datetime = FieldDB(default_factory=datetime.now, description="Timestamp when the employee was last updated")
-    
-    orders: list["Order"] = Relationship(back_populates="employee")
+    created_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the employee was created")
+    updated_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the employee was last updated")
+
+    orders: Optional[list['Order']] = Relationship(back_populates="employee", sa_relationship_kwargs={"lazy": "selectin"})
     
 class EmployeeCreate(BaseModel):
 
@@ -119,7 +122,7 @@ class EmployeeCreate(BaseModel):
                                                     "email": "doro@example.com",
                                                     "phone": "555-555-5555",
                                                     "role": "Empleado",
-                                                    "birth_date": "1990-01-01T00:00:00Z",
+                                                    "birth_date": "1990-01-01",
                                                     "first_name": "Dorotea",
                                                     "last_name": "Hernandez",
                                                 }
@@ -138,7 +141,7 @@ class EmployeeUpdate(BaseModel):
     first_name: Optional[str] = Field(None, description="Employee's first name")
     last_name: Optional[str] = Field(None, description="Employee's last name")
     status: Optional[bool] = Field(None, description="Is the employee active?")
-    updated_at: datetime = Field(default_factory=datetime.now, description="Timestamp when the employee was last updated")
+    updated_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the employee was last updated")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                             use_enum_values=True,

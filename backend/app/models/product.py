@@ -1,10 +1,14 @@
-from __future__ import annotations
 from fastapi import UploadFile
-from typing import Optional
-from datetime import datetime
+from typing import Optional, TYPE_CHECKING
+from datetime import datetime, date
 
 from pydantic import BaseModel, Field, ConfigDict
 from sqlmodel import Field as FieldDB, SQLModel, Relationship
+
+if TYPE_CHECKING:
+    from models.service import ServiceInput
+    from models.products import ProductCategory
+    from models.order import OrderProduct
 
 class Product(SQLModel, table=True):
     """
@@ -18,12 +22,13 @@ class Product(SQLModel, table=True):
     stock: int = FieldDB(..., description="Available stock of the product")
     minimum_stock: int = FieldDB(..., description="Minimum stock level of the product")
     image_key: Optional[str] = FieldDB(None, description="Key of the product image")
-    expiration_date: Optional[datetime] = FieldDB(None, description="Expiration date of the consumable product")
-    created_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the product was created")
-    updated_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the product was last updated")
+    expiration_date: Optional[date] = FieldDB(None, description="Expiration date of the consumable product")
+    created_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the product was created")
+    updated_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the product was last updated")
 
-    service_inputs: list["ServiceInput"] = Relationship(back_populates="product")
-    product_categories: list["ProductCategory"] = Relationship(back_populates="product")
+    service_inputs: Optional[list['ServiceInput']] = Relationship(back_populates="product", sa_relationship_kwargs={"lazy": "selectin"})
+    product_categories: Optional[list['ProductCategory']] = Relationship(back_populates="product", sa_relationship_kwargs={"lazy": "selectin"})
+    order_products: Optional[list['OrderProduct']] = Relationship(back_populates="product", sa_relationship_kwargs={"lazy": "selectin"})
 
 class ProductCreate(BaseModel):
     
@@ -34,7 +39,7 @@ class ProductCreate(BaseModel):
     cost: float = Field(..., description="Product's cost", gt = 0)
     stock: int = Field(..., description="Available stock of the product", gt = 0)
     minimum_stock: int = Field(..., description="Minimum stock level of the product", gt = 0)
-    expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
+    expiration_date: Optional[date] = Field(None, description="Expiration date of the consumable product")
     
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
@@ -44,7 +49,7 @@ class ProductCreate(BaseModel):
                                                   "price": 9.99,
                                                   "stock": 50,
                                                   "minimum_stock" : 7,
-                                                  "expiration_date": "2023-12-31T00:00:00Z"
+                                                  "expiration_date": "2023-12-31"
                                               }
                                           },
                                           json_encoders={
@@ -64,7 +69,7 @@ class ProductRead(BaseModel):
     stock: int = Field(..., description="Available stock of the product")
     minimum_stock: int = Field(..., description="Minimum stock level of the product")
     image_key: Optional[str] = Field(None, description="URL of the product image")
-    expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
+    expiration_date: Optional[date] = Field(None, description="Expiration date of the consumable product")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
@@ -76,7 +81,7 @@ class ProductRead(BaseModel):
                                                   "stock": 50,
                                                   "minimum_stock" : 7,
                                                   "image_url": "https://example.com/image.jpg",
-                                                  "expiration_date": "2023-12-31T00:00:00Z"
+                                                  "expiration_date": "2023-12-31"
                                               }
                                           },
                                           json_encoders={
@@ -94,8 +99,8 @@ class ProductUpdate(BaseModel):
     price: Optional[float] = Field(None, description="Product's price", gt = 0)
     cost: Optional[float] = Field(None, description="Product's cost", gt = 0)
     minimum_stock: Optional[int] = Field(None, description="Minimum stock level of the product", gt = 0)
-    expiration_date: Optional[datetime] = Field(None, description="Expiration date of the consumable product")
-    updated_at: datetime = Field(default_factory=datetime.now(), description="Timestamp when the product was last updated")
+    expiration_date: Optional[date] = Field(None, description="Expiration date of the consumable product")
+    updated_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the product was last updated")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
@@ -106,7 +111,7 @@ class ProductUpdate(BaseModel):
                                                   "cost": 5.99,
                                                   "stock": 50,
                                                   "minimum_stock" : 7,
-                                                  "expiration_date": "2023-12-31T00:00:00Z",
+                                                  "expiration_date": "2023-12-31",
                                                   "updated_at" : "2023-12-31T00:00:00Z"
                                               }
                                           },
@@ -121,8 +126,8 @@ class ProductCategory(SQLModel, table=True):
     product_id: int = FieldDB(foreign_key="product.id", primary_key=True)
     category_id: int = FieldDB(foreign_key="category.id", primary_key=True)
 
-    product: "Product" = Relationship(back_populates="product_categories")
-    category: "Category" = Relationship(back_populates="product_categories")
+    product: 'Product' = Relationship(back_populates="product_categories")
+    category: 'Category' = Relationship(back_populates="product_categories")
 
 class Category(SQLModel, table=True):
     """
@@ -131,10 +136,10 @@ class Category(SQLModel, table=True):
     id: Optional[int] = FieldDB(primary_key=True, index=True)
     name: str = FieldDB(..., description="Category's name")
     description: str = FieldDB(..., description="Category's description")
-    created_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the category was created")
-    updated_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the category was last updated")
+    created_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the category was created")
+    updated_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the category was last updated")
 
-    product_categories: list["ProductCategory"] = Relationship(back_populates="category")
+    product_categories: Optional[list['ProductCategory']] = Relationship(back_populates="category", sa_relationship_kwargs={"lazy": "selectin"})
 
 class CategoryCreate(BaseModel):
     """
@@ -177,7 +182,7 @@ class CategoryUpdate(BaseModel):
     id: int = Field(..., description="Category's unique identifier")
     name: Optional[str] = Field(None, description="Category's name")
     description: Optional[str] = Field(None, description="Category's description")
-    update_at: datetime = Field(default_factory=datetime.now(), description="Timestamp when the category was last updated")
+    update_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the category was last updated")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,

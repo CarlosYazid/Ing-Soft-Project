@@ -24,9 +24,9 @@ class OrderCrud:
             async with db_session.begin():
                 
                 new_order = Order(**order.model_dump(exclude_unset=True))
-                
                 db_session.add(new_order) 
-                await db_session.refresh(new_order)
+            
+            await db_session.refresh(new_order)
 
             if order.status is OrderStatus.COMPLETED:
                 
@@ -46,7 +46,6 @@ class OrderCrud:
         try:
 
             response = await db_session.exec(select(Order))
-
             orders = list(response.all())
 
             if not orders:
@@ -64,10 +63,9 @@ class OrderCrud:
         try:
 
             response = await db_session.exec(select(Order).where(Order.id == order_id))
-
             order = response.first()
 
-            if not order:
+            if order is None:
                 raise HTTPException(detail="Order not found", status_code=404)
 
             return order
@@ -98,24 +96,23 @@ class OrderCrud:
 
         if not await OrderUtils.exist_order(db_session, fields.id):
             raise HTTPException(detail="Order not found", status_code=404)
-        
 
         try:
+            
+            response = await db_session.exec(select(Order).where(Order.id == fields.id))
+            order = response.one()
 
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Order).where(Order.id == fields.id))
-                order = response.one()
-
-                for key, value in fields.model_dump(exclude_unset=True).items():
+            for key, value in fields.model_dump(exclude_unset=True).items():
                     
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
+                    continue
                     
-                    setattr(order, key, value)
+                setattr(order, key, value)
 
-                db_session.add(order)
-                await db_session.refresh(order)
+            db_session.add(order)
+            await db_session.commit()
+            
+            await db_session.refresh(order)
             
             if order.status is OrderStatus.COMPLETED:
 
@@ -126,6 +123,7 @@ class OrderCrud:
             return order
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to update order", status_code=500) from e
 
     @classmethod
@@ -136,16 +134,17 @@ class OrderCrud:
             raise HTTPException(detail="Order not found", status_code=404)
         
         try:
+            
+            response = await db_session.exec(select(Order).where(Order.id == order_id))
+            order = response.one()
+            
+            order.status = status
 
             async with db_session.begin():
 
-                response = await db_session.exec(select(Order).where(Order.id == order_id))
-                order = response.one()
-
-                order.status = status
-
                 db_session.add(order)
-                await db_session.refresh(order)
+            
+            await db_session.refresh(order)
 
             if status is OrderStatus.COMPLETED:
 
@@ -178,14 +177,15 @@ class OrderCrud:
         
         try:
             
-            async with db_session.begin():
-                
-                response = await db_session.exec(select(Order).where(Order.id == order_id))
-                order = response.one()
-                
-                await db_session.delete(order)
+            response = await db_session.exec(select(Order).where(Order.id == order_id))
+            
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
+            return True
             
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to delete order", status_code=500) from e
 
     @classmethod
@@ -211,8 +211,8 @@ class OrderCrud:
             async with db_session.begin():
                 
                 db_session.add(order_service)
-                await db_session.refresh(order_service)
-        
+            
+            await db_session.refresh(order_service)
             return order_service
         
         except Exception as e:
@@ -301,20 +301,27 @@ class OrderCrud:
             raise HTTPException(detail="Failed to retrieve orders for service", status_code=500) from e
     
     @classmethod
-    async def delete_order_service(cls, db_session: AsyncSession, order_service_id: int) -> bool:
-        """Delete an order service by ID."""
+    async def delete_order_service(cls, db_session: AsyncSession, order_service: OrderService) -> bool:
+        """Delete an order service"""
         
+        # Check if the order service exists before attempting to delete
+        if not await OrderUtils.exist_order_service(db_session, order_service):
+            raise HTTPException(detail="Order service not found", status_code=404)
+
+        if await OrderUtils.order_service_in_order_completed(db_session, order_service):
+            raise HTTPException(detail="Order service in order completed", status_code=404)
+
         try:
             
-            async with db_session.begin():
-
-                await db_session.exec(delete(OrderService).where(OrderService.id == order_service_id))
-                
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to delete order service", status_code=500) from e
-    
+
     @classmethod
     async def create_order_product(cls, db_session: AsyncSession, order_product: OrderProduct) -> OrderProduct:
         """Add a product to an order."""
@@ -335,21 +342,20 @@ class OrderCrud:
         
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Order).where(Order.id == order_product.order_id))
-                order = response.one()
+            response = await db_session.exec(select(Order).where(Order.id == order_product.order_id))
+            order = response.one()
                 
-                response = await db_session.exec(select(Product.price).where(Product.id == order_product.product_id))
-                price_product = response.one()
+            response = await db_session.exec(select(Product.price).where(Product.id == order_product.product_id))
+            price_product = response.one()
 
-                order.total += order_product.quantity * price_product
+            order.total += order_product.quantity * price_product
+            
+            async with db_session.begin():
 
                 db_session.add(order)
                 db_session.add(order_product)
-                await db_session.refresh(order)
-                await db_session.refresh(order_product)
             
+            await db_session.refresh(order_product)
             return order_product
         
         except Exception as e:
@@ -427,9 +433,7 @@ class OrderCrud:
 
         try:
 
-            async with db_session.begin():
-                
-                await db_session.exec(delete(OrderProduct).where(OrderProduct.product_id == product_id))
+            await db_session.exec(delete(OrderProduct).where(OrderProduct.product_id == product_id))
                 
             return True
 
@@ -445,9 +449,7 @@ class OrderCrud:
 
         try:
 
-            async with db_session.begin():
-
-                await db_session.exec(delete(OrderProduct).where(OrderProduct.order_id == order_id))
+            await db_session.exec(delete(OrderProduct).where(OrderProduct.order_id == order_id))
 
             return True
 
@@ -456,7 +458,7 @@ class OrderCrud:
     
     @classmethod
     async def delete_order_product(cls, db_session: AsyncSession, order_product: OrderProduct) -> bool:
-        """Delete an order product by ID."""
+        """Delete an order product"""
         
         # Check if the order product exists before attempting to delete
         if not await OrderUtils.exist_order_product(db_session, order_product):
@@ -467,11 +469,11 @@ class OrderCrud:
 
         try:
             
-            async with db_session.begin():
-                
-                await db_session.delete(order_product)
+            await db_session.delete(response.one())
+            await db_session.commit()
             
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to delete order product", status_code=500) from e

@@ -1,10 +1,14 @@
-from __future__ import annotations
-from datetime import datetime
+from datetime import datetime, date
 from enum import Enum
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, ConfigDict
 from sqlmodel import SQLModel, Field as FieldDB, Relationship
+
+if TYPE_CHECKING:
+    from models.product import Product
+    from models.service import Service
+    from models.user import Client, Employee
 
 class OrderProduct(SQLModel, table=True):
     """
@@ -14,8 +18,8 @@ class OrderProduct(SQLModel, table=True):
     product_id: int = FieldDB(foreign_key="product.id", index=True, primary_key=True)
     quantity: int = FieldDB(..., description="Quantity of the product")
 
-    order: "Order" = Relationship(back_populates="order_products")
-    product: "Product" = Relationship(back_populates="order_products")
+    order: 'Order' = Relationship(back_populates="order_products")
+    product: 'Product' = Relationship(back_populates="order_products")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
@@ -34,8 +38,8 @@ class OrderService(SQLModel, table=True):
     service_id: int = FieldDB(foreign_key="service.id", index=True, primary_key=True)
     quantity: int = FieldDB(..., description="Quantity of the service")
 
-    order: "Order" = Relationship(back_populates="order_services")
-    service: "Service" = Relationship(back_populates="order_services")
+    order: 'Order' = Relationship(back_populates="order_services")
+    service: 'Service' = Relationship(back_populates="order_services")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
@@ -65,14 +69,14 @@ class Order(SQLModel, table=True):
     total_price: Optional[float] = FieldDB(..., description="Total price of the order")
     status: OrderStatus = FieldDB(default=OrderStatus.PENDING, description="Current status of the order")
     employee_id: int = FieldDB(foreign_key="employee.id", description="Employee assigned to the order")
-    created_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the order was created")
-    updated_at: datetime = FieldDB(default_factory=datetime.now(), description="Timestamp when the order was last updated")
+    created_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the order was created")
+    updated_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the order was last updated")
 
-    order_products: list["OrderProduct"] = Relationship(back_populates="order")
-    order_services: list["OrderService"] = Relationship(back_populates="order")
-    
-    client: "Client" = Relationship(back_populates="client")
-    employee: "Employee" = Relationship(back_populates="employee")
+    order_products: Optional[list['OrderProduct']] = Relationship(back_populates="order", sa_relationship_kwargs={"lazy": "selectin"})
+    order_services: Optional[list['OrderService']] = Relationship(back_populates="order", sa_relationship_kwargs={"lazy": "selectin"})
+
+    client: 'Client' = Relationship(back_populates="orders")
+    employee: 'Employee' = Relationship(back_populates="orders")
     
 class OrderCreate(BaseModel):
     
@@ -100,7 +104,7 @@ class OrderUpdate(BaseModel):
     id: int = Field(..., description="Order's unique identifier", gt = 0)
     total_price: Optional[float] = Field(None, description="Total price of the order", gt = 0)
     status: Optional[OrderStatus] = Field(None, description="Current status of the order")
-    updated_at: datetime = Field(default_factory=datetime.now(), description="Timestamp when the order was last updated")
+    updated_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the order was last updated")
 
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           use_enum_values=True,

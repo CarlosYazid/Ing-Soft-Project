@@ -14,9 +14,7 @@ async def lifespan(app: FastAPI):
     await init_db()
     yield
 
-
 app = FastAPI(lifespan=lifespan)
-    
 
 # Middleware configuration
 app.add_middleware(
@@ -26,7 +24,6 @@ app.add_middleware(
     allow_methods=SETTINGS.allow_methods,
     allow_headers=SETTINGS.allow_headers,
 )
-
 
 # Include routers
 app.include_router(UserRouter)
@@ -40,10 +37,9 @@ app.include_router(InvoiceRouter)
 # Static files configuration
 app.mount("/static", StaticFiles(directory="../frontend/my-app/static", html=True), name="frontend")
 
-
 @app.get("/")
 async def root():
     return { "status" : "Ok" }
 
 if __name__ == "__main__":
-    run(app, host="127.0.0.1", port=8000, reload=True)
+    run("main:app", host="127.0.0.1", port=8000, reload=True)

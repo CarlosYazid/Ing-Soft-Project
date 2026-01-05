@@ -20,8 +20,8 @@ class ServiceCrud:
                 # create service
                 new_service = Service(**service.model_dump(exclude_unset=True))
                 db_session.add(new_service)
-                await db_session.refresh(new_service)
-
+                
+            await db_session.refresh(new_service)
             return new_service
         
         except Exception as e:
@@ -53,7 +53,7 @@ class ServiceCrud:
             result = await db_session.exec(select(Service).where(Service.id == service_id))
             service = result.first()
 
-            if not service:
+            if service is None:
                 raise HTTPException(detail="Service not found", status_code=404)
 
             return service
@@ -61,7 +61,6 @@ class ServiceCrud:
         except Exception as e:
             raise HTTPException(detail="Service search failed", status_code=500) from e
         
-
     @classmethod
     async def update_service(cls, db_session: AsyncSession, fields: ServiceUpdate) -> Service:
         """Update an existing service."""
@@ -74,26 +73,26 @@ class ServiceCrud:
             raise HTTPException(detail="Service not found", status_code=404)
         
         try:
+            
+            response = await db_session.exec(select(Service).where(Service.id == fields.id))
+            service = response.one()
 
-            async with db_session.begin():
+            # update service
+            for key, value in fields.model_dump(exclude_unset=True).items():
 
-                # update service
-                response = await db_session.exec(select(Service).where(Service.id == fields.id))
-                service = response.one()
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
+                    continue
 
-                for key, value in fields.model_dump(exclude_unset=True).items():
+                setattr(service, key, value)
 
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
-                        continue
-
-                    setattr(service, key, value)
-
-                db_session.add(service)
-                await db_session.refresh(service)
+            db_session.add(service)
+            await db_session.commit()    
                 
+            await db_session.refresh(service)
             return service
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Service update failed", status_code=500) from e
 
     @classmethod
@@ -111,18 +110,17 @@ class ServiceCrud:
             raise HTTPException(detail="Cannot delete service with active orders", status_code=400)
 
         try:
+            
+            # delete service
+            response = await db_session.exec(select(Service).where(Service.id == service_id))
 
-            async with db_session.begin():
-
-                # delete service
-                response = await db_session.exec(select(Service).where(Service.id == service_id))
-                service = response.one()
-
-                db_session.delete(service)
-
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
             return True
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Service deletion failed", status_code=500) from e
 
     @classmethod
@@ -139,7 +137,6 @@ class ServiceCrud:
         if not await ProductUtils.exist_product(db_session, service_input.product_id):
             raise HTTPException(detail="Product not found", status_code=404)
         
-        
         # check if service input already exists
         if await ServiceUtils.exist_service_input(db_session, service_input):
             raise HTTPException(detail="Service input already exists", status_code=400)
@@ -152,8 +149,7 @@ class ServiceCrud:
                 new_service_input = ServiceInput(**service_input.model_dump(exclude_unset=True))
                 db_session.add(new_service_input)
                 
-                await db_session.refresh(new_service_input)
-
+            await db_session.refresh(new_service_input)
             return new_service_input
         
         except Exception as e:
@@ -210,16 +206,15 @@ class ServiceCrud:
             raise HTTPException(detail="Service input not found", status_code=404)
         
         try:
+            
+            # delete service input
+            response = await db_session.exec(select(ServiceInput).where(ServiceInput.service_id == service_input.service_id).where(ServiceInput.product_id == service_input.product_id))
 
-            async with db_session.begin():
-
-                # delete service input
-                response = await db_session.exec(select(ServiceInput).where(ServiceInput.service_id == service_input.service_id).where(ServiceInput.product_id == service_input.product_id))
-                service_input = response.one()
-
-                db_session.delete(service_input)
-
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Service input deletion failed", status_code=500) from e

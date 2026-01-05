@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends
-from sqlmodel.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import OrderRead, OrderUpdate, OrderCreate, OrderStatus, OrderService, OrderProduct
 from crud import OrderCrud

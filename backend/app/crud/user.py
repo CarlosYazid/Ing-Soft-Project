@@ -19,10 +19,9 @@ class UserCrud:
             async with db_session.begin():
                 
                 new_employee = Employee(**employee.model_dump(exclude_unset=True))
-                
                 db_session.add(new_employee)
-                await db_session.refresh(new_employee)
-                
+
+            await db_session.refresh(new_employee)
             return new_employee
         
         except Exception as e:
@@ -56,7 +55,7 @@ class UserCrud:
             
             if employee is None:
                 raise HTTPException(detail="Employee not found", status_code=404)
-
+            
             return employee
 
         except Exception as e:
@@ -78,7 +77,6 @@ class UserCrud:
 
         except Exception as e:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
-
     
     @classmethod
     async def read_employee_by_documentid(cls, db_session: AsyncSession, document_id: int) -> Employee:
@@ -96,7 +94,6 @@ class UserCrud:
 
         except Exception as e:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
-    
 
     @classmethod
     async def update_employee(cls, db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
@@ -109,25 +106,25 @@ class UserCrud:
             raise HTTPException(detail="Employee not found", status_code=404)
         
         try:
-
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Employee).where(Employee.id == fields.id))
-                employee = response.one()
-
-                for key, value in fields.model_dump(exclude_unset=True).items():
+            
+            response = await db_session.exec(select(Employee).where(Employee.id == fields.id))
+            employee = response.one()
+            
+            for key, value in fields.model_dump(exclude_unset=True).items():
                 
                     if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
                         continue
                 
                     setattr(employee, key, value)
 
-                db_session.add(employee)
-                await db_session.refresh(employee)
-
+            db_session.add(employee)
+            await db_session.commit()
+            
+            await db_session.refresh(employee)
             return employee
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Employee update failed", status_code=500) from e
 
     @classmethod
@@ -142,26 +139,26 @@ class UserCrud:
         
         try:
             
-            async with db_session.begin():
+            response = await db_session.exec(select(Employee).where(Employee.email == fields.email))
+            employee = response.one()
             
-                response = await db_session.exec(select(Employee).where(Employee.email == fields.email))
-                employee = response.one()
-            
-                for key, value in fields.model_dump(exclude_unset=True).items():
+            for key, value in fields.model_dump(exclude_unset=True).items():
                 
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
-                        continue
-                    if key == "email":
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                    continue
+                if key == "email":
+                    continue
 
-                    setattr(employee, key, value)
+                setattr(employee, key, value)
             
-                db_session.add(employee)
-                await db_session.refresh(employee)
-            
+            db_session.add(employee)
+            await db_session.commit()
+
+            await db_session.refresh(employee)
             return employee
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Employee update failed", status_code=500) from e
 
     
@@ -177,24 +174,24 @@ class UserCrud:
         
         try:
             
-            async with db_session.begin():
+            response = await db_session.exec(select(Employee).where(Employee.documentid == fields.documentid))
+            employee = response.one()
             
-                response = await db_session.exec(select(Employee).where(Employee.documentid == fields.documentid))
-                employee = response.one()
+            for key, value in fields.model_dump(exclude_unset=True).items():
 
-                for key, value in fields.model_dump(exclude_unset=True).items():
-
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                    continue
                     
-                    setattr(employee, key, value)
+                setattr(employee, key, value)
 
-                db_session.add(employee)
-                await db_session.refresh(employee)
-
+            db_session.add(employee)
+            await db_session.commit()
+                
+            await db_session.refresh(employee)
             return employee
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Employee update failed", status_code=500) from e
     
     @classmethod
@@ -212,15 +209,15 @@ class UserCrud:
 
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Employee).where(Employee.id == employee_id))
-
-                db_session.delete(response.one())
+            response = await db_session.exec(select(Employee).where(Employee.id == employee_id))
+            
+            await db_session.delete(response.one())
+            await db_session.commit()
                 
             return True
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
     
     @classmethod
@@ -240,15 +237,15 @@ class UserCrud:
 
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Employee).where(Employee.email == email))
-
-                db_session.delete(response.one())
+            response = await db_session.exec(select(Employee).where(Employee.email == email))
+            
+            await db_session.delete(response.one())
+            await db_session.commit()
 
             return True
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
 
     @classmethod
@@ -268,15 +265,15 @@ class UserCrud:
 
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Employee).where(Employee.documentid == document_id))
-
-                db_session.delete(response.one())
+            response = await db_session.exec(select(Employee).where(Employee.documentid == document_id))
+            
+            await db_session.delete(response.one())
+            await db_session.commit()
                 
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
         
     @classmethod
@@ -288,10 +285,9 @@ class UserCrud:
             async with db_session.begin():
                 
                 client = Client(**client_.model_dump(exclude_unset=True))
-                
                 db_session.add(client)
-                await db_session.refresh(client)
-                
+            
+            await db_session.refresh(client)
             return client
         
         except Exception as e:
@@ -377,24 +373,24 @@ class UserCrud:
 
         try:
             
-            async with db_session.begin():
+            response = await db_session.exec(select(Client).where(Client.id == fields.id))
+            client = response.one()
+            
+            for key, value in fields.model_dump(exclude_unset=True).items():
 
-                response = await db_session.exec(select(Client).where(Client.id == fields.id))
-                client = response.one()
-
-                for key, value in fields.model_dump(exclude_unset=True).items():
-
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                    continue
                 
-                    setattr(client, key, value)
+                setattr(client, key, value)    
 
-                db_session.add(client)
-                await db_session.refresh(client)
-
+            db_session.add(client)
+            await db_session.commit()
+            
+            await db_session.refresh(client)
             return client
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @classmethod
@@ -409,24 +405,24 @@ class UserCrud:
         
         try:
             
-            async with db_session.begin():
+            response = await db_session.exec(select(Client).where(Client.email == fields.email))
+            client = response.one()
             
-                response = await db_session.exec(select(Client).where(Client.email == fields.email))
-                client = response.one()
+            for key, value in fields.model_dump(exclude_unset=True).items():
 
-                for key, value in fields.model_dump(exclude_unset=True).items():
-
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                    continue
                 
-                    setattr(client, key, value)
+                setattr(client, key, value)
+            
+            db_session.add(client)
+            await db_session.commit()
 
-                db_session.add(client)
-                await db_session.refresh(client)
-
+            await db_session.refresh(client)
             return client
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @classmethod
@@ -441,24 +437,24 @@ class UserCrud:
         
         try:
             
-            async with db_session.begin():
+            response = await db_session.exec(select(Client).where(Client.documentid == fields.documentid))
+            client = response.one()
+            
+            for key, value in fields.model_dump(exclude_unset=True).items():
 
-                response = await db_session.exec(select(Client).where(Client.documentid == fields.documentid))
-                client = response.one()
-
-                for key, value in fields.model_dump(exclude_unset=True).items():
-
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
-                        continue
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE_USER:
+                    continue
                     
-                    setattr(client, key, value)
+                setattr(client, key, value)
 
-                db_session.add(client)
-                await db_session.refresh(client)
-
+            db_session.add(client)
+            await db_session.commit()
+                
+            await db_session.refresh(client)
             return client
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @classmethod
@@ -476,16 +472,15 @@ class UserCrud:
         
         try:
             
-            async with db_session.begin():
+            response = await db_session.exec(select(Client).where(Client.id == client_id))
             
-                response = await db_session.exec(select(Client).where(Client.id == client_id))
-                client = response.one()
-
-                db_session.delete(client)
-
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Client deletion failed", status_code=500) from e
     
     @classmethod
@@ -505,16 +500,15 @@ class UserCrud:
 
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Client).where(Client.email == email))
-                client = response.one()
-
-                db_session.delete(client)
-
+            response = await db_session.exec(select(Client).where(Client.email == email))
+            
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Client deletion failed", status_code=500) from e
       
     @classmethod
@@ -533,15 +527,14 @@ class UserCrud:
             raise HTTPException(detail="Cannot delete client with active orders", status_code=400)
         
         try:
-
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Client).where(Client.documentid == document_id))
-                client = response.one()
             
-                db_session.delete(client)
+            response = await db_session.exec(select(Client).where(Client.documentid == document_id))
 
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
             return True
 
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Client deletion failed", status_code=500) from e

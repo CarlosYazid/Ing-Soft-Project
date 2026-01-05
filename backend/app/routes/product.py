@@ -32,7 +32,7 @@ async def read_product(request: Request, _id: int, db_session: AsyncSession = De
     return await ProductCrud.read_product(db_session, _id)
 
 @router.get("/", response_model = ProductRead)
-async def read_product_2(request: Request, id: int, db_session: AsyncSession = Depends(get_session):
+async def read_product_2(request: Request, id: int, db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve a product by ID.
     """

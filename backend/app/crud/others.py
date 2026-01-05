@@ -19,10 +19,9 @@ class PaymentCrud:
 
                 # Create the payment
                 new_payment = Payment(**payment.model_dump(exclude_unset=True))
-                
                 session.add(new_payment)
-                await session.refresh(new_payment)
-
+            
+            await session.refresh(new_payment)
             return new_payment
         
         except Exception as e:
@@ -53,7 +52,7 @@ class PaymentCrud:
             response = await db_session.exec(select(Payment).where(Payment.id == payment_id))
             payment = response.first()
 
-            if not payment:
+            if payment is None:
                 raise HTTPException(detail="Payment not found", status_code=404)
 
             return payment
@@ -74,24 +73,24 @@ class PaymentCrud:
         
         try:
             
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Payment).where(Payment.id == fields.id))
-                payment = response.one()
-
-                for key, value in fields.model_dump(exclude_unset=True).items():
-                    
-                    if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
-                        continue
-                    
-                    setattr(payment, key, value)
-
-                db_session.add(payment)
-                await db_session.refresh(payment)
+            response = await db_session.exec(select(Payment).where(Payment.id == fields.id))
+            payment = response.one()
             
+            for key, value in fields.model_dump(exclude_unset=True).items():
+                    
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
+                    continue
+                    
+                setattr(payment, key, value)
+
+            db_session.add(payment)
+            await db_session.commit()
+            
+            await db_session.refresh(payment)
             return payment
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to update payment", status_code=500) from e
     
     @classmethod
@@ -102,15 +101,14 @@ class PaymentCrud:
             raise HTTPException(detail="Payment not found", status_code=404)
         
         try:
+            
+            response = await db_session.exec(select(Payment).where(Payment.id == payment_id))
 
-            async with db_session.begin():
-
-                response = await db_session.exec(select(Payment).where(Payment.id == payment_id))
-                payment = response.one()
-
-                await db_session.delete(payment)
+            await db_session.delete(response.one())
+            await db_session.commit()
             
             return True
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to delete payment", status_code=500) from e
