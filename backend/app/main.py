@@ -6,7 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
 
 from core import SETTINGS
-from routes import UserRouter, AuthRouter, OrderRouter, ProductRouter, ServiceRouter, OthersRouter, InvoiceRouter
+from routes import (
+    UserRouter, AuthRouter, OrderRouter,
+    ProductRouter, ServiceRouter, OthersRouter,
+    InvoiceRouter, FileRouter)
 from db import init_db
 
 @asynccontextmanager
@@ -33,6 +36,7 @@ app.include_router(ProductRouter)
 app.include_router(ServiceRouter)
 app.include_router(OthersRouter)
 app.include_router(InvoiceRouter)
+app.include_router(FileRouter)
 
 # Static files configuration
 app.mount("/static", StaticFiles(directory="../frontend/my-app/static", html=True), name="frontend")
@@ -42,4 +46,4 @@ async def root():
     return { "status" : "Ok" }
 
 if __name__ == "__main__":
-    run("main:app", host=SETTINGS.port, port=8000, reload=True)
+    run("main:app", host='0.0.0.0', port=SETTINGS.port, reload=True)

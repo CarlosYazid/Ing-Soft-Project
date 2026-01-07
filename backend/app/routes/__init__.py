@@ -5,6 +5,7 @@ from routes.product import router as ProductRouter
 from routes.order import router as OrderRouter
 from routes.others import router as OthersRouter
 from routes.invoice import router as InvoiceRouter
+from routes.files import router as FileRouter
 __all__ = [
     "UserRouter",
     "AuthRouter",
@@ -12,5 +13,6 @@ __all__ = [
     "ProductRouter",
     "OrderRouter",
     "OthersRouter",
-    "InvoiceRouter"
+    "InvoiceRouter",
+    "FileRouter"
 ]

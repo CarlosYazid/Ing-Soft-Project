@@ -21,11 +21,10 @@ class OrderCrud:
         
         try:
             
-            async with db_session.begin():
-                
-                new_order = Order(**order.model_dump(exclude_unset=True))
-                db_session.add(new_order) 
-            
+            new_order = Order(**order.model_dump(exclude_unset=True))
+            db_session.add(new_order)
+             
+            await db_session.commit()
             await db_session.refresh(new_order)
 
             if order.status is OrderStatus.COMPLETED:
@@ -37,6 +36,7 @@ class OrderCrud:
             return new_order
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Order creation failed", status_code=500) from e
 
     @classmethod
@@ -140,10 +140,10 @@ class OrderCrud:
             
             order.status = status
 
-            async with db_session.begin():
-
-                db_session.add(order)
             
+            db_session.add(order)
+            
+            await db_session.commit()
             await db_session.refresh(order)
 
             if status is OrderStatus.COMPLETED:
@@ -155,6 +155,7 @@ class OrderCrud:
             return order
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to update order status", status_code=500) from e
     
     @classmethod
@@ -207,15 +208,16 @@ class OrderCrud:
             raise HTTPException(detail="Service not found", status_code=404)
         
         try:
-            
-            async with db_session.begin():
                 
-                db_session.add(order_service)
+            db_session.add(order_service)
             
+            await db_session.commit()
             await db_session.refresh(order_service)
+            
             return order_service
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to add service to order", status_code=500) from e
     
     @classmethod

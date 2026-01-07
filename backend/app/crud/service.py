@@ -15,16 +15,16 @@ class ServiceCrud:
         
         try:
             
-            async with db_session.begin():
-
-                # create service
-                new_service = Service(**service.model_dump(exclude_unset=True))
-                db_session.add(new_service)
-                
+            new_service = Service(**service.model_dump(exclude_unset=True))
+            db_session.add(new_service)
+            
+            await db_session.commit()    
             await db_session.refresh(new_service)
+            
             return new_service
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Service creation failed", status_code=500) from e
     
     @classmethod
@@ -143,16 +143,17 @@ class ServiceCrud:
         
         try:
             
-            async with db_session.begin():
-
-                # create service input
-                new_service_input = ServiceInput(**service_input.model_dump(exclude_unset=True))
-                db_session.add(new_service_input)
-                
+            # create service input
+            new_service_input = ServiceInput(**service_input.model_dump(exclude_unset=True))
+            db_session.add(new_service_input)
+            
+            await db_session.commit()    
             await db_session.refresh(new_service_input)
+            
             return new_service_input
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Service input creation failed", status_code=500) from e
     
     @classmethod

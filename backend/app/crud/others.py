@@ -15,16 +15,17 @@ class PaymentCrud:
         
         try:
             
-            async with db_session as session:
-
-                # Create the payment
-                new_payment = Payment(**payment.model_dump(exclude_unset=True))
-                session.add(new_payment)
+            # Create the payment
+            new_payment = Payment(**payment.model_dump(exclude_unset=True))
+            db_session.add(new_payment)
             
+            await db_session.commit()
             await session.refresh(new_payment)
+            
             return new_payment
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to create payment", status_code=500) from e
     
     @classmethod

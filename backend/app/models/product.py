@@ -35,7 +35,6 @@ class ProductCreate(BaseModel):
     name: str = Field(..., description="Product's name")
     short_description: Optional[str] = Field(None, description="Short description of the product")
     price: float = Field(..., description="Product's price", gt = 0)
-    image: UploadFile = Field(..., description="Image of the product")
     cost: float = Field(..., description="Product's cost", gt = 0)
     stock: int = Field(..., description="Available stock of the product", gt = 0)
     minimum_stock: int = Field(..., description="Minimum stock level of the product", gt = 0)
@@ -48,6 +47,7 @@ class ProductCreate(BaseModel):
                                                   "short_description": "Este es un producto de papelería de ejemplo.",
                                                   "price": 9.99,
                                                   "stock": 50,
+                                                  "cost": 5.6,
                                                   "minimum_stock" : 7,
                                                   "expiration_date": "2023-12-31"
                                               }
@@ -105,11 +105,11 @@ class ProductUpdate(BaseModel):
     model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
                                           json_schema_extra={
                                               "example": {
+                                                  "id": 1,
                                                   "name": "Ejemplo de producto de papelería",
                                                   "short_description": "Este es un producto de papelería de ejemplo.",
                                                   "price": 9.99,
                                                   "cost": 5.99,
-                                                  "stock": 50,
                                                   "minimum_stock" : 7,
                                                   "expiration_date": "2023-12-31",
                                                   "updated_at" : "2023-12-31T00:00:00Z"

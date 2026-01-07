@@ -15,12 +15,11 @@ router = APIRouter(prefix="/product")
 @router.post("/", response_model = ProductRead)
 async def create_product(request: Request,
                          product: ProductCreate,
-                         storage_client: BaseClient = Depends(get_e2_client),
                          db_session: AsyncSession = Depends(get_session)):
     """
     Create a product
     """
-    return await ProductCrud.create_product(db_session, storage_client, product)
+    return await ProductCrud.create_product(db_session, product)
 
 @router.get("/all", response_model = list[ProductRead])
 async def read_all_products(request: Request, db_session: AsyncSession = Depends(get_session)):

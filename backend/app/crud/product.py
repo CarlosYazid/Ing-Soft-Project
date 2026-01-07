@@ -11,33 +11,21 @@ class ProductCrud:
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
 
     @classmethod
-    async def create_product(cls, db_session: AsyncSession, storage_client: BaseClient, product: ProductCreate) -> Product:
+    async def create_product(cls, db_session: AsyncSession, product: ProductCreate) -> Product:
         """Create a new product."""
-        
-        image_key = None
-        
-        if product.image:
-
-            image_key = await ProductUtils.upload_image(storage_client, product.image)
-            
+                    
         try:
             
-            product_data : dict = product.model_dump(exclude_unset=True)
-            product_data["image_key"] = image_key
-            
-            async with db_session.begin():
-            
-                new_product = Product(**product_data)
-                db_session.add(new_product)
+            new_product = Product(**product.model_dump(exclude_unset=True))
+            db_session.add(new_product)
 
-            await db_session.refresh(new_product)    
+            await db_session.commit()
+            await db_session.refresh(new_product)
+            
             return new_product
         
         except Exception as e:
-
-            if image_key:
-                await ProductUtils.delete_image(storage_client, image_key)
-
+            await db_session.rollback()
             raise HTTPException(status_code=500, detail="Service creation failed") from e
         
     
@@ -117,22 +105,23 @@ class ProductCrud:
             response = await db_session.exec(select(Product).where(Product.id == product_id))
             product = response.one()
 
-            async with db_session.begin():
+            if replace:
+                product.stock = new_stock
+            else:
+                product.stock += new_stock
 
-                if replace:
-                    product.stock = new_stock
-                else:
-                    product.stock += new_stock
+            if product.stock < 0:
+                product.stock = 0
 
-                if product.stock < 0:
-                    product.stock = 0
-
-                db_session.add(product)
+            db_session.add(product)
             
+            await db_session.commit()
             await db_session.refresh(product)
+            
             return product
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Stock update failed", status_code=500) from e
     
     @classmethod
@@ -148,21 +137,25 @@ class ProductCrud:
             response = await db_session.exec(select(Product).where(Product.id == product_id))
             product = response.one()
 
-            async with db_session.begin():
+            old_image_key = product.image_key 
 
-                if not product.image_key is None:
-                    await ProductUtils.delete_image(storage_client, product.image_key)
+            image_key = await ProductUtils.upload_image(storage_client, image)
 
-                image_key = await ProductUtils.upload_image(storage_client, image)
+            product.image_key = image_key
 
-                product.image_key = image_key
+            db_session.add(product)
 
-                db_session.add(product)
-
+            await db_session.commit()
             await db_session.refresh(product)
+            
+            if not old_image_key is None:
+                await ProductUtils.delete_image(storage_client, old_image_key)
+            
             return product
     
         except Exception as e:
+            await db_session.rollback()
+            print(e)
             raise HTTPException(detail="Image update failed", status_code=500) from e
     
     @classmethod
@@ -213,14 +206,15 @@ class ProductCrud:
 
         try:
 
-            async with db_session.begin():
-
-                db_session.add(product_category)
+            db_session.add(product_category)
             
+            await db_session.commit()
             await db_session.refresh(product_category)
+            
             return product_category
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to create product category", status_code=500) from e
     
     @classmethod
@@ -267,15 +261,16 @@ class ProductCrud:
         
         try:
             
-            async with db_session.begin():
-
-                new_category = Category(**category.model_dump(exclude_unset=True))
-                db_session.add(new_category)
+            new_category = Category(**category.model_dump(exclude_unset=True))
+            db_session.add(new_category)
             
+            await db_session.commit()
             await db_session.refresh(new_category)
+            
             return new_category
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Failed to create category", status_code=500) from e
     
     @classmethod

@@ -1,23 +1,12 @@
 from fastapi import APIRouter, Request, Depends
-from botocore.client import BaseClient
-from sqlmodel.ext.asyncio import AsyncSession
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import PaymentCreate, PaymentRead, PaymentUpdate, PaymentMethod, PaymentStatus
 from crud import PaymentCrud
-from services import AuthService, PaymentService, FileService
-from core import get_e2_client
+from services import AuthService, PaymentService
 from db import get_session
 
 router = APIRouter(prefix="/others")
-
-@router.get("/files/{key:path}")
-async def get_file(request: Request,
-                   key: str,
-                   storage_client: BaseClient = Depends(get_e2_client)):
-    """
-    Retrieve a file by name.
-    """
-    return await FileService.get_file(storage_client, key)
 
 @router.post("/payment", response_model = PaymentRead)
 async def create_payment(request: Request,

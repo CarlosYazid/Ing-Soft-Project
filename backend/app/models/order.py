@@ -111,6 +111,7 @@ class OrderUpdate(BaseModel):
                                           json_schema_extra={
                                               "example": {
                                                   "id": 1,
+                                                  "total_price": 3.5,
                                                   "status": "Completada",
                                                   "updated_at": "2023-01-01T00:00:00Z"
                                               }

@@ -16,15 +16,16 @@ class UserCrud:
         
         try:
             
-            async with db_session.begin():
-                
-                new_employee = Employee(**employee.model_dump(exclude_unset=True))
-                db_session.add(new_employee)
+            new_employee = Employee(**employee.model_dump(exclude_unset=True))
+            db_session.add(new_employee)
 
+            await db_session.commit()
             await db_session.refresh(new_employee)
+            
             return new_employee
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Employee creation failed", status_code=500) from e
 
     @classmethod
@@ -281,16 +282,17 @@ class UserCrud:
         """Create a new client."""
         
         try:
-            
-            async with db_session.begin():
                 
-                client = Client(**client_.model_dump(exclude_unset=True))
-                db_session.add(client)
+            client = Client(**client_.model_dump(exclude_unset=True))
+            db_session.add(client)
             
+            await db_session.commit()
             await db_session.refresh(client)
+            
             return client
         
         except Exception as e:
+            await db_session.rollback()
             raise HTTPException(detail="Client creation failed", status_code=500) from e
 
     
