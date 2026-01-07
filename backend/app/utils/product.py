@@ -1,34 +1,87 @@
-from db import get_db_client
+from uuid import uuid4
+
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
+from fastapi import HTTPException, UploadFile
+from botocore.client import BaseClient
+
+from models import Product, Category, ProductCategory
 from core import SETTINGS
 
 class ProductUtils:
     
+    ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
+    
     @classmethod
-    async def exist_product(cls, product_id: int) -> bool:
+    async def exist_product(cls, db_session: AsyncSession, product_id: int) -> bool:
         """Check if a product exists by ID."""
+        
+        try:
+            
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            
+            return bool(response.first())
+        
+        except Exception as e:
+            raise HTTPException(detail="Product existence check failed", status_code=500) from e
+        
+        
+    @classmethod
+    async def upload_image(cls, storage_client : BaseClient, image: UploadFile) -> str:
+        """Upload an image to the storage."""
 
-        client = await get_db_client()
+        if image.content_type not in cls.ALLOWED_IMAGE_TYPES:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    f"Invalid image type: {image.content_type}. "
+                    f"Allowed types are: {', '.join(cls.ALLOWED_IMAGE_TYPES)}"
+                ),
+            )
 
-        response = await client.table(SETTINGS.product_table).select("id").eq("id", product_id).execute()
+        await image.seek(0)
 
-        return bool(response.data)
+        safe_name = f"{uuid4()}-{image.filename}"
+        image_key = f"{SETTINGS.image_folder}/{safe_name}"
+
+        await storage_client.upload_fileobj(
+            image.file,
+            SETTINGS.bucket_name,
+            image_key,
+            ExtraArgs={"ContentType": image.content_type},
+            )
+        
+        return image_key
+
     
     @classmethod
-    async def exist_category(cls, category_id: int) -> bool:
+    async def delete_image(cls, storage_client: BaseClient, image_key: str) -> None:
+        """Delete an image from the storage."""
+
+        await storage_client.delete_object(Bucket=SETTINGS.bucket_name, Key=image_key)
+    
+    @classmethod
+    async def exist_category(cls, db_session: AsyncSession, category_id: int) -> bool:
         """Check if a category exists by ID."""
+        
+        try:
+            
+            response = await db_session.exec(select(Category).where(Category.id == category_id))
 
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.category_table).select("id").eq("id", category_id).execute()
-
-        return bool(response.data)
+            return bool(response.first())
+        
+        except Exception as e:
+            raise HTTPException(detail="Category existence check failed", status_code=500) from e
     
     @classmethod
-    async def exist_product_category(cls, product_category_id: int) -> bool:
+    async def exist_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> bool:
         """Check if a product category exists by ID."""
 
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_category_table).select("id").eq("id", product_category_id).execute()
-
-        return bool(response.data)
+        try:
+            
+            response = await db_session.exec(select(ProductCategory).where(ProductCategory.product_id == product_category.product_id, ProductCategory.category_id == product_category.category_id))
+            
+            return bool(response.first())
+        
+        except Exception as e:
+            raise HTTPException(detail="Product category existence check failed", status_code=500) from e

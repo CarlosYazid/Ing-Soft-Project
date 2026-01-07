@@ -1,41 +1,49 @@
-from models.user import AbstractUser,UserBase, Client, Employee, ClientCreate, EmployeeCreate, EmployeeRole
-from models.product import ProductBase, Product, ProductBasePlusID, ProductCreate, ProductCategory, Category, ProductCategoryPlusID, ProductCategoryCreate, CategoryPlusID, CategoryCreate 
-from models.service import ServiceBase, Service, ServiceInput, ServiceInputCreate, ServiceBasePlusID, ServiceCreate
-from models.order import OrderBase, Order, OrderProduct, OrderService, OrderStatus, OrderProductCreate, OrderServiceCreate, OrderBasePlusID, OrderCreate
-from models.others import PaymentBase, Payment, PaymentMethod, PaymentStatus, PaymentBasePlusID, PaymentCreate, Email, File, Invoice, InvoiceItem, InvoiceRequest
+from .user import Client, ClientCreate, ClientRead, ClientUpdate, Employee, EmployeeCreate, EmployeeRead, EmployeeUpdate, EmployeeRole
+from .product import Product, ProductCreate, ProductRead, ProductUpdate, ProductCategory, Category, CategoryCreate, CategoryRead, CategoryUpdate 
+from .service import Service, ServiceCreate, ServiceRead, ServiceUpdate, ServiceInput
+from .order import Order, OrderCreate, OrderRead, OrderUpdate, OrderProduct, OrderService, OrderStatus
+from .others import Payment, PaymentCreate, PaymentRead, PaymentUpdate, PaymentMethod, PaymentStatus, Email, File, Invoice, InvoiceItem, InvoiceRequest
 
 __all__ = [
-    "AbstractUser",
-    "UserBase",
     "Client",
     "ClientCreate",
+    "ClientRead",
+    "ClientUpdate",
     "Employee",
     "EmployeeCreate",
-    "ProductBase",
+    "EmployeeRead",
+    "EmployeeUpdate",
     "Product",
-    "ProductBasePlusID",
     "ProductCreate",
+    "ProductRead",
+    "ProductUpdate",
     "ProductCategory",
-    "ProductTypes",
-    "ServiceBase",
+    "Category",
+    "CategoryCreate",
+    "CategoryRead",
+    "CategoryUpdate",
     "Service",
-    "ServiceInput",
-    "ServiceInputCreate",
-    "ServiceBasePlusID",
     "ServiceCreate",
-    "OrderBase",
+    "ServiceRead",
+    "ServiceUpdate",
+    "ServiceInput",
     "Order",
-    "OrderBasePlusID",
     "OrderCreate",
-    "OrderProductCreate",
-    "OrderServiceCreate",
+    "OrderRead",
+    "OrderUpdate",
     "OrderProduct",
     "OrderService",
     "OrderStatus",
-    "PaymentBase",
     "Payment",
-    "PaymentBasePlusID",
     "PaymentCreate",
+    "PaymentRead",
+    "PaymentUpdate",
     "PaymentMethod",
-    "PaymentStatus"
+    "PaymentStatus",
+    "Email",
+    "File",
+    "Invoice",
+    "InvoiceItem",
+    "InvoiceRequest",
+    "EmployeeRole"
 ]

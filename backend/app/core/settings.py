@@ -1,39 +1,34 @@
-from pydantic import EmailStr, SecretStr, Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 import os
 from pathlib import Path
 from typing import Optional
 
+from pydantic import EmailStr, SecretStr, Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 class Settings(BaseSettings):
     # General
     app_name: str = "InventaryApp"
     environment: str = "development"  # development | production | staging
     debug: bool = True
-    model_config = SettingsConfigDict(env_file=os.path.join(os.path.dirname(__file__), "../../.env"), env_file_encoding='utf-8', extra='allow')
+    model_config = SettingsConfigDict(env_file=os.path.join(os.path.dirname(__file__), "../../../.env"), env_file_encoding='utf-8', extra='allow')
     BACKEND_DIR: Path = Path(__file__).resolve().parent.parent.parent
     FRONTEND_DIR: Path = BACKEND_DIR.parent / "frontend"
     STATIC_DIR: Path = FRONTEND_DIR / "my-app" / "static"
+    port: int = 8000
 
-
-    # Supabase
+    # Database
     db_url: str = Field(..., alias="database_url")
-    db_key: SecretStr = Field(..., alias="database_key")
-    employee_table: str = Field(..., alias="employee_table")
-    client_table: str = Field(..., alias="client_table")
+    
+    #Storage
+    storage_endpoint_url: str = Field(..., alias="storage_endpoint_url")
+    storage_access_key: SecretStr = Field(..., alias="access_key")
+    storage_secret_key: SecretStr = Field(..., alias="secret_key")
+    storage_region: str = Field(..., alias="region")
     bucket_name: str = Field(..., alias="bucket_name")
-    service_table: str = Field(..., alias="service_table")
-    product_table: str = Field(..., alias="product_table")
-    low_stock_products_view: str = Field(..., alias="low_stock_products_view")
-    expired_products_view: str = Field(..., alias="expired_products_view")
-    service_inputs_table: str = Field(..., alias="service_inputs_table")
-    product_category_table: str = Field(..., alias="product_category_table")
-    category_table: str = Field(..., alias="category_table")
-    order_table: str = Field(..., alias="order_table")
-    order_service_table: str = Field(..., alias="order_service_table")
-    order_product_table: str = Field(..., alias="order_product_table")
-    payment_table: str = Field(..., alias="payment_table")
+    image_folder: str = Field(..., alias="image_folder")
+    invoice_folder: str = Field(..., alias="invoice_folder")
+    
     
     # Invoices
     INVOICES_PATH: Path = STATIC_DIR / "invoices"

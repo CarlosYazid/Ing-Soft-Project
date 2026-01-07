@@ -1,117 +1,123 @@
 from fastapi import APIRouter, Request, Depends
+from sqlmodel.ext.asyncio.session import AsyncSession
 
-from models import PaymentCreate, PaymentMethod, PaymentStatus
+from models import PaymentCreate, PaymentRead, PaymentUpdate, PaymentMethod, PaymentStatus
 from crud import PaymentCrud
 from services import AuthService, PaymentService
+from db import get_session
 
+router = APIRouter(prefix="/others")
 
-router = APIRouter(prefix="/payment")
-
-@router.post("/")
-async def create_payment(request: Request, payment: PaymentCreate):
+@router.post("/payment", response_model = PaymentRead)
+async def create_payment(request: Request,
+                         payment: PaymentCreate,
+                         db_session: AsyncSession = Depends(get_session)):
     """
     Create a new payment.
     """
-    return await PaymentCrud.create_payment(payment)
+    return await PaymentCrud.create_payment(db_session, payment)
 
-@router.get("/all")
-async def read_all_payments(request: Request):
-    return await PaymentCrud.read_all_payments()
+@router.get("/payment/all", response_model = list[PaymentRead])
+async def read_all_payments(request: Request,
+                            db_session: AsyncSession = Depends(get_session)):
+    return await PaymentCrud.read_all_payments(db_session)
 
-@router.get("/base/all")
-async def read_all_payments_base(request: Request):
-    """
-    Retrieve all payments in base format.
-    """
-    return await PaymentCrud.read_all_payments_base()
-
-@router.get("/{_id}")
-async def read_payment(request: Request, _id: int):
+@router.get("/payment/{_id}", response_model = PaymentRead)
+async def read_payment(request: Request,
+                       _id: int,
+                       db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve a payment by ID.
     """
-    return await PaymentCrud.read_payment(_id)
+    return await PaymentCrud.read_payment(db_session, _id)
 
-@router.get("/")
-async def read_payment_2(request: Request, id: int):
+@router.get("/payment/", response_model = PaymentRead)
+async def read_payment_2(request: Request,
+                         id: int,
+                         db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve a payment by ID.
     """
-    return await PaymentCrud.read_payment(id)
+    return await PaymentCrud.read_payment(db_session, id)
 
-@router.get("/base/{_id}")
-async def read_payment_base(request: Request, _id: int):
-    """
-    Get a payment base by ID.
-    """
-    return await PaymentCrud.read_payment_base(_id)
 
-@router.get("/base/")
-async def read_payment_base_2(request: Request, id: int):
-    """
-    Get a payment base by ID.
-    """
-    return await PaymentCrud.read_payment_base(id)
-
-@router.put("/{_id}")
-async def update_payment(request: Request, _id: int, fields: dict):
+@router.put("/payment/", response_model = PaymentRead)
+async def update_payment(request: Request,
+                         fields: PaymentUpdate,
+                         db_session: AsyncSession = Depends(get_session)):
     """
     Update an existing payment by ID.
     """
-    return await PaymentCrud.update_payment(_id, fields)
+    return await PaymentCrud.update_payment(db_session, fields)
 
-@router.delete("/{_id}")
-async def delete_payment(request: Request, _id: int):
+@router.delete("/payment/{_id}")
+async def delete_payment(request: Request,
+                         _id: int,
+                         db_session: AsyncSession = Depends(get_session)):
     """
     Delete a payment by ID.
     """
-    return await PaymentCrud.delete_payment(_id)
+    return await PaymentCrud.delete_payment(db_session, _id)
 
-@router.delete("/")
-async def delete_payment_2(request: Request, id: int):
+@router.delete("/payment/")
+async def delete_payment_2(request: Request,
+                           id: int,
+                           db_session: AsyncSession = Depends(get_session)):
     """
     Delete a payment by ID.
     """
-    return await PaymentCrud.delete_payment(id)
+    return await PaymentCrud.delete_payment(db_session, id)
 
-@router.get("/search/client/{client_id}")
-async def search_payments_by_client(request: Request, client_id: int):
+@router.get("/payment/search/client/{client_id}", response_model = list[PaymentRead])
+async def search_payments_by_client(request: Request,
+                                    client_id: int,
+                                    db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve payments by client ID.
     """
-    return await PaymentService.search_payments_by_client_id(client_id)
+    return await PaymentService.search_payments_by_client_id(db_session, client_id)
 
-@router.get("/search/client/")
-async def search_payments_by_client_2(request: Request, client_id: int):
+@router.get("/payment/search/client/", response_model = list[PaymentRead])
+async def search_payments_by_client_2(request: Request,
+                                      client_id: int,
+                                      db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve payments by client ID.
     """
-    return await PaymentService.search_payments_by_client_id(client_id)
+    return await PaymentService.search_payments_by_client_id(db_session, client_id)
 
-@router.get("/search/status/{status}")
-async def search_payments_by_status(request: Request, status: PaymentStatus):
+@router.get("/payment/search/status/{status}", response_model = list[PaymentRead])
+async def search_payments_by_status(request: Request,
+                                    status: PaymentStatus,
+                                    db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve payments by status.
     """
-    return await PaymentService.search_payments_by_status(status)
+    return await PaymentService.search_payments_by_status(db_session, status)
 
-@router.get("/search/status/")
-async def search_payments_by_status_2(request: Request, status: PaymentStatus):
+@router.get("/payment/search/status/", response_model = list[PaymentRead])
+async def search_payments_by_status_2(request: Request,
+                                      status: PaymentStatus,
+                                      db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve payments by status.
     """
-    return await PaymentService.search_payments_by_status(status)
+    return await PaymentService.search_payments_by_status(db_session, status)
 
-@router.get("/search/method/{method}")
-async def search_payments_by_method(request : Request, method: PaymentMethod):
+@router.get("/payment/search/method/{method}", response_model = list[PaymentRead])
+async def search_payments_by_method(request : Request,
+                                    method: PaymentMethod,
+                                    db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve payments by method.
     """
-    return await PaymentService.search_payments_by_method(method)
+    return await PaymentService.search_payments_by_method(db_session, method)
 
-@router.get("/search/method/")
-async def search_payments_by_method_2(request: Request, method: PaymentMethod):
+@router.get("/payment/search/method/", response_model = list[PaymentRead])
+async def search_payments_by_method_2(request: Request,
+                                      method: PaymentMethod,
+                                      db_session: AsyncSession = Depends(get_session)):
     """
     Retrieve payments by method.
     """
-    return await PaymentService.search_payments_by_method(method)
+    return await PaymentService.search_payments_by_method(db_session, method)

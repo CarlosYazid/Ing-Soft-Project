@@ -1,13 +1,20 @@
-from db import get_db_client
-from core import SETTINGS
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
+from fastapi import HTTPException
+
+from models import Payment
 
 class PaymentUtils:
     
     @classmethod
-    async def exist_payment(cls, payment_id: int) -> bool:
+    async def exist_payment(cls, db_session: AsyncSession, payment_id: int) -> bool:
         """Check if a payment exists by ID."""
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.payment_table).select("id").eq("id", payment_id).execute()
-
-        return bool(response.data)
+        
+        try:
+            
+            response = await db_session.exec(select(Payment).where(Payment.id == payment_id))
+            
+            return bool(response.first())
+        
+        except Exception as e:
+            raise HTTPException(detail="Payment existence check failed", status_code=500) from e

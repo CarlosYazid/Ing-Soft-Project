@@ -1,413 +1,359 @@
 from fastapi import HTTPException, UploadFile
+from sqlmodel.ext.asyncio.session import AsyncSession
+from sqlmodel import select
+from botocore.client import BaseClient
 
-from db import get_db_client
-from models import Product, ProductCreate, ProductBasePlusID, ProductCategory, Category, ProductCategoryCreate, CategoryPlusID, CategoryCreate
-from core import SETTINGS
+from models import Product, ProductCreate, ProductUpdate, ProductCategory, Category, CategoryCreate, CategoryUpdate
 from utils import ProductUtils
 
 class ProductCrud:
-
-    ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
-    EXCLUDED_FIELDS_FOR_UPDATE = {"id", "image_url", "created_at", "stock"}
-    ALLOWED_FIELDS_FOR_UPDATE = set(ProductCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_UPDATE
-    EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE = {"id", "created_at"}
-    ALLOWED_FIELDS_FOR_CATEGORY_UPDATE = set(ProductCategoryCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE
-    EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE = {"id", "created_at", "product_id"}
-    ALLOWED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE = set(ProductCategoryCreate.model_fields.keys()) - EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE
-
-    FIELDS_PRODUCT_BASE = set(ProductBasePlusID.model_fields.keys())
-    FIELDS_CATEGORY_BASE = set(CategoryPlusID.model_fields.keys())
+    
+    EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
 
     @classmethod
-    async def create_product(cls, product: ProductCreate) -> Product:
+    async def create_product(cls, db_session: AsyncSession, product: ProductCreate) -> Product:
         """Create a new product."""
-        
-        client = await get_db_client()
-
-        names = await client.table(SETTINGS.product_table).select("name").execute()
-
-
-        if bool(names.data):
-
-            names = [n['name'].lower() for n in names.data]
-
-            if product.name.lower() in names:
-                raise HTTPException(status_code=404, detail="The product already exists")
-        
-        product.image_url = None  # Initialize image_url to None
-
-        from services.gen_ai import GenAIService
-
-        product.short_description = await GenAIService.gen_short_description(product.description)
+                    
+        try:
             
-        response = await client.table(SETTINGS.product_table).insert(product.model_dump(mode="json")).execute()
+            new_product = Product(**product.model_dump(exclude_unset=True))
+            db_session.add(new_product)
+
+            await db_session.commit()
+            await db_session.refresh(new_product)
+            
+            return new_product
         
-        if not response.data:
-            raise HTTPException(status_code=500, detail="Failed to create product")
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(status_code=500, detail="Service creation failed") from e
         
-        return Product.model_validate(response.data[0])
     
     @classmethod
-    async def read_all_products(cls) -> list[Product]:
-        """Retrieve all products."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No products found", status_code=404)
-
-        return [Product.model_validate(product) for product in response.data]
-    
-    @classmethod
-    async def read_all_products_base(cls) -> list[ProductBasePlusID]:
+    async def read_all_products(cls, db_session: AsyncSession) -> list[Product]:
         """Retrieve all products."""
         
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).execute()
+            response = await db_session.exec(select(Product))
+            products = list(response.all())
 
-        if not bool(response.data):
-            raise HTTPException(detail="No products found", status_code=404)
-        
-        return [ProductBasePlusID.model_validate(product) for product in response.data]
+            if not products:
+                raise HTTPException(detail="No products found", status_code=404)
+
+            return products
+
+        except Exception as e:
+            raise HTTPException(detail="Product search failed", status_code=500) from e
     
     @classmethod
-    async def read_product(cls, product_id: int) -> Product:
-        """Retrieve a product by ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select("*").eq("id", product_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Product not found", status_code=404)
-
-        return Product.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_product_base(cls, product_id: int) -> ProductBasePlusID:
+    async def read_product(cls, db_session: AsyncSession, product_id: int) -> Product:
         """Retrieve a product by ID."""
         
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).select(*cls.FIELDS_PRODUCT_BASE).eq("id", product_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Product not found", status_code=404)
-
-        return ProductBasePlusID.model_validate(response.data[0])
+        try:
+            
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            product = response.first()
+            
+            if product is None:
+                raise HTTPException(detail="Product not found", status_code=404)
+            
+            return product
+        
+        except Exception as e:
+            raise HTTPException(detail="Product search failed", status_code=500) from e
     
     @classmethod
-    async def update_product(cls, product_id: int, fields: dict) -> Product:
+    async def update_product(cls, db_session: AsyncSession, fields: ProductUpdate) -> Product:
         """Update an existing product."""
         
         # Check if the product exists before attempting to update
-        if not await ProductUtils.exist_product(product_id):
+        if not await ProductUtils.exist_product(db_session, fields.id):
             raise HTTPException(detail="Product not found", status_code=404)
         
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_UPDATE):
-            raise HTTPException(detail=f"Cannot update fields: {', '.join(cls.EXCLUDED_FIELDS_FOR_UPDATE)}", status_code=400)
+        try:
+            
+            response = await db_session.exec(select(Product).where(Product.id == fields.id))
+            product = response.one()
+            
+            for key, value in fields.model_dump(exclude_unset=True).items():
+                    
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
+                    continue
+                    
+                setattr(product, key, value)
 
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_UPDATE):
-            raise HTTPException(detail="Update attribute of product", status_code=400)
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_table).update(fields).eq("id", product_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to update product", status_code=500)
-
-        return Product.model_validate(response.data[0])
+            db_session.add(product)
+            await db_session.commit()
+                
+            await db_session.refresh(product)
+            return product
+            
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Product update failed", status_code=500) from e
     
     @classmethod
-    async def upload_image(cls, product_id: int, image: UploadFile) -> str:
-        """Upload an image for a product and return the URL."""
-
-        if image.content_type not in cls.ALLOWED_IMAGE_TYPES:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Invalid image type: {image.content_type}. Allowed types are: {', '.join(cls.ALLOWED_IMAGE_TYPES)}",
-            )
-        
-        # Check if the product exists before attempting to upload an image
-        if not await ProductUtils.exist_product(product_id):
-            raise HTTPException(status_code=404, detail="Product not found")
-
-        name, ext = image.filename.split(".")[-2:]
-        
-        client = await get_db_client()
-        
-        last_image = await client.table(SETTINGS.product_table).select("image_url").eq("id", product_id).execute()
-
-        filename = f"products/{product_id}_{name.replace(' ', '_').lower()}.{ext}"
-
-        if bool(last_image.data) and bool(last_image.data[0]["image_url"]):
-            last_image = "products/" + last_image.data[0]["image_url"].split("/")[-1]
-            await client.storage.from_(SETTINGS.bucket_name).remove([last_image, filename])
-        else:
-            await client.storage.from_(SETTINGS.bucket_name).remove([filename])
-
-        file_content = await image.read()
-
-        response = await client.storage.from_(SETTINGS.bucket_name).upload(
-            path=filename,
-            file=file_content,
-            file_options={"content-type": image.content_type})
-
-        if not bool(response):
-            raise HTTPException(status_code=500, detail="Failed to upload image")
-
-        image_url = f"{SETTINGS.db_url}/storage/v1/object/public/{SETTINGS.bucket_name}/{filename}"
-        
-        response = await client.table(SETTINGS.product_table).update({"image_url": image_url}).eq("id", product_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(status_code=500, detail="Failed to update product with image URL")
-
-        return image_url
-    
-    @classmethod
-    async def update_stock(cls, product_id: int, new_stock: int, replace: bool = True) -> Product:
+    async def update_stock(cls, db_session: AsyncSession, product_id: int, new_stock: int, replace: bool = True) -> Product:
         """Update the stock of a product by ID."""
 
         # Check if the product exists before attempting to update stock
-        if not await ProductUtils.exist_product(product_id):
+        if not await ProductUtils.exist_product(db_session, product_id):
             raise HTTPException(detail="Product not found", status_code=404)
-        
-        client = await get_db_client()
-
-        if not replace:
+        try:
             
-            current_stock_response = await client.table(SETTINGS.product_table).select("stock").eq("id", product_id).execute()
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            product = response.one()
 
-            if not bool(current_stock_response.data):
-                raise HTTPException(detail="The product has no stock, better replace it.", status_code=404)
+            if replace:
+                product.stock = new_stock
+            else:
+                product.stock += new_stock
 
-            new_stock += int(current_stock_response.data[0]["stock"])
+            if product.stock < 0:
+                product.stock = 0
+
+            db_session.add(product)
+            
+            await db_session.commit()
+            await db_session.refresh(product)
+            
+            return product
         
-        if new_stock < 0:
-            new_stock = 0
-
-        response = await client.table(SETTINGS.product_table).update({"stock": new_stock}).eq("id", product_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to update product stock", status_code=500)
-
-        return Product.model_validate(response.data[0])
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Stock update failed", status_code=500) from e
     
     @classmethod
-    async def delete_product(cls, product_id: int) -> None:
+    async def update_image(cls, db_session: AsyncSession, storage_client: BaseClient, product_id: int, image: UploadFile) -> Product:
+        """Update the image of a product by ID."""
+
+        # Check if the product exists before attempting to update the image
+        if not await ProductUtils.exist_product(db_session, product_id):
+            raise HTTPException(detail="Product not found", status_code=404)
+        
+        try:
+            
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            product = response.one()
+
+            old_image_key = product.image_key 
+
+            image_key = await ProductUtils.upload_image(storage_client, image)
+
+            product.image_key = image_key
+
+            db_session.add(product)
+
+            await db_session.commit()
+            await db_session.refresh(product)
+            
+            if not old_image_key is None:
+                await ProductUtils.delete_image(storage_client, old_image_key)
+            
+            return product
+    
+        except Exception as e:
+            await db_session.rollback()
+            print(e)
+            raise HTTPException(detail="Image update failed", status_code=500) from e
+    
+    @classmethod
+    async def delete_product(cls, db_session: AsyncSession, storage_client: BaseClient, product_id: int) -> bool:
         """Delete a product by ID."""
 
         # Check if the product exists before attempting to delete
-        if not await ProductUtils.exist_product(product_id):
+        if not await ProductUtils.exist_product(db_session, product_id):
             raise HTTPException(detail="Product not found", status_code=404)
         
         from utils import OrderUtils
         
         # Check if the product is associated with any orders
-        if await OrderUtils.exist_product_in_orders(product_id):
+        if await OrderUtils.exist_product_in_orders(db_session, product_id):
             raise HTTPException(detail="Cannot delete product associated with orders", status_code=400)
         
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.product_table).delete().eq("id", product_id).execute()
+            image_key = None
 
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to delete product", status_code=500)
+            response = await db_session.exec(select(Product).where(Product.id == product_id))
+            product = response.one()
+
+            if not product.image_key is None:
+                image_key = product.image_key
+
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
+            if not image_key is None:
+                await ProductUtils.delete_image(storage_client, image_key)
+
+            return True
         
-        return bool(response.data)
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Product deletion failed", status_code=500) from e
     
     @classmethod
-    async def create_product_category(cls, category: ProductCategoryCreate) -> ProductCategory:
+    async def create_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> ProductCategory:
         """Create a new product category."""
         
-        if not await ProductUtils.exist_product(category.product_id):
+        if not await ProductUtils.exist_product(db_session, product_category.product_id):
             raise HTTPException(detail="Product not found", status_code=404)
         
-        if not await ProductUtils.exist_category(category.category_id):
+        if not await ProductUtils.exist_category(db_session, product_category.category_id):
             raise HTTPException(detail="Category not found", status_code=404)
 
-        client = await get_db_client()
+        try:
 
-        response = await client.table(SETTINGS.product_category_table).insert(category.model_dump(mode="json")).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to create product category", status_code=500)
-
-        return ProductCategory.model_validate(response.data[0])
+            db_session.add(product_category)
+            
+            await db_session.commit()
+            await db_session.refresh(product_category)
+            
+            return product_category
+        
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Failed to create product category", status_code=500) from e
     
     @classmethod
-    async def read_all_product_categories(cls) -> list[ProductCategory]:
+    async def read_all_product_categories(cls, db_session: AsyncSession) -> list[ProductCategory]:
         """Retrieve all product categories."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_category_table).select("*").execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No product categories found", status_code=404)
-
-        return [ProductCategory.model_validate(category) for category in response.data]
-    
-    @classmethod
-    async def read_product_category(cls, category_id: int) -> ProductCategory:
-        """Retrieve a product category by ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_category_table).select("*").eq("id", category_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Product category not found", status_code=404)
-
-        return ProductCategory.model_validate(response.data[0])
+        
+        try:
+            
+            response = await db_session.exec(select(ProductCategory))
+            product_categories = list(response.all())
+            
+            if not product_categories:
+                raise HTTPException(detail="No product categories found", status_code=404)
+            
+            return product_categories
+        
+        except Exception as e:
+            raise HTTPException(detail="Failed to retrieve product categories", status_code=500) from e
 
     @classmethod
-    async def update_product_category(cls, product_category_id: int, fields: dict) -> ProductCategory:
-        """Update an existing product category."""
-
-        # Check if the category exists before attempting to update
-        if not await ProductUtils.exist_product_category(product_category_id):
-            raise HTTPException(detail="Category not found", status_code=404)
-        
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE):
-            raise HTTPException(detail=f"Cannot update fields: {', '.join(cls.EXCLUDED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE)}", status_code=400)
-        
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE):
-            print(fields.keys(), cls.ALLOWED_FIELDS_FOR_PRODUCT_CATEGORY_UPDATE)
-            raise HTTPException(detail="Update attribute of product category", status_code=400)
-        
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_category_table).update(fields).eq("id", product_category_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to update category", status_code=500)
-
-        return ProductCategory.model_validate(response.data[0])
-
-    @classmethod
-    async def delete_product_category(cls, category_id: int) -> None:
+    async def delete_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> bool:
         """Delete a product category by ID."""
 
         # Check if the category exists before attempting to delete
-        if not await ProductUtils.exist_category(category_id):
-            raise HTTPException(detail="Category not found", status_code=404)
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.product_category_table).delete().eq("id", category_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to delete category", status_code=500)
+        if not await ProductUtils.exist_product_category(db_session, product_category):
+            raise HTTPException(detail="Product Category not found", status_code=404)
         
-        return bool(response.data)
+        try:
+            
+            response = await db_session.exec(select(ProductCategory).where(ProductCategory.product_id == product_category.product_id, ProductCategory.category_id == product_category.category_id))
+
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
+            return True
+
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Product category deletion failed", status_code=500) from e
 
     @classmethod
-    async def create_category(cls, category: CategoryCreate) -> Category:
+    async def create_category(cls, db_session: AsyncSession, category: CategoryCreate) -> Category:
         """Create a new product category."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.category_table).insert(category.model_dump(mode="json")).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to create category", status_code=500)
-
-        return Category.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_all_categories(cls) -> list[Category]:
-        """Retrieve all product categories."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.category_table).select("*").execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="No categories found", status_code=404)
-
-        return [Category.model_validate(category) for category in response.data]
-    
-    @classmethod
-    async def read_category(cls, category_id: int) -> Category:
-        """Retrieve a product category by ID."""
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.category_table).select("*").eq("id", category_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Category not found", status_code=404)
-
-        return Category.model_validate(response.data[0])
-    
-    @classmethod
-    async def read_category_base(cls, category_id: int) -> CategoryPlusID:
-        """Retrieve a product category by ID."""
         
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.category_table).select(*cls.FIELDS_CATEGORY_BASE).eq("id", category_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Category not found", status_code=404)
-
-        return CategoryPlusID.model_validate(response.data[0])
+        try:
+            
+            new_category = Category(**category.model_dump(exclude_unset=True))
+            db_session.add(new_category)
+            
+            await db_session.commit()
+            await db_session.refresh(new_category)
+            
+            return new_category
+        
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Failed to create category", status_code=500) from e
     
     @classmethod
-    async def read_all_categories_base(cls) -> list[CategoryPlusID]:
+    async def read_all_categories(cls, db_session: AsyncSession) -> list[Category]:
         """Retrieve all product categories."""
         
-        client = await get_db_client()
+        try:
+            
+            response = await db_session.exec(select(Category))
+            categories = list(response.all())
 
-        response = await client.table(SETTINGS.category_table).select(*cls.FIELDS_CATEGORY_BASE).execute()
+            if not categories:
+                raise HTTPException(detail="No categories found", status_code=404)
 
-        if not bool(response.data):
-            raise HTTPException(detail="No categories found", status_code=404)
-
-        return [CategoryPlusID.model_validate(category) for category in response.data]
+            return categories
+        
+        except Exception as e:
+            raise HTTPException(detail="Failed to retrieve categories", status_code=500) from e
     
     @classmethod
-    async def update_category(cls, category_id: int, fields: dict) -> Category:
+    async def read_category(cls, db_session: AsyncSession, category_id: int) -> Category:
+        """Retrieve a product category by ID."""
+        
+        try:
+            
+            response = await db_session.exec(select(Category).where(Category.id == category_id))
+            category = response.first()
+
+            if category is None:
+                raise HTTPException(detail="Category not found", status_code=404)
+
+            return category
+        
+        except Exception as e:
+            raise HTTPException(detail="Failed to retrieve category", status_code=500) from e
+    
+    @classmethod
+    async def update_category(cls, db_session: AsyncSession, fields: CategoryUpdate) -> Category:
         """Update an existing product category."""
         
         # Check if the category exists before attempting to update
-        if not await ProductUtils.exist_category(category_id):
+        if not await ProductUtils.exist_category(db_session, fields.id):
             raise HTTPException(detail="Category not found", status_code=404)
         
-        if any(field in fields for field in cls.EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE):
-            raise HTTPException(detail=f"Cannot update fields: {', '.join(cls.EXCLUDED_FIELDS_FOR_CATEGORY_UPDATE)}", status_code=400)
+        try:
+            
+            response = await db_session.exec(select(Category).where(Category.id ==fields.id))
+            category = response.one()
+
+            for key, value in fields.model_dump(exclude_unset=True).items():
+                    
+                if key in cls.EXCLUDED_FIELDS_FOR_UPDATE:
+                    continue
+
+                setattr(category, key, value)
+
+            db_session.add(category)
+            await db_session.commit()
+                
+            await db_session.refresh(category)
+            return category
         
-        if not(set(fields.keys()) <= cls.ALLOWED_FIELDS_FOR_CATEGORY_UPDATE):
-            raise HTTPException(detail="Update attribute of category", status_code=400)
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.category_table).update(fields).eq("id", category_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to update category", status_code=500)
-
-        return Category.model_validate(response.data[0])
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Failed to update category", status_code=500) from e
     
     @classmethod
-    async def delete_category(cls, category_id: int) -> None:
+    async def delete_category(cls, db_session: AsyncSession, category_id: int) -> bool:
         """Delete a product category by ID."""
 
         # Check if the category exists before attempting to delete
-        if not await ProductUtils.exist_category(category_id):
+        if not await ProductUtils.exist_category(db_session, category_id):
             raise HTTPException(detail="Category not found", status_code=404)
-
-        client = await get_db_client()
-
-        response = await client.table(SETTINGS.category_table).delete().eq("id", category_id).execute()
-
-        if not bool(response.data):
-            raise HTTPException(detail="Failed to delete category", status_code=500)
         
-        return bool(response.data)
+        try:
+            
+            response = await db_session.exec(select(Category).where(Category.id == category_id))
+            
+            await db_session.delete(response.one())
+            await db_session.commit()
+            
+            return True
+        
+        except Exception as e:
+            await db_session.rollback()
+            raise HTTPException(detail="Failed to delete category", status_code=500) from e
