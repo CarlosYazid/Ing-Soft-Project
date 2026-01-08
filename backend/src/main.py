@@ -4,6 +4,11 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from uvicorn import run
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
+from slowapi.extensions import _rate_limit_exceeded_handler
 
 from core import SETTINGS
 from routes import (
@@ -12,12 +17,25 @@ from routes import (
     InvoiceRouter, FileRouter)
 from db import init_db
 
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=[
+        "60/minute",     # limite sostenido
+        "15/second"      # controla picos/bursts
+    ]
+)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await init_db()
     yield
 
-app = FastAPI(lifespan=lifespan)   
+app = FastAPI(lifespan=lifespan)
+
+# Ratelimiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # Middleware configuration
 app.add_middleware(
@@ -37,9 +55,6 @@ app.include_router(ServiceRouter)
 app.include_router(OthersRouter)
 app.include_router(InvoiceRouter)
 app.include_router(FileRouter)
-
-# Static files configuration
-app.mount("/static", StaticFiles(directory="../frontend/my-app/static", html=True), name="frontend")
 
 @app.get("/")
 async def root():
