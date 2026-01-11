@@ -2,8 +2,9 @@ from fastapi import HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, delete
 
-from models import Order, OrderCreate, OrderUpdate, OrderService, OrderProduct, OrderStatus
+from models import Order, OrderService, OrderProduct, OrderStatus
 from utils import OrderUtils, UserUtils
+from schemas import OrderCreate, OrderUpdate
 
 class OrderCrud:
     

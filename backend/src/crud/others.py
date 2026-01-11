@@ -2,8 +2,9 @@ from fastapi import HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from models import Payment, PaymentCreate, PaymentUpdate
+from models import Payment
 from utils import PaymentUtils
+from schemas import PaymentCreate, PaymentUpdate
 
 class PaymentCrud:
     
@@ -20,7 +21,7 @@ class PaymentCrud:
             db_session.add(new_payment)
             
             await db_session.commit()
-            await session.refresh(new_payment)
+            await db_session.refresh(new_payment)
             
             return new_payment
         

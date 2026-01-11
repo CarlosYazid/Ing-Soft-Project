@@ -2,8 +2,9 @@ from fastapi import HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from models import ClientCreate, ClientUpdate, Client, EmployeeCreate, EmployeeUpdate, Employee
+from models import Client, Employee
 from utils import UserUtils
+from schemas import ClientCreate, ClientUpdate, EmployeeCreate, EmployeeUpdate
 
 class UserCrud:
     """CRUD operations for users"""

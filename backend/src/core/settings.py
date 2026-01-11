@@ -29,13 +29,8 @@ class Settings(BaseSettings):
     image_folder: str = Field(..., alias="image_folder")
     invoice_folder: str = Field(..., alias="invoice_folder")
     
-    
     # Invoices
     INVOICES_PATH: Path = STATIC_DIR / "invoices"
-
-    #Groq
-    groq_api_key: SecretStr = Field(..., alias="groq_api_key")
-    groq_model: str = Field(..., alias="groq_model")
 
     # Email
     smtp_host: str = Field(..., alias="smtp_host")

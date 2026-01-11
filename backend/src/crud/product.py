@@ -3,8 +3,9 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from botocore.client import BaseClient
 
-from models import Product, ProductCreate, ProductUpdate, ProductCategory, Category, CategoryCreate, CategoryUpdate
+from models import Product, ProductCategory, Category
 from utils import ProductUtils
+from schemas import ProductCreate, ProductUpdate, CategoryCreate, CategoryUpdate
 
 class ProductCrud:
     

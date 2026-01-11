@@ -2,8 +2,9 @@ from fastapi import HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 
-from models import Service, ServiceCreate, ServiceUpdate,  ServiceInput
+from models import Service,  ServiceInput
 from utils import ServiceUtils
+from schemas import ServiceCreate, ServiceUpdate
 
 class ServiceCrud:
     
