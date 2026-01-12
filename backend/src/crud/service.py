@@ -2,15 +2,16 @@ from fastapi import HTTPException
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 
-from models import Service, ServiceCreate, ServiceUpdate,  ServiceInput
+from models import Service,  ServiceInput
 from utils import ServiceUtils
+from schemas import ServiceCreate, ServiceUpdate
 
 class ServiceCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
 
-    @classmethod
-    async def create_service(cls, db_session: AsyncSession, service: ServiceCreate) -> Service:
+    @staticmethod
+    async def create_service(db_session: AsyncSession, service: ServiceCreate) -> Service:
         """Create a new service."""
         
         try:
@@ -26,26 +27,9 @@ class ServiceCrud:
         except Exception as e:
             await db_session.rollback()
             raise HTTPException(detail="Service creation failed", status_code=500) from e
-    
-    @classmethod
-    async def read_all_services(cls, db_session: AsyncSession) -> list[Service]:
-        """Retrieve all services."""
         
-        try:
-
-            result = await db_session.exec(select(Service))
-            services = list(result.all())
-
-            if not services:
-                raise HTTPException(detail="No services found", status_code=404)
-
-            return services
-        
-        except Exception as e:
-            raise HTTPException(detail="Service search failed", status_code=500) from e
-        
-    @classmethod
-    async def read_service(cls, db_session: AsyncSession, service_id: int) -> Service:
+    @staticmethod
+    async def read_service(db_session: AsyncSession, service_id: int) -> Service:
         """Retrieve a service by ID."""
         
         try:
@@ -61,8 +45,8 @@ class ServiceCrud:
         except Exception as e:
             raise HTTPException(detail="Service search failed", status_code=500) from e
         
-    @classmethod
-    async def update_service(cls, db_session: AsyncSession, fields: ServiceUpdate) -> Service:
+    @staticmethod
+    async def update_service(db_session: AsyncSession, fields: ServiceUpdate) -> Service:
         """Update an existing service."""
         
         if fields.id is None:
@@ -95,8 +79,8 @@ class ServiceCrud:
             await db_session.rollback()
             raise HTTPException(detail="Service update failed", status_code=500) from e
 
-    @classmethod
-    async def delete_service(cls, db_session: AsyncSession, service_id: int) -> bool:
+    @staticmethod
+    async def delete_service(db_session: AsyncSession, service_id: int) -> bool:
         """Delete a service by ID."""
 
         # check if service exists
@@ -123,8 +107,8 @@ class ServiceCrud:
             await db_session.rollback()
             raise HTTPException(detail="Service deletion failed", status_code=500) from e
 
-    @classmethod
-    async def create_service_input(cls, db_session: AsyncSession, service_input: ServiceInput) -> ServiceInput:
+    @staticmethod
+    async def create_service_input(db_session: AsyncSession, service_input: ServiceInput) -> ServiceInput:
         """Create a new service input."""
         
         # check if service exists
@@ -156,51 +140,8 @@ class ServiceCrud:
             await db_session.rollback()
             raise HTTPException(detail="Service input creation failed", status_code=500) from e
     
-    @classmethod
-    async def read_service_inputs_by_product(cls, db_session: AsyncSession, product_id: int) -> list[ServiceInput]:
-        """Retrieve all service inputs for a specific product ID."""
-        
-        # check if product exists
-        from utils import ProductUtils
-
-        if not await ProductUtils.exist_product(db_session, product_id):
-            raise HTTPException(detail="Product not found", status_code=404)
-
-        try:
-
-            response = await db_session.exec(select(ServiceInput).where(ServiceInput.product_id == product_id))
-            service_inputs = list(response.all())
-
-            if not service_inputs:
-                raise HTTPException(detail="No service inputs found for this product", status_code=404)
-
-            return service_inputs
-        
-        except Exception as e:
-            raise HTTPException(detail="Service input search failed", status_code=500) from e
-
-    @classmethod
-    async def read_service_inputs_by_service(cls, db_session: AsyncSession, service_id: int) -> list[ServiceInput]:
-        """Retrieve all service inputs for a specific service ID."""
-
-        if not await ServiceUtils.exist_service(db_session, service_id):
-            raise HTTPException(detail="Service not found", status_code=404)
-
-        try:
-            
-            response = await db_session.exec(select(ServiceInput).where(ServiceInput.service_id == service_id))
-            service_inputs = list(response.all())
-            
-            if not service_inputs:
-                raise HTTPException(detail="No service inputs found for this", status_code=404)
-            
-            return service_inputs
-        
-        except Exception as e:
-            raise HTTPException(detail="Service input search failed", status_code=500) from e
-
-    @classmethod
-    async def delete_service_input(cls, db_session: AsyncSession, service_input: ServiceInput) -> bool:
+    @staticmethod
+    async def delete_service_input(db_session: AsyncSession, service_input: ServiceInput) -> bool:
         """Delete a service input by service and product"""
         
         if not await ServiceUtils.exist_service_input(db_session, service_input):

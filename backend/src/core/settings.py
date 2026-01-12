@@ -22,20 +22,15 @@ class Settings(BaseSettings):
     
     #Storage
     storage_endpoint_url: str = Field(..., alias="storage_endpoint_url")
-    storage_access_key: SecretStr = Field(..., alias="access_key")
-    storage_secret_key: SecretStr = Field(..., alias="secret_key")
-    storage_region: str = Field(..., alias="region")
+    storage_access_key: SecretStr = Field(..., alias="storage_access_key")
+    storage_secret_key: SecretStr = Field(..., alias="storage_secret_key")
+    storage_region: str = Field(..., alias="storage_region")
     bucket_name: str = Field(..., alias="bucket_name")
     image_folder: str = Field(..., alias="image_folder")
     invoice_folder: str = Field(..., alias="invoice_folder")
     
-    
     # Invoices
     INVOICES_PATH: Path = STATIC_DIR / "invoices"
-
-    #Groq
-    groq_api_key: SecretStr = Field(..., alias="groq_api_key")
-    groq_model: str = Field(..., alias="groq_model")
 
     # Email
     smtp_host: str = Field(..., alias="smtp_host")

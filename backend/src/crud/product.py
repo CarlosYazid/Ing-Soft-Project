@@ -3,15 +3,16 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 from botocore.client import BaseClient
 
-from models import Product, ProductCreate, ProductUpdate, ProductCategory, Category, CategoryCreate, CategoryUpdate
+from models import Product, ProductCategory, Category
 from utils import ProductUtils
+from schemas import ProductCreate, ProductUpdate, CategoryCreate, CategoryUpdate
 
 class ProductCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
 
-    @classmethod
-    async def create_product(cls, db_session: AsyncSession, product: ProductCreate) -> Product:
+    @staticmethod
+    async def create_product(db_session: AsyncSession, product: ProductCreate) -> Product:
         """Create a new product."""
                     
         try:
@@ -27,27 +28,9 @@ class ProductCrud:
         except Exception as e:
             await db_session.rollback()
             raise HTTPException(status_code=500, detail="Service creation failed") from e
-        
     
-    @classmethod
-    async def read_all_products(cls, db_session: AsyncSession) -> list[Product]:
-        """Retrieve all products."""
-        
-        try:
-
-            response = await db_session.exec(select(Product))
-            products = list(response.all())
-
-            if not products:
-                raise HTTPException(detail="No products found", status_code=404)
-
-            return products
-
-        except Exception as e:
-            raise HTTPException(detail="Product search failed", status_code=500) from e
-    
-    @classmethod
-    async def read_product(cls, db_session: AsyncSession, product_id: int) -> Product:
+    @staticmethod
+    async def read_product(db_session: AsyncSession, product_id: int) -> Product:
         """Retrieve a product by ID."""
         
         try:
@@ -63,8 +46,8 @@ class ProductCrud:
         except Exception as e:
             raise HTTPException(detail="Product search failed", status_code=500) from e
     
-    @classmethod
-    async def update_product(cls, db_session: AsyncSession, fields: ProductUpdate) -> Product:
+    @staticmethod
+    async def update_product(db_session: AsyncSession, fields: ProductUpdate) -> Product:
         """Update an existing product."""
         
         # Check if the product exists before attempting to update
@@ -93,8 +76,8 @@ class ProductCrud:
             await db_session.rollback()
             raise HTTPException(detail="Product update failed", status_code=500) from e
     
-    @classmethod
-    async def update_stock(cls, db_session: AsyncSession, product_id: int, new_stock: int, replace: bool = True) -> Product:
+    @staticmethod
+    async def update_stock(db_session: AsyncSession, product_id: int, new_stock: int, replace: bool = True) -> Product:
         """Update the stock of a product by ID."""
 
         # Check if the product exists before attempting to update stock
@@ -124,8 +107,8 @@ class ProductCrud:
             await db_session.rollback()
             raise HTTPException(detail="Stock update failed", status_code=500) from e
     
-    @classmethod
-    async def update_image(cls, db_session: AsyncSession, storage_client: BaseClient, product_id: int, image: UploadFile) -> Product:
+    @staticmethod
+    async def update_image(db_session: AsyncSession, storage_client: BaseClient, product_id: int, image: UploadFile) -> Product:
         """Update the image of a product by ID."""
 
         # Check if the product exists before attempting to update the image
@@ -155,11 +138,10 @@ class ProductCrud:
     
         except Exception as e:
             await db_session.rollback()
-            print(e)
             raise HTTPException(detail="Image update failed", status_code=500) from e
     
-    @classmethod
-    async def delete_product(cls, db_session: AsyncSession, storage_client: BaseClient, product_id: int) -> bool:
+    @staticmethod
+    async def delete_product(db_session: AsyncSession, storage_client: BaseClient, product_id: int) -> bool:
         """Delete a product by ID."""
 
         # Check if the product exists before attempting to delete
@@ -194,8 +176,8 @@ class ProductCrud:
             await db_session.rollback()
             raise HTTPException(detail="Product deletion failed", status_code=500) from e
     
-    @classmethod
-    async def create_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> ProductCategory:
+    @staticmethod
+    async def create_product_category(db_session: AsyncSession, product_category: ProductCategory) -> ProductCategory:
         """Create a new product category."""
         
         if not await ProductUtils.exist_product(db_session, product_category.product_id):
@@ -217,25 +199,8 @@ class ProductCrud:
             await db_session.rollback()
             raise HTTPException(detail="Failed to create product category", status_code=500) from e
     
-    @classmethod
-    async def read_all_product_categories(cls, db_session: AsyncSession) -> list[ProductCategory]:
-        """Retrieve all product categories."""
-        
-        try:
-            
-            response = await db_session.exec(select(ProductCategory))
-            product_categories = list(response.all())
-            
-            if not product_categories:
-                raise HTTPException(detail="No product categories found", status_code=404)
-            
-            return product_categories
-        
-        except Exception as e:
-            raise HTTPException(detail="Failed to retrieve product categories", status_code=500) from e
-
-    @classmethod
-    async def delete_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> bool:
+    @staticmethod
+    async def delete_product_category(db_session: AsyncSession, product_category: ProductCategory) -> bool:
         """Delete a product category by ID."""
 
         # Check if the category exists before attempting to delete
@@ -255,8 +220,8 @@ class ProductCrud:
             await db_session.rollback()
             raise HTTPException(detail="Product category deletion failed", status_code=500) from e
 
-    @classmethod
-    async def create_category(cls, db_session: AsyncSession, category: CategoryCreate) -> Category:
+    @staticmethod
+    async def create_category(db_session: AsyncSession, category: CategoryCreate) -> Category:
         """Create a new product category."""
         
         try:
@@ -273,25 +238,8 @@ class ProductCrud:
             await db_session.rollback()
             raise HTTPException(detail="Failed to create category", status_code=500) from e
     
-    @classmethod
-    async def read_all_categories(cls, db_session: AsyncSession) -> list[Category]:
-        """Retrieve all product categories."""
-        
-        try:
-            
-            response = await db_session.exec(select(Category))
-            categories = list(response.all())
-
-            if not categories:
-                raise HTTPException(detail="No categories found", status_code=404)
-
-            return categories
-        
-        except Exception as e:
-            raise HTTPException(detail="Failed to retrieve categories", status_code=500) from e
-    
-    @classmethod
-    async def read_category(cls, db_session: AsyncSession, category_id: int) -> Category:
+    @staticmethod
+    async def read_category(db_session: AsyncSession, category_id: int) -> Category:
         """Retrieve a product category by ID."""
         
         try:
@@ -307,8 +255,8 @@ class ProductCrud:
         except Exception as e:
             raise HTTPException(detail="Failed to retrieve category", status_code=500) from e
     
-    @classmethod
-    async def update_category(cls, db_session: AsyncSession, fields: CategoryUpdate) -> Category:
+    @staticmethod
+    async def update_category(db_session: AsyncSession, fields: CategoryUpdate) -> Category:
         """Update an existing product category."""
         
         # Check if the category exists before attempting to update
@@ -337,8 +285,8 @@ class ProductCrud:
             await db_session.rollback()
             raise HTTPException(detail="Failed to update category", status_code=500) from e
     
-    @classmethod
-    async def delete_category(cls, db_session: AsyncSession, category_id: int) -> bool:
+    @staticmethod
+    async def delete_category(db_session: AsyncSession, category_id: int) -> bool:
         """Delete a product category by ID."""
 
         # Check if the category exists before attempting to delete

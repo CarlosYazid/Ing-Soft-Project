@@ -3,63 +3,32 @@ from botocore.client import BaseClient
 from starlette.responses import StreamingResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
+from sqlalchemy.sql.expression import Select
 
 from models import Payment, PaymentMethod, PaymentStatus
 from core import SETTINGS
 
 class PaymentService:
 
+    @staticmethod
+    def read_all_payments() -> Select:
+        """Query for retrieve all payments."""
+        return select(Payment)
     
-    @classmethod
-    async def search_payments_by_status(cls, db_session: AsyncSession, status: PaymentStatus) -> list[Payment]:
-        """Retrieve payments by status."""
-        
-        try:
-            
-            response = await db_session.exec(select(Payment).where(Payment.status is status))
-            payments = list(response.all())
-            
-            if not payments:
-                raise HTTPException(detail="Payments not found", status_code=404)
-            
-            return payments
-        
-        except Exception as e:
-            raise HTTPException(detail="Payment searching", status_code=500) from e
+    @staticmethod
+    def search_payments_by_status(status: PaymentStatus) -> Select:
+        """Query for retrieve payments by status."""
+        return select(Payment).where(Payment.status is status)
     
-    @classmethod
-    async def search_payments_by_method(cls, db_session: AsyncSession, method: PaymentMethod) -> list[Payment]:
-        """Retrieve payments by method."""
-        
-        try:
-            
-            response = await db_session.exec(select(Payment).where(Payment.method is method))
-            payments = list(response.all())
-            
-            if not payments:
-                raise HTTPException(detail="Payments not found", status_code=404)
-            
-            return payments
-        
-        except Exception as e:
-            raise HTTPException(detail="Failed", status_code=500) from e
+    @staticmethod
+    def search_payments_by_method(method: PaymentMethod) -> Select:
+        """Query for retrieve payments by method."""
+        return select(Payment).where(Payment.method is method)
     
-    @classmethod
-    async def search_payments_by_client_id(cls, db_session: AsyncSession, client_id: int) -> list[Payment]:
-        """Retrieve payments by client ID."""
-        
-        try:
-            
-            response = await db_session.exec(select(Payment).where(Payment.client_id == client_id))
-            payments = list(response.all())
-            
-            if not payments:
-                raise HTTPException(detail="Payments not found", status_code= 404)
-            
-            return payments
-        
-        except Exception as e:
-            raise HTTPException(detail="", status_code=500) from e
+    @staticmethod
+    def search_payments_by_client(client_id: int) -> Select:
+        """Query for retrieve payments by client."""
+        return select(Payment).where(Payment.client_id == client_id)
 class FileService:
     
     @classmethod

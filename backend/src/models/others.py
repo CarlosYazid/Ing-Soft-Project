@@ -2,130 +2,16 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.base import MIMEBase
 from email import encoders
-from typing import Optional, TYPE_CHECKING
-from datetime import datetime, date
+from typing import Optional
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 import os
 
 from pydantic import BaseModel, Field, ConfigDict, EmailStr
-from sqlmodel import SQLModel, Field as FieldDB, Relationship
 
 from core import SETTINGS
-
-if TYPE_CHECKING:
-    from models.user import Client
-
-
-class PaymentMethod(str, Enum):
-    """
-    Enum for payment methods.
-    """
-    CASH = "Efectivo"
-    BANK_TRANSFER = "Transferencia_bancaria"
-    ON_CREDIT = "Crédito_en_tiempo"
-
-class PaymentStatus(str, Enum):
-    """
-    Enum for payment statuses.
-    """
-    PENDING = "Pendiente"
-    COMPLETED = "Completado"
-    FAILED = "Fallido"
-    REFUNDED = "Reembolsado"
-
-
-class Payment(SQLModel, table=True):
-    """
-    Model for payments.
-    """
-    id: Optional[int] = FieldDB(primary_key=True, description="Payment's unique identifier")
-    client_id: int = FieldDB(foreign_key="client.id", description="Client associated with the payment")
-    amount: float = FieldDB(..., description="Amount paid")
-    method: PaymentMethod = FieldDB(..., description="Payment method used")
-    status: PaymentStatus = FieldDB(..., description="Current status of the payment")
-    due_date: Optional[date] = FieldDB(None, description="Due date for the credit payment")
-    interest_rate: Optional[float] = FieldDB(None, description="Interest rate applied to the credit")
-    account_number: Optional[str] = FieldDB(None, description="Account number for the bank transfer")
-    created_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the payment was created")
-    updated_at: datetime = FieldDB(default_factory = datetime.now, description="Timestamp when the payment was last updated")
-
-    client: 'Client' = Relationship(back_populates="payments", sa_relationship_kwargs={"lazy": "selectin"})
-
-class PaymentCreate(BaseModel):
-    
-    client_id: int = Field(..., description="Client associated with the payment", gt = 0)
-    amount: float = Field(..., description="Amount paid", gt = 0)
-    method: PaymentMethod = Field(default=PaymentMethod.CASH, description="Payment method used")
-    status: PaymentStatus = Field(default=PaymentStatus.PENDING, description="Current status of the payment")
-    due_date: Optional[date] = Field(None, description="Due date for the credit payment")
-    interest_rate: Optional[float] = Field(None, description="Interest rate applied to the credit", gt = 0)
-    account_number: Optional[str] = Field(None, description="Account number for the bank transfer", gt = 0)
-    
-    model_config : ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "client_id": 1,
-                                                  "amount": 1000.00,
-                                                  "method": "Crédito_en_tiempo",
-                                                  "status": "Pendiente",
-                                                  "due_date": "2023-01-01",
-                                                  "interest_rate": 0.05,
-                                                  "account_number": "1234567890"
-                                              }
-                                          })
-    
-class PaymentUpdate(BaseModel):
-
-    id: int = Field(..., description="Payment's unique identifier", gt = 0)
-    amount: Optional[float] = Field(None, description="Amount paid", gt = 0)
-    method: Optional[PaymentMethod] = Field(None, description="Payment method used")
-    status: Optional[PaymentStatus] = Field(None, description="Current status of the payment")
-    due_date: Optional[date] = Field(None, description="Due date for the credit payment")
-    interest_rate: Optional[float] = Field(None, description="Interest rate applied to the credit", gt = 0)
-    account_number: Optional[str] = Field(None, description="Account number for the bank transfer", gt = 0)
-    updated_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the payment was last updated")
-
-    model_config : ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "amount": 1000.00,
-                                                  "method": "Crédito_en_tiempo",
-                                                  "status": "Pendiente",
-                                                  "due_date": "2023-01-01",
-                                                  "interest_rate": 0.05,
-                                                  "account_number": "1234567890",
-                                                  "updated_at": "2023-01-01T00:00:00Z"
-                                              }
-                                          })
-
-class PaymentRead(BaseModel):
-
-    id: int = Field(..., description="Payment's unique identifier")
-    client_id: int = Field(..., description="Client associated with the payment")
-    amount: float = Field(..., description="Amount paid")
-    method: PaymentMethod = Field(..., description="Payment method used")
-    status: PaymentStatus = Field(..., description="Current status of the payment")
-    due_date: Optional[date] = Field(None, description="Due date for the credit payment")
-    interest_rate: Optional[float] = Field(None, description="Interest rate applied to the credit")
-    account_number: Optional[str] = Field(None, description="Account number for the bank transfer")
-
-    model_config : ConfigDict = ConfigDict(str_strip_whitespace=True,
-                                          use_enum_values=True,
-                                          json_schema_extra={
-                                              "example": {
-                                                  "id": 1,
-                                                  "client_id": 1,
-                                                  "amount": 1000.00,
-                                                  "method": "Crédito_en_tiempo",
-                                                  "status": "Pendiente",
-                                                  "due_date": "2023-01-01T00:00:00Z",
-                                                  "interest_rate": 0.05,
-                                                  "account_number": "1234567890"
-                                              }
-                                          })
+from models import Client
 
 class EmailType(str, Enum):
     """

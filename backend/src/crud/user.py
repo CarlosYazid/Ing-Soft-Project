@@ -2,16 +2,17 @@ from fastapi import HTTPException
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
-from models import ClientCreate, ClientUpdate, Client, EmployeeCreate, EmployeeUpdate, Employee
+from models import Client, Employee
 from utils import UserUtils
+from schemas import ClientCreate, ClientUpdate, EmployeeCreate, EmployeeUpdate
 
 class UserCrud:
     """CRUD operations for users"""
     
     EXCLUDED_FIELDS_FOR_UPDATE_USER = {"id", "documentid"}
 
-    @classmethod
-    async def create_employee(cls, db_session : AsyncSession, employee : EmployeeCreate) -> Employee:
+    @staticmethod
+    async def create_employee(db_session : AsyncSession, employee : EmployeeCreate) -> Employee:
         """Create a new employee."""
         
         try:
@@ -28,25 +29,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Employee creation failed", status_code=500) from e
 
-    @classmethod
-    async def read_all_employees(cls, db_session : AsyncSession) -> list[Employee]:
-        """Retrieve all employees."""
-
-        try:
-
-            response = await db_session.exec(select(Employee))
-            employees = list(response.all())
-            
-            if not employees:
-                raise HTTPException(detail="No employees found", status_code=404)
-
-            return employees
-
-        except Exception as e:
-            raise HTTPException(detail="Employees retrieval failed", status_code=500) from e
-
-    @classmethod
-    async def read_employee(cls, db_session: AsyncSession, employee_id: int) -> Employee:
+    @staticmethod
+    async def read_employee(db_session: AsyncSession, employee_id: int) -> Employee:
         """Retrieve an employee by ID."""
         
         try:
@@ -62,8 +46,8 @@ class UserCrud:
         except Exception as e:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
 
-    @classmethod
-    async def read_employee_by_email(cls, db_session: AsyncSession, email: str) -> Employee:
+    @staticmethod
+    async def read_employee_by_email(db_session: AsyncSession, email: str) -> Employee:
         """Retrieve an employee by email."""
         
         try:
@@ -79,8 +63,8 @@ class UserCrud:
         except Exception as e:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
     
-    @classmethod
-    async def read_employee_by_documentid(cls, db_session: AsyncSession, document_id: int) -> Employee:
+    @staticmethod
+    async def read_employee_by_documentid(db_session: AsyncSession, document_id: int) -> Employee:
         """Retrieve an employee by document ID."""
         
         try:
@@ -96,8 +80,8 @@ class UserCrud:
         except Exception as e:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
 
-    @classmethod
-    async def update_employee(cls, db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
+    @staticmethod
+    async def update_employee(db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee."""
         
         if fields.id is None:
@@ -128,8 +112,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Employee update failed", status_code=500) from e
 
-    @classmethod
-    async def update_employee_by_email(cls, db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
+    @staticmethod
+    async def update_employee_by_email(db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee by email."""
         
         if fields.email is None:
@@ -163,8 +147,8 @@ class UserCrud:
             raise HTTPException(detail="Employee update failed", status_code=500) from e
 
     
-    @classmethod
-    async def update_employee_by_documentid(cls, db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
+    @staticmethod
+    async def update_employee_by_documentid(db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee by document ID."""
         
         if fields.documentid is None:
@@ -195,8 +179,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Employee update failed", status_code=500) from e
     
-    @classmethod
-    async def delete_employee(cls, db_session: AsyncSession, employee_id: int) -> bool:
+    @staticmethod
+    async def delete_employee(db_session: AsyncSession, employee_id: int) -> bool:
         """Delete an employee by ID."""
         
         if not await UserUtils.exist_employee(db_session, employee_id):
@@ -206,7 +190,7 @@ class UserCrud:
         from utils import OrderUtils
         
         if await OrderUtils.exist_orders_by_employee(db_session, employee_id):
-            raise HTTPException(detail="Cannot delete employee with active orders", status_code=400)
+            raise HTTPException(detail="Cannot delete employee with active orders. Consider disabling your status.", status_code=400)
 
         try:
             
@@ -221,8 +205,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
     
-    @classmethod
-    async def delete_employee_by_email(cls, db_session: AsyncSession, email: str) -> bool:
+    @staticmethod
+    async def delete_employee_by_email(db_session: AsyncSession, email: str) -> bool:
         """Delete an employee by email."""
         
         if not await UserUtils.exist_employee_by_email(db_session, email):
@@ -234,7 +218,7 @@ class UserCrud:
         from utils import OrderUtils
         
         if await OrderUtils.exist_orders_by_employee(db_session, id_):
-            raise HTTPException(detail="Cannot delete employee with active orders", status_code=400)
+            raise HTTPException(detail="Cannot delete employee with active orders. Consider disabling your status.", status_code=400)
 
         try:
             
@@ -249,8 +233,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
 
-    @classmethod
-    async def delete_employee_by_documentid(cls, db_session: AsyncSession, document_id: int) -> bool:
+    @staticmethod
+    async def delete_employee_by_documentid(db_session: AsyncSession, document_id: int) -> bool:
         """Delete an employee by document ID."""
         
         if not await UserUtils.exist_employee_by_documentid(db_session, document_id):
@@ -262,7 +246,7 @@ class UserCrud:
         from utils import OrderUtils
         
         if await OrderUtils.exist_orders_by_employee(db_session, id_):
-            raise HTTPException(detail="Cannot delete employee with active orders", status_code=400)
+            raise HTTPException(detail="Cannot delete employee with active orders. Consider disabling your status.", status_code=400)
 
         try:
             
@@ -277,8 +261,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
         
-    @classmethod
-    async def create_client(cls, db_session: AsyncSession, client_: ClientCreate) -> Client:
+    @staticmethod
+    async def create_client(db_session: AsyncSession, client_: ClientCreate) -> Client:
         """Create a new client."""
         
         try:
@@ -294,27 +278,9 @@ class UserCrud:
         except Exception as e:
             await db_session.rollback()
             raise HTTPException(detail="Client creation failed", status_code=500) from e
-
     
-    @classmethod
-    async def read_all_clients(cls, db_session: AsyncSession) -> list[Client]:
-        """Retrieve all clients."""
-        
-        try:
-
-            response = await db_session.exec(select(Client))
-            clients = list(response.all())
-
-            if not clients:
-                raise HTTPException(detail="No clients found", status_code=404)
-
-            return clients
-        
-        except Exception as e:
-            raise HTTPException(detail="Clients retrieval failed", status_code=500) from e
-    
-    @classmethod
-    async def read_client(cls, db_session: AsyncSession, client_id: int) -> Client:
+    @staticmethod
+    async def read_client(db_session: AsyncSession, client_id: int) -> Client:
         """Retrieve a client by ID."""
         
         try:
@@ -330,8 +296,8 @@ class UserCrud:
         except Exception as e:
             raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
-    @classmethod
-    async def read_client_by_email(cls, db_session: AsyncSession, email: str) -> Client:
+    @staticmethod
+    async def read_client_by_email(db_session: AsyncSession, email: str) -> Client:
         """Retrieve a client by email."""
         
         try:
@@ -347,8 +313,8 @@ class UserCrud:
         except Exception as e:
             raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
-    @classmethod
-    async def read_client_by_documentid(cls, db_session: AsyncSession, document_id: int) -> Client:   
+    @staticmethod
+    async def read_client_by_documentid(db_session: AsyncSession, document_id: int) -> Client:   
         """Retrieve a client by document ID."""
         try:
 
@@ -363,8 +329,8 @@ class UserCrud:
         except Exception as e:
             raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
-    @classmethod
-    async def update_client(cls, db_session: AsyncSession, fields: ClientUpdate) -> Client:
+    @staticmethod
+    async def update_client(db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client."""
         
         if fields.id is None:
@@ -395,8 +361,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
-    @classmethod
-    async def update_client_by_email(cls, db_session: AsyncSession, fields: ClientUpdate) -> Client:
+    @staticmethod
+    async def update_client_by_email(db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client by email."""
         
         if fields.email is None:
@@ -427,8 +393,8 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
-    @classmethod
-    async def update_client_by_documentid(cls, db_session: AsyncSession, fields: ClientUpdate) -> Client:
+    @staticmethod
+    async def update_client_by_documentid(db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client by document ID."""
         
         if fields.documentid is None:
@@ -459,18 +425,13 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
-    @classmethod
-    async def delete_client(cls, db_session: AsyncSession, client_id: int) -> bool:
+    @staticmethod
+    async def delete_client(db_session: AsyncSession, client_id: int) -> bool:
         """Delete a client by ID."""
         
         # check if the client exists
         if not await UserUtils.exist_client(db_session, client_id):
             raise HTTPException(detail="Client not found", status_code=404)
-        
-        from utils import OrderUtils
-        
-        if await OrderUtils.exist_order_by_client(db_session, client_id):
-            raise HTTPException(detail="Cannot delete client with active orders", status_code=400)
         
         try:
             
@@ -485,20 +446,13 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Client deletion failed", status_code=500) from e
     
-    @classmethod
-    async def delete_client_by_email(cls, db_session: AsyncSession, email: str) -> bool:
+    @staticmethod
+    async def delete_client_by_email(db_session: AsyncSession, email: str) -> bool:
         """Delete a client by email."""
         
         # check if the client exists
         if not await UserUtils.exist_client_by_email(db_session, email):
             raise HTTPException(detail="Client not found", status_code=404)
-        
-        from utils import OrderUtils
-        
-        _id = await UserUtils.translate_email_by_client_id(db_session, email)
-
-        if await OrderUtils.exist_order_by_client(db_session, _id):
-            raise HTTPException(detail="Cannot delete client with active orders", status_code=400)
 
         try:
             
@@ -513,20 +467,13 @@ class UserCrud:
             await db_session.rollback()
             raise HTTPException(detail="Client deletion failed", status_code=500) from e
       
-    @classmethod
-    async def delete_client_by_documentid(cls, db_session: AsyncSession, document_id: int) -> bool:
+    @staticmethod
+    async def delete_client_by_documentid(db_session: AsyncSession, document_id: int) -> bool:
         """Delete a client by document ID."""
         
         # check if the client exists
         if not await UserUtils.exist_client_by_documentid(db_session, document_id):
             raise HTTPException(detail="Client not found", status_code=404)
-        
-        from utils import OrderUtils
-        
-        _id = await UserUtils.translate_documentid_by_client_id(db_session, document_id)
-        
-        if await OrderUtils.exist_order_by_client(db_session, _id):
-            raise HTTPException(detail="Cannot delete client with active orders", status_code=400)
         
         try:
             

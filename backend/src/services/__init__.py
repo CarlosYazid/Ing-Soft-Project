@@ -6,7 +6,6 @@ from services.service import ServiceService
 from services.others import PaymentService, FileService
 from services.email import EmailService
 from services.invoice import InvoiceService
-from services.gen_ai import GenAIService
 
 __all__ = [
     "UserService",
