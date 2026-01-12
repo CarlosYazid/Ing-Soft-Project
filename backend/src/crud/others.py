@@ -10,8 +10,8 @@ class PaymentCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
     
-    @classmethod
-    async def create_payment(cls, db_session: AsyncSession, payment: PaymentCreate) -> Payment:
+    @staticmethod
+    async def create_payment(db_session: AsyncSession, payment: PaymentCreate) -> Payment:
         """Create a new payment."""
         
         try:
@@ -29,25 +29,8 @@ class PaymentCrud:
             await db_session.rollback()
             raise HTTPException(detail="Failed to create payment", status_code=500) from e
     
-    @classmethod
-    async def read_all_payments(cls, db_session: AsyncSession) -> list[Payment]:
-        """Retrieve all payments."""
-        
-        try:
-            
-            response = await db_session.exec(select(Payment))
-            payments = list(response.all())
-            
-            if not payments:
-                raise HTTPException(detail="No payments found", status_code=404)
-            
-            return payments
-        
-        except Exception as e:
-            raise HTTPException(detail="Failed to retrieve payments", status_code=500) from e
-
-    @classmethod
-    async def read_payment(cls, db_session: AsyncSession, payment_id: int) -> Payment:
+    @staticmethod
+    async def read_payment(db_session: AsyncSession, payment_id: int) -> Payment:
         """Retrieve a payment by ID."""
         try:
 
@@ -62,8 +45,8 @@ class PaymentCrud:
         except Exception as e:
             raise HTTPException(detail="Failed to retrieve payment", status_code=500) from e
     
-    @classmethod
-    async def update_payment(cls, db_session: AsyncSession, fields: PaymentUpdate) -> Payment:
+    @staticmethod
+    async def update_payment(db_session: AsyncSession, fields: PaymentUpdate) -> Payment:
         """Update an existing payment."""
 
         # check if payment exists
@@ -92,8 +75,8 @@ class PaymentCrud:
             await db_session.rollback()
             raise HTTPException(detail="Failed to update payment", status_code=500) from e
     
-    @classmethod
-    async def delete_payment(cls, db_session: AsyncSession, payment_id: int) -> bool:
+    @staticmethod
+    async def delete_payment(db_session: AsyncSession, payment_id: int) -> bool:
         """Delete a payment by ID."""
         
         if not await PaymentUtils.exist_payment(db_session, payment_id):

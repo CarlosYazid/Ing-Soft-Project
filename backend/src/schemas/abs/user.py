@@ -12,8 +12,6 @@ class UserCreate(BaseCreate):
     phone: Optional[str] = Field(None, description="User's phone number")
     first_name: str = Field(..., description="User's firstname")
     last_name: str = Field(..., description="User's lastname")
-    
-
 class UserUpdate(BaseUpdate):
 
     id: Optional[int] = Field(None, description="User's ID", gt = 0)

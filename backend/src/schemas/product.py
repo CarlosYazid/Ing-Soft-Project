@@ -55,7 +55,7 @@ class ProductRead(BaseRead):
                                                   "price": 9.99,
                                                   "stock": 50,
                                                   "minimum_stock" : 7,
-                                                  "image_url": "https://example.com/image.jpg",
+                                                  "image_key": "/images/image.jpg",
                                                   "expiration_date": "2023-12-31"
                                               }
                                           },

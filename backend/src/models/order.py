@@ -70,8 +70,15 @@ class Order(BaseModel, table=True):
     status: OrderStatus = Field(default=OrderStatus.PENDING, description="Current status of the order")
     employee_id: int = Field(foreign_key="employee.id", description="Employee assigned to the order", index = True)
     
-    order_products: Optional[list['OrderProduct']] = Relationship(back_populates="order", sa_relationship_kwargs={"lazy": "selectin"})
-    order_services: Optional[list['OrderService']] = Relationship(back_populates="order", sa_relationship_kwargs={"lazy": "selectin"})
-
+    order_products: Optional[list['OrderProduct']] = Relationship(back_populates="order",
+                                                                  sa_relationship_kwargs={
+                                                                      "lazy": "selectin",
+                                                                      "cascade": "all, delete-orphan"
+                                                                      })
+    order_services: Optional[list['OrderService']] = Relationship(back_populates="order", sa_relationship_kwargs={
+                                                                      "lazy": "selectin",
+                                                                      "cascade": "all, delete-orphan"
+                                                                      })
+    
     client: 'Client' = Relationship(back_populates="orders")
     employee: 'Employee' = Relationship(back_populates="orders")

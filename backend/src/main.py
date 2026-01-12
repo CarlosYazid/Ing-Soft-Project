@@ -3,12 +3,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi_pagination import add_pagination
 from uvicorn import run
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
-from slowapi.extensions import _rate_limit_exceeded_handler
+from slowapi.extension import _rate_limit_exceeded_handler
 
 from core import SETTINGS
 from routes import (
@@ -20,8 +21,8 @@ from db import init_db
 limiter = Limiter(
     key_func=get_remote_address,
     default_limits=[
-        "60/minute",     # limite sostenido
-        "15/second"      # controla picos/bursts
+        "120/minute",     # limite sostenido
+        "30/second"      # controla picos/bursts
     ]
 )
 
@@ -32,12 +33,15 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Paginacion
+add_pagination(app)
+
 # Ratelimiter
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
-# Middleware configuration
+# Middleware configuracion
 app.add_middleware(
     CORSMiddleware,
     allow_origins=SETTINGS.allowed_origins,

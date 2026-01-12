@@ -10,5 +10,11 @@ if TYPE_CHECKING:
 
 class Client(UserModel, table = True):
     
-    orders: Optional[list['Order']] = Relationship(back_populates="client", sa_relationship_kwargs={"lazy": "selectin"})
-    payments: Optional[list['Payment']] = Relationship(back_populates="client", sa_relationship_kwargs={"lazy": "selectin"})
+    orders: Optional[list['Order']] = Relationship(back_populates="client", sa_relationship_kwargs={
+                                                                      "lazy": "selectin",
+                                                                      "cascade": "all, delete-orphan"
+                                                                      })
+    payments: Optional[list['Payment']] = Relationship(back_populates="client", sa_relationship_kwargs={
+                                                                      "lazy": "selectin",
+                                                                      "cascade": "all, delete-orphan"
+                                                                      })
