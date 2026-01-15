@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import EmailStr, Field
 
-from schemas.abs.base import BaseCreate, BaseUpdate, BaseRead
+from dtos.abs.base import BaseCreate, BaseUpdate, BaseRead, BaseFilter
 
 class UserCreate(BaseCreate):
     
@@ -12,14 +12,15 @@ class UserCreate(BaseCreate):
     phone: Optional[str] = Field(None, description="User's phone number")
     first_name: str = Field(..., description="User's firstname")
     last_name: str = Field(..., description="User's lastname")
+
 class UserUpdate(BaseUpdate):
 
     id: Optional[int] = Field(None, description="User's ID", gt = 0)
     email: Optional[EmailStr] = Field(None, description="User's email address")
     documentid: Optional[int] = Field(None, description="User's document ID", gt = 0)
     phone: Optional[str] = Field(None, description="User's phone number")
-    first_name: str = Field(..., description="User's firstname")
-    last_name: str = Field(..., description="User's lastname")
+    first_name: Optional[str] = Field(..., description="User's firstname")
+    last_name: Optional[str] = Field(..., description="User's lastname")
     status: Optional[bool] = Field(None, description="Is the user active?")
     updated_at: datetime = Field(default_factory = datetime.now, description="Timestamp when the client was last updated")
 
@@ -32,3 +33,9 @@ class UserRead(BaseRead):
     first_name: str = Field(..., description="User's firstname")
     last_name: str = Field(..., description="User's lastname")
     status: bool = Field(..., description="Is the user active?")
+    
+class UserFilter(BaseFilter):
+    
+    first_name: Optional[str] = Field(None, description="User's firstname")
+    last_name: Optional[str] = Field(None, description="User's lastname")
+    status: Optional[bool] = Field(None, description="Is the user active?")

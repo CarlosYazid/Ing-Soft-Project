@@ -28,3 +28,12 @@ class BaseRead(BaseModel):
                                                 datetime: lambda v: v.isoformat(),
                                                 date: lambda v: v.isoformat()
                                             })
+
+class BaseFilter(BaseModel):
+    
+    model_config: ConfigDict = ConfigDict(str_strip_whitespace=True,
+                                          use_enum_values=True,
+                                          json_encoders={
+                                                datetime: lambda v: v.isoformat(),
+                                                date: lambda v: v.isoformat()
+                                            })

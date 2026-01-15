@@ -4,7 +4,7 @@ from fastapi_pagination.ext.sqlmodel import apaginate
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import OrderStatus, OrderService, OrderProduct
-from schemas import OrderRead, OrderUpdate, OrderCreate
+from dtos import OrderRead, OrderUpdate, OrderCreate, OrderFilter, OrderProductFilter, OrderServiceFilter
 from crud import OrderCrud
 from services import AuthService, OrderService as OrderServiceService
 from db import get_session
@@ -148,82 +148,30 @@ async def delete_order_product_2(request: Request,
     """
     return await OrderCrud.delete_order_product(db_session, order_product)
 
-@router.get("/all/", response_model=Page[OrderRead])
-async def read_all_orders(request: Request,
-                          db_session: AsyncSession = Depends(get_session)):
+@router.post("/search", response_model=Page[OrderRead])
+async def search_orders(request: Request,
+                        filters: OrderFilter,
+                        db_session: AsyncSession = Depends(get_session)):
     """
-    Retrieve all orders.
+    Search orders who meet the filters.
     """
-    return await apaginate(db_session, OrderServiceService.read_all_orders())
+    return await apaginate(db_session, OrderServiceService.search_orders(filters))
 
-@router.get("/service/order/{order_id}", response_model=Page[OrderService])
-async def search_orders_services_by_order(request: Request,
-                                        order_id: int,
-                                        db_session: AsyncSession = Depends(get_session)):
+@router.post("/service/search", response_model=Page[OrderService])
+async def search_order_services(request: Request,
+                                 filters: OrderServiceFilter,
+                                 db_session: AsyncSession = Depends(get_session)):
     """
-    Retrieve order services by order ID.
+    Search orders services who meet the filters.
     """
-    return await apaginate(db_session, await OrderServiceService.search_orders_services_by_order(db_session, order_id))
+    return await apaginate(db_session, OrderServiceService.search_order_services(filters))
 
-@router.get("/service/order/", response_model=Page[OrderService])
-async def search_orders_services_by_order_2(request: Request,
-                                          order_id: int,
-                                          db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve order services by order ID.
-    """
-    return await apaginate(db_session, await OrderServiceService.search_orders_services_by_order(db_session, order_id))
 
-@router.get("/product/order/{order_id}", response_model=Page[OrderProduct])
-async def search_orders_products_by_order(request: Request,
-                                        order_id: int,
-                                        db_session: AsyncSession = Depends(get_session)):
+@router.post("/product/search", response_model=Page[OrderProduct])
+async def search_order_products(request: Request,
+                                filters: OrderProductFilter,
+                                db_session: AsyncSession = Depends(get_session)):
     """
-    Retrieve order products by order ID.
+    Search orders products who meet the filters.
     """
-    return await apaginate(db_session, await OrderServiceService.search_orders_products_by_order(db_session, order_id))
-
-@router.get("/product/order/", response_model=Page[OrderProduct])
-async def search_order_products_by_order_2(request: Request,
-                                         order_id: int,
-                                         db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve order products by order ID.
-    """
-    return await apaginate(db_session, await OrderServiceService.search_orders_products_by_order(db_session, order_id))
-
-@router.get("/client/{client_id}", response_model=Page[OrderRead])
-async def search_orders_by_client(request: Request,
-                                     client_id: int,
-                                     db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve orders by client ID.
-    """
-    return await apaginate(db_session, await OrderServiceService.search_orders_by_client(db_session, client_id))
-
-@router.get("/client/", response_model=Page[OrderRead])
-async def search_orders_by_client_2(request: Request,
-                                       client_id: int,
-                                       db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve orders by client ID.
-    """
-    return await apaginate(db_session, await OrderServiceService.search_orders_by_client(db_session, client_id))
-
-@router.get("/status/{status}", response_model=Page[OrderRead])
-async def search_orders_by_status(request: Request,
-                                  status: OrderStatus,
-                                  db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve orders by status.
-    """
-    return await apaginate(db_session, OrderServiceService.search_orders_by_status(status))
-
-@router.get("/status/", response_model=Page[OrderRead])
-async def search_orders_by_status_2(request: Request,
-                                    status: OrderStatus,
-                                    db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve orders by status.
-    """
-    return await apaginate(db_session, OrderServiceService.search_orders_by_status(status))
+    return await apaginate(db_session, OrderServiceService.search_order_products(filters))

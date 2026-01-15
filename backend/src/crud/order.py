@@ -4,13 +4,15 @@ from sqlmodel import select, delete
 
 from models import Order, OrderService, OrderProduct, OrderStatus
 from utils import OrderUtils, UserUtils
-from schemas import OrderCreate, OrderUpdate
+from dtos import OrderCreate, OrderUpdate
+from core import log_operation
 
 class OrderCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
     
     @staticmethod
+    @log_operation(True)
     async def create_order(db_session: AsyncSession, order: OrderCreate) -> Order:
         """Create a new order."""
         
@@ -41,6 +43,7 @@ class OrderCrud:
             raise HTTPException(detail="Order creation failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_order(db_session: AsyncSession, order_id: int) -> Order:
         """Retrieve an order by ID."""
         
@@ -58,6 +61,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to retrieve order", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_order_status(db_session: AsyncSession, order_id: int) -> OrderStatus:
         """Retrieve the status of an order."""
 
@@ -75,6 +79,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to retrieve order status", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def update_order(db_session: AsyncSession, fields: OrderUpdate) -> Order:
         """Update an existing order."""
 
@@ -111,6 +116,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to update order", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def update_order_status(db_session: AsyncSession, order_id: int, status: OrderStatus) -> Order:
         """Update the status of an order."""
 
@@ -142,6 +148,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to update order status", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_order(db_session: AsyncSession, order_id: int) -> None:
         """Delete an order by ID."""
         
@@ -167,6 +174,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to delete order", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def create_order_service(db_session: AsyncSession, order_service: OrderService) -> OrderService:
         """Add a service to an order."""
 
@@ -197,8 +205,8 @@ class OrderCrud:
             await db_session.rollback()
             raise HTTPException(detail="Failed to add service to order", status_code=500) from e
     
-    
     @staticmethod
+    @log_operation(True)
     async def update_order_serivce(db_session: AsyncSession, order_service: OrderService) -> OrderService:
         """Update order service"""
         
@@ -228,6 +236,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to update order service", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_order_services_by_service(db_session: AsyncSession, service_id: int) -> bool:
         """Delete all order services associated with a specific service."""
 
@@ -247,6 +256,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to delete order services", status_code=500) from e    
     
     @staticmethod
+    @log_operation(True)
     async def delete_order_service(db_session: AsyncSession, order_service: OrderService) -> bool:
         """Delete order services"""
         
@@ -274,6 +284,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to delete order service", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def create_order_product(db_session: AsyncSession, order_product: OrderProduct) -> OrderProduct:
         """Add a product to an order."""
 
@@ -315,6 +326,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to add product to order", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_order_product(db_session: AsyncSession, order_product: OrderProduct) -> OrderProduct:
         """Update order product"""
         
@@ -344,6 +356,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to update order product", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_order_products_by_product(db_session: AsyncSession, product_id: int) -> bool:
         """Delete all order products associated with a specific product."""
 
@@ -363,6 +376,7 @@ class OrderCrud:
             raise HTTPException(detail="Failed to delete order products", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_order_product(db_session: AsyncSession, order_product: OrderProduct) -> bool:
         """Delete an order product"""
         

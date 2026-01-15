@@ -1,10 +1,11 @@
 from typing import Optional
 from datetime import date
 
+from sqlalchemy.sql.expression import Select
 from pydantic import ConfigDict, Field
 
-from models import EmployeeRole
-from schemas.abs import UserCreate, UserRead, UserUpdate
+from models import EmployeeRole, Employee
+from dtos.abs import UserCreate, UserRead, UserUpdate, UserFilter
 
 class EmployeeCreate(UserCreate):
 
@@ -72,3 +73,31 @@ class EmployeeRead(UserRead):
                                                     "status": True,
                                                 }
                                             })
+
+class EmployeeFilter(UserFilter):
+    
+    role: Optional[EmployeeRole] = Field(None, description="Employee's role")
+    min_birth_date: Optional[date] = Field(None, description="Min employee's birth date")
+    max_birth_date: Optional[date] = Field(None, description="Max employee's birth date")
+    
+    def apply(self, query: Select) -> Select:
+        
+        if self.first_name:
+            query = query.where(Employee.first_name.ilike(f"%{self.first_name}%"))
+        
+        if self.last_name:
+            query = query.where(Employee.last_name.ilike(f"%{self.last_name}"))
+        
+        if not self.status is None:
+            query = query.where(Employee.status == self.status)
+        
+        if self.role:
+            query = query.where(Employee.role == self.role)
+        
+        if self.min_birth_date:
+            query = query.where(Employee.birth_date >= self.min_birth_date)
+        
+        if self.max_birth_date:
+            query = query.where(Employee.birth_date <= self.max_birth_date)
+        
+        return query

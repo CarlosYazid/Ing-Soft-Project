@@ -4,7 +4,7 @@ from fastapi_pagination.ext.sqlmodel import apaginate
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import PaymentMethod, PaymentStatus
-from schemas import PaymentCreate, PaymentRead, PaymentUpdate
+from dtos import PaymentCreate, PaymentRead, PaymentUpdate, PaymentFilter
 from crud import PaymentCrud
 from services import AuthService, PaymentService
 from db import get_session
@@ -65,61 +65,11 @@ async def delete_payment_2(request: Request,
     """
     return await PaymentCrud.delete_payment(db_session, id)
 
-@router.get("/payment/all/", response_model = Page[PaymentRead])
-async def read_all_payments(request: Request,
-                            db_session: AsyncSession = Depends(get_session)):
-    return await apaginate(db_session, PaymentService.read_all_payments())
-
-@router.get("/payment/search/client/{client_id}", response_model = Page[PaymentRead])
-async def search_payments_by_client(request: Request,
-                                    client_id: int,
-                                    db_session: AsyncSession = Depends(get_session)):
+@router.post("/payment/search", response_model = Page[PaymentRead])
+async def search_payments(request: Request,
+                          filters: PaymentFilter,
+                          db_session: AsyncSession = Depends(get_session)):
     """
-    Retrieve payments by client ID.
+    Search payments who meet the filters.
     """
-    return await apaginate(db_session, PaymentService.search_payments_by_client(client_id))
-
-@router.get("/payment/search/client/", response_model = Page[PaymentRead])
-async def search_payments_by_client_2(request: Request,
-                                      client_id: int,
-                                      db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve payments by client ID.
-    """
-    return await apaginate(db_session, PaymentService.search_payments_by_client(client_id))
-
-@router.get("/payment/search/status/{status}", response_model = Page[PaymentRead])
-async def search_payments_by_status(request: Request,
-                                    status: PaymentStatus,
-                                    db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve payments by status.
-    """
-    return await apaginate(db_session, PaymentService.search_payments_by_status(status))
-
-@router.get("/payment/search/status/", response_model = Page[PaymentRead])
-async def search_payments_by_status_2(request: Request,
-                                      status: PaymentStatus,
-                                      db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve payments by status.
-    """
-    return await apaginate(db_session, PaymentService.search_payments_by_status(status))
-
-@router.get("/payment/search/method/{method}", response_model = Page[PaymentRead])
-async def search_payments_by_method(request : Request,
-                                    method: PaymentMethod,
-                                    db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve payments by method.
-    """
-    return await apaginate(db_session, PaymentService.search_payments_by_method(method))
-
-@router.get("/payment/search/method/", response_model = Page[PaymentRead])
-async def search_payments_by_method_2(request: Request,
-                                      method: PaymentMethod,
-                                      db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve payments by method.
-    """
-    return await apaginate(db_session, PaymentService.search_payments_by_method(method))
+    return await apaginate(db_session, PaymentService.search_payments(filters))

@@ -1,9 +1,11 @@
 from typing import Optional
 from datetime import date, datetime
 
+from sqlalchemy.sql.expression import Select
 from pydantic import Field, ConfigDict
 
-from schemas.abs import BaseCreate, BaseRead, BaseUpdate
+from dtos.abs import BaseCreate, BaseRead, BaseUpdate, BaseFilter
+from models import Product, Category
 
 class ProductCreate(BaseCreate):
     
@@ -95,6 +97,49 @@ class ProductUpdate(BaseUpdate):
                                               date: lambda v: v.isoformat()
                                           })
 
+class ProductFilter(BaseFilter):
+    
+    name: Optional[str] = Field(None, description="Product's name")
+    max_price: Optional[float] = Field(None, description="Max product's price", gt = 0)
+    min_price: Optional[float] = Field(None, description="Min product's price", gt = 0)
+    max_cost: Optional[float] = Field(None, description="Max product's cost", gt = 0)
+    min_cost: Optional[float] = Field(None, description="Min product's cost", gt = 0)
+    max_stock: Optional[int] = Field(None, description="Max stock of the product", gt = 0)
+    min_stock: Optional[int] = Field(None, description="Min stock of the product", gt = 0)
+    max_expiration_date: Optional[date] = Field(None, description="Max expiration date of the consumable product")
+    min_expiration_date: Optional[date] = Field(None, description="Min expiration date of the consumable product")
+    
+    def apply(self, query: Select) -> Select:
+        
+        if self.name:
+            query = query.where(Product.name.ilike(f"%{self.name}%"))
+        
+        if self.max_price:
+            query = query.where(Product.price <= self.max_price)
+        
+        if self.min_price:
+            query = query.where(Product.price >= self.min_price)
+        
+        if self.max_cost:
+            query = query.where(Product.cost <= self.max_cost)
+        
+        if self.min_cost:
+            query = query.where(Product.cost >= self.min_cost)
+        
+        if self.max_stock:
+            query = query.where(Product.stock <= self.max_stock)
+        
+        if self.min_stock:
+            query = query.where(Product.stock >= self.min_stock)
+        
+        if self.max_expiration_date:        
+            query = query.where(Product.expiration_date <= self.max_expiration_date)
+        
+        if self.min_expiration_date:
+            query = query.where(Product.expiration_date >= self.min_expiration_date)
+        
+        return query     
+    
 class CategoryCreate(BaseCreate):
     """
     Category model for the API request.
@@ -147,3 +192,14 @@ class CategoryUpdate(BaseUpdate):
                                                   "update_at": "2023-12-31T00:00:00Z"
                                               }
                                           })
+
+class CategoryFilter(BaseFilter):
+    
+    name: Optional[str] = Field(None, description="Category's name")
+    
+    def apply(self, query : Select) -> Select:
+        
+        if self.name:
+            query = query.where(Category.name.ilike(f"%{self.name}%"))
+        
+        return query

@@ -7,7 +7,7 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from botocore.client import BaseClient
 
 from models import ProductCategory
-from schemas import ProductCreate, ProductRead, ProductUpdate, CategoryCreate, CategoryRead, CategoryUpdate
+from dtos import ProductCreate, ProductRead, ProductUpdate, ProductFilter, CategoryCreate, CategoryRead, CategoryUpdate, CategoryFilter
 from crud import ProductCrud
 from services import AuthService, ProductService
 from core import get_e2_client
@@ -111,7 +111,7 @@ async def delete_product_2(request: Request,
     """
     return await ProductCrud.delete_product(db_session, storage_client, id)
 
-@router.post("/product_category", response_model = ProductCategory)
+@router.post("/product-category", response_model = ProductCategory)
 async def create_product_category(request: Request,
                                   category: ProductCategory,
                                   db_session: AsyncSession = Depends(get_session)):
@@ -120,7 +120,7 @@ async def create_product_category(request: Request,
     """
     return await ProductCrud.create_product_category(db_session, category)
 
-@router.delete("/product_category/")
+@router.delete("/product-category/")
 async def delete_product_category(request: Request,
                                   product_category: ProductCategory,
                                   db_session: AsyncSession = Depends(get_session)):
@@ -175,19 +175,14 @@ async def delete_category_2(request: Request, id: int, db_session: AsyncSession 
     """
     return await ProductCrud.delete_category(db_session, id)
 
-@router.get("/all/", response_model = Page[ProductRead])
-async def read_all_products(request: Request, db_session: AsyncSession = Depends(get_session)):
+@router.post("/search", response_model = Page[ProductRead])
+async def search_products(request: Request,
+                          filters: ProductFilter,
+                          db_session: AsyncSession = Depends(get_session)):
     """
-    Retrieve all products
+    Search category who meet the filters.
     """
-    return await apaginate(db_session, ProductService.read_all_products())
-
-@router.get("/category/all/", response_model = Page[CategoryRead])
-async def read_all_categories(request: Request, db_session: AsyncSession = Depends(get_session)):
-    """
-    Retrieve all product categories.
-    """
-    return await apaginate(db_session, ProductService.read_all_categories())
+    return await apaginate(db_session, ProductService.search_products(filters))
 
 @router.get("/search/category/{category_id}", response_model = Page[ProductRead])
 async def search_products_by_category(request: Request,
@@ -207,101 +202,23 @@ async def search_products_by_category_2(request: Request,
     """
     return await apaginate(db_session, ProductService.search_products_by_category(category_id))
 
-@router.get("/search/name/{name}", response_model = Page[ProductRead])
-async def search_products_by_name(request: Request,
-                                  name: str,
-                                  db_session: AsyncSession = Depends(get_session)):
+@router.get("/search/service/{service_id}", response_model = Page[ProductRead])
+async def search_products_by_service(request: Request,
+                                     service_id: int,
+                                     db_session: AsyncSession = Depends(get_session)):
     """
-    Search products by name.
+    Get products by service.
     """
-    return await apaginate(db_session, ProductService.search_products_by_name(name))
+    return await apaginate(db_session, ProductService.search_products_by_service(service_id))
 
-@router.get("/search/name/", response_model = Page[ProductRead])
-async def search_products_by_name_2(request: Request,
-                                    name: str,
-                                    db_session: AsyncSession = Depends(get_session)):
+@router.get("/search/service/", response_model = Page[ProductRead])
+async def search_products_by_service_2(request: Request,
+                                     service_id: int,
+                                     db_session: AsyncSession = Depends(get_session)):
     """
-    Search products by name in base format.
+    Get products by service.
     """
-    return await apaginate(db_session, ProductService.search_products_by_name(name))
-
-@router.get("/search/price/{min_price}/{max_price}", response_model = Page[ProductRead])
-async def search_products_by_price_range(request: Request,
-                                         min_price: float,
-                                         max_price: float,
-                                         db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by price range.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_price_range(min_price, max_price))
-
-@router.get("/search/price/", response_model = Page[ProductRead])
-async def search_products_by_price_range_2(request: Request,
-                                           min_price: float,
-                                           max_price: float,
-                                           db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by price range in base format.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_price_range(min_price, max_price))
-
-@router.get("/search/stock/{min_stock}/{max_stock}", response_model = Page[ProductRead])
-async def search_products_by_stock_range(request: Request,
-                                         min_stock: int,
-                                         max_stock: int,
-                                         db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by stock range.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_stock_range(min_stock, max_stock))
-
-@router.get("/search/stock/", response_model = Page[ProductRead])
-async def search_products_by_stock_range_2(request: Request,
-                                           min_stock: int,
-                                           max_stock: int,
-                                           db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by stock range in base format.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_stock_range(min_stock, max_stock))
-
-@router.get("/search/expiration/{expiration_date}", response_model = Page[ProductRead])
-async def search_products_by_expiration_date(request: Request,
-                                             expiration_date: date,
-                                             db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by expiration date.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_expiration_date(expiration_date))
-
-@router.get("/search/expiration/", response_model = Page[ProductRead])
-async def search_products_by_expiration_date_2(request: Request,
-                                               expiration_date: date,
-                                               db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by expiration date in base format.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_expiration_date(expiration_date))
-
-@router.get("/search/cost/{min_cost}/{max_cost}", response_model = Page[ProductRead])
-async def search_products_by_cost_range(request: Request,
-                                        min_cost: float,
-                                        max_cost: float,
-                                        db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by cost range.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_cost_range(min_cost, max_cost))
-
-@router.get("/search/cost/", response_model = Page[ProductRead])
-async def search_products_by_cost_range_2(request: Request,
-                                          min_cost: float,
-                                          max_cost: float, 
-                                          db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by cost range in base format.
-    """
-    return await apaginate(db_session, ProductService.search_products_by_cost_range(min_cost, max_cost))
+    return await apaginate(db_session, ProductService.search_products_by_service(service_id))
 
 @router.get("/search/low-stock", response_model = Page[ProductRead])
 async def search_low_stock_products(request: Request,
@@ -319,20 +236,11 @@ async def search_expired_products(request: Request,
     """
     return await apaginate(db_session, ProductService.search_expired_products())
 
-@router.get("/search/category/name/{category_name}", response_model = Page[ProductRead])
-async def search_category_by_name(request: Request,
-                                  category_name: str,
-                                  db_session: AsyncSession = Depends(get_session)):
+@router.post("/category/search", response_model = Page[CategoryRead])
+async def search_category(request: Request,
+                          filters: CategoryFilter,
+                          db_session: AsyncSession = Depends(get_session)):
     """
-    Search products by category name.
+    Search category who meet the filters.
     """
-    return await apaginate(db_session, ProductService.search_category_by_name(category_name))
-
-@router.get("/search/category/name/", response_model = Page[ProductRead])
-async def search_category_by_name_2(request: Request,
-                                    category_name: str,
-                                    db_session: AsyncSession = Depends(get_session)):
-    """
-    Search products by category name in base format.
-    """
-    return await apaginate(db_session, ProductService.search_category_by_name(category_name))
+    return await apaginate(db_session, ProductService.search_categories(filters))

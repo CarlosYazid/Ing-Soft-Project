@@ -4,13 +4,15 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import Payment
 from utils import PaymentUtils
-from schemas import PaymentCreate, PaymentUpdate
+from dtos import PaymentCreate, PaymentUpdate
+from core import log_operation
 
 class PaymentCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
     
     @staticmethod
+    @log_operation(True)
     async def create_payment(db_session: AsyncSession, payment: PaymentCreate) -> Payment:
         """Create a new payment."""
         
@@ -30,6 +32,7 @@ class PaymentCrud:
             raise HTTPException(detail="Failed to create payment", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_payment(db_session: AsyncSession, payment_id: int) -> Payment:
         """Retrieve a payment by ID."""
         try:
@@ -46,6 +49,7 @@ class PaymentCrud:
             raise HTTPException(detail="Failed to retrieve payment", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_payment(db_session: AsyncSession, fields: PaymentUpdate) -> Payment:
         """Update an existing payment."""
 
@@ -76,6 +80,7 @@ class PaymentCrud:
             raise HTTPException(detail="Failed to update payment", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_payment(db_session: AsyncSession, payment_id: int) -> bool:
         """Delete a payment by ID."""
         
