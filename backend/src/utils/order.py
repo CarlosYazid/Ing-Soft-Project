@@ -3,11 +3,13 @@ from sqlmodel import select
 from fastapi import HTTPException
 
 from models import OrderStatus, Order, OrderService, OrderProduct
+from core import log_operation
 
 class OrderUtils:
 
-    @classmethod
-    async def exist_order(cls, db_session: AsyncSession, order_id: int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_order(db_session: AsyncSession, order_id: int) -> bool:
         """Check if an order exists by ID."""
         
         try:
@@ -19,8 +21,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order existence check failed", status_code=500) from e
     
-    @classmethod
-    async def exist_orders_by_employee(cls, db_session: AsyncSession, employee_id: int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_orders_by_employee(db_session: AsyncSession, employee_id: int) -> bool:
         """Check if any orders exist for a specific employee."""
         
         try:
@@ -32,8 +35,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order existence check failed", status_code=500) from e
     
-    @classmethod
-    async def exist_order_by_client(cls, db_session: AsyncSession, client_id: int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_order_by_client(db_session: AsyncSession, client_id: int) -> bool:
         """Check if any orders exist for a specific client."""
         
         try:
@@ -45,8 +49,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order existence check failed", status_code=500) from e
 
-    @classmethod
-    async def exist_order_service(cls, db_session: AsyncSession, order_service: OrderService) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_order_service(db_session: AsyncSession, order_service: OrderService) -> bool:
         """Check if an order service exists by ID."""
         
         try:
@@ -58,8 +63,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order service existence check failed", status_code=500) from e
     
-    @classmethod
-    async def exist_service_in_orders(cls, db_session: AsyncSession, service_id: int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_service_in_orders(db_session: AsyncSession, service_id: int) -> bool:
         """Check if a service is associated with any orders."""
         
         try:
@@ -71,8 +77,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Service existence check failed", status_code=500) from e
 
-    @classmethod
-    async def exist_order_product(cls, db_session: AsyncSession, order_product: OrderProduct) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_order_product(db_session: AsyncSession, order_product: OrderProduct) -> bool:
         """Check if an order product exists by ID."""
         
         try:
@@ -84,8 +91,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order product existence check failed", status_code=500) from e
     
-    @classmethod
-    async def exist_order_services_in_order(cls, db_session: AsyncSession, order_id : int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_order_services_in_order(db_session: AsyncSession, order_id : int) -> bool:
         """Check if at least one order service exists in a order"""
         
         try:
@@ -97,8 +105,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order service existence check failed", status_code=500) from e
     
-    @classmethod
-    async def exist_order_products_in_order(cls, db_session: AsyncSession, order_id : int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_order_products_in_order(db_session: AsyncSession, order_id : int) -> bool:
         """Check if at least one order service exists in a order"""
         
         try:
@@ -110,8 +119,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order product existence check failed", status_code=500) from e
 
-    @classmethod
-    async def order_product_in_order_completed(cls, db_session: AsyncSession, order_product: OrderProduct) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def order_product_in_order_completed(db_session: AsyncSession, order_product: OrderProduct) -> bool:
         """Check if an order product exist in a order completed"""
         
         if not await OrderUtils.exist_order_product(db_session, order_product):
@@ -126,8 +136,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order product existence check failed", status_code=500) from e
         
-    @classmethod
-    async def order_service_in_order_completed(cls, db_session: AsyncSession, order_service: OrderService) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def order_service_in_order_completed(db_session: AsyncSession, order_service: OrderService) -> bool:
         """Check if an order service exist in a order completed"""
         
         if not await OrderUtils.exist_order_service(db_session, order_service):
@@ -142,8 +153,9 @@ class OrderUtils:
         except Exception as e:
             raise HTTPException(detail="Order service existence check failed", status_code=500) from e
     
-    @classmethod
-    async def exist_product_in_orders(cls, db_session: AsyncSession, product_id: int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_product_in_orders(db_session: AsyncSession, product_id: int) -> bool:
         """Check if a product is associated with any orders."""
         
         try:

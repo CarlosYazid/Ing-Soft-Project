@@ -6,7 +6,7 @@ from fastapi_pagination.ext.sqlmodel import apaginate
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import EmployeeRole
-from schemas import ClientCreate, ClientRead, ClientUpdate, EmployeeCreate, EmployeeRead, EmployeeUpdate
+from dtos import ClientCreate, ClientRead, ClientUpdate, ClientFilter, EmployeeCreate, EmployeeRead, EmployeeUpdate, EmployeeFilter
 from crud import UserCrud
 from db import get_session
 from services import AuthService, UserService
@@ -302,117 +302,20 @@ async def delete_client_by_documentid_2(request: Request,
     """
     return await UserCrud.delete_client_by_documentid(db_session, document_id)
 
-@router.get("/employee/all/", response_model = Page[EmployeeRead])
-async def read_all_employees(request: Request,
-                              db_session : AsyncSession = Depends(get_session)):
-    """
-    Retrieve all employees.
-    """
-    return await apaginate(db_session, UserService.read_all_employees())
-
-@router.get("/employee/search/name/{name}", response_model = Page[EmployeeRead])
-async def search_employees_by_name(request: Request,
-                                   name: str,
-                                   db_session: AsyncSession = Depends(get_session)):
-    """
-    Search employees by name.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_name(name))
-
-@router.get("/employee/search/birthday/{birthday}", response_model = Page[EmployeeRead])
-async def search_employees_by_birthday(request: Request,
-                                       birthday: date,
-                                       db_session: AsyncSession = Depends(get_session)):
-    """
-    Search employees by birthday.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_birthday(birthday))
-
-@router.get("/employee/search/status/{status}", response_model = Page[EmployeeRead])
-async def search_employees_by_status(request: Request,
-                                     status: bool,
-                                     db_session: AsyncSession = Depends(get_session)):
-    """
-    Search employees by status.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_status(status))
-
-@router.get("/employee/search/role/{role}", response_model = Page[EmployeeRead])
-async def search_employees_by_role(request : Request,
-                                   role : EmployeeRole,
-                                   db_session: AsyncSession = Depends(get_session)):
-    """
-    Search employees by role.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_role(role))
-
-@router.get("/employee/search/name/{name}/role/{role}", response_model = Page[EmployeeRead])
-async def search_employees_by_name_and_role(request: Request, 
-                                            name: str,
-                                            role: EmployeeRole,
-                                            db_session: AsyncSession = Depends(get_session)):
-    """Search employees by name and role.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_name_and_role(name, role))
-
-@router.get("/employee/search/name/{name}/status/{status}", response_model = Page[EmployeeRead])
-async def search_employees_by_name_and_status(request: Request, 
-                                              name: str,
-                                              status: bool,
-                                              db_session: AsyncSession = Depends(get_session)):
-    """Search employees by name and status.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_name_and_status(name, status))
-
-@router.get("/employee/search/role/{role}/status/{status}", response_model = Page[EmployeeRead])
-async def search_employees_by_role_and_status(request: Request, 
-                                              role: EmployeeRole,
-                                              status: bool,
-                                              db_session: AsyncSession = Depends(get_session)):
-    """Search employees by role and status.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_role_and_status(role, status))
-
-@router.get("/employee/search/name/{name}/birthday/{birthday}", response_model = Page[EmployeeRead])
-async def search_employee_by_name_and_birthday(request: Request, 
-                                               name: str,
-                                               birthday: date,
-                                               db_session: AsyncSession = Depends(get_session)):
-    """Search employees by name and birthday.
-    """
-    return await apaginate(db_session, UserService.search_employees_by_name_and_birthday(name, birthday))
-
-@router.get("/client/all/", response_model = Page[ClientRead])
-async def read_all_clients(request: Request,
+@router.post("/employee/search", response_model = Page[EmployeeRead])
+async def search_employees(request: Request,
+                           filters: EmployeeFilter,
                            db_session : AsyncSession = Depends(get_session)):
     """
-    Retrieve all clients.
+    Search employees who meet the filters.
     """
-    return await apaginate(db_session, UserService.read_all_clients())
+    return await apaginate(db_session, UserService.search_employees(filters))
 
-@router.get("/client/search/name/{name}", response_model = Page[ClientRead])
-async def search_clients_by_name(request: Request,
-                                 name: str,
-                                 db_session: AsyncSession = Depends(get_session)):
+@router.post("/client/search", response_model = Page[ClientRead])
+async def search_clients(request: Request,
+                         filters: ClientFilter,
+                         db_session : AsyncSession = Depends(get_session)):
     """
-    Search clients by name.
+    Search clients who meet the filters.
     """
-    return await apaginate(db_session, UserService.search_clients_by_name(name))
-
-@router.get("/client/search/status/{status}", response_model = Page[ClientRead])
-async def search_clients_by_status(request: Request,
-                                   status: bool,
-                                   db_session: AsyncSession = Depends(get_session)):
-    """
-    Search clients by status.
-    """
-    return await apaginate(db_session, UserService.search_clients_by_status(status))
-
-@router.get("/client/search/name/{name}/status/{status}", response_model = Page[ClientRead])
-async def search_clients_by_name_and_status(request: Request,
-                                            name: str,
-                                            status: bool,
-                                            db_session: AsyncSession = Depends(get_session)):
-    """Search clients by name and status.
-    """
-    return await apaginate(db_session, UserService.search_clients_by_name_and_status(name, status))
+    return await apaginate(db_session, UserService.search_clients(filters))

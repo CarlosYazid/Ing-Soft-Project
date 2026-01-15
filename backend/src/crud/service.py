@@ -4,13 +4,15 @@ from sqlmodel import select
 
 from models import Service,  ServiceInput
 from utils import ServiceUtils
-from schemas import ServiceCreate, ServiceUpdate
+from dtos import ServiceCreate, ServiceUpdate
+from core import log_operation
 
 class ServiceCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
 
     @staticmethod
+    @log_operation(True)
     async def create_service(db_session: AsyncSession, service: ServiceCreate) -> Service:
         """Create a new service."""
         
@@ -29,6 +31,7 @@ class ServiceCrud:
             raise HTTPException(detail="Service creation failed", status_code=500) from e
         
     @staticmethod
+    @log_operation(True)
     async def read_service(db_session: AsyncSession, service_id: int) -> Service:
         """Retrieve a service by ID."""
         
@@ -46,6 +49,7 @@ class ServiceCrud:
             raise HTTPException(detail="Service search failed", status_code=500) from e
         
     @staticmethod
+    @log_operation(True)
     async def update_service(db_session: AsyncSession, fields: ServiceUpdate) -> Service:
         """Update an existing service."""
         
@@ -80,6 +84,7 @@ class ServiceCrud:
             raise HTTPException(detail="Service update failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def delete_service(db_session: AsyncSession, service_id: int) -> bool:
         """Delete a service by ID."""
 
@@ -108,6 +113,7 @@ class ServiceCrud:
             raise HTTPException(detail="Service deletion failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def create_service_input(db_session: AsyncSession, service_input: ServiceInput) -> ServiceInput:
         """Create a new service input."""
         
@@ -141,6 +147,7 @@ class ServiceCrud:
             raise HTTPException(detail="Service input creation failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_service_input(db_session: AsyncSession, service_input: ServiceInput) -> bool:
         """Delete a service input by service and product"""
         

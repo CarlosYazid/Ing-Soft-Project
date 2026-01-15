@@ -1,8 +1,10 @@
 from datetime import datetime
 
+from sqlalchemy.sql.expression import Select
 from pydantic import ConfigDict
 
-from schemas.abs import UserCreate, UserRead, UserUpdate
+from dtos.abs import UserCreate, UserRead, UserUpdate, UserFilter
+from models import Client
 
 class ClientCreate(UserCreate):
     
@@ -46,3 +48,18 @@ class ClientRead(UserRead):
                                                     "status": True,
                                                 }
                                             })
+
+class ClientFilter(UserFilter):
+    
+    def apply(self, query: Select) -> Select:
+        
+        if self.first_name:
+            query = query.where(Client.first_name.ilike(f"%{self.first_name}%"))
+        
+        if self.last_name:
+            query = query.where(Client.last_name.ilike(f"%{self.last_name}"))
+        
+        if not self.status is None:
+            query = query.where(Client.status == self.status)
+        
+        return query

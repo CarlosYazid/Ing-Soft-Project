@@ -5,13 +5,15 @@ from botocore.client import BaseClient
 
 from models import Product, ProductCategory, Category
 from utils import ProductUtils
-from schemas import ProductCreate, ProductUpdate, CategoryCreate, CategoryUpdate
+from dtos import ProductCreate, ProductUpdate, CategoryCreate, CategoryUpdate
+from core import log_operation
 
 class ProductCrud:
     
     EXCLUDED_FIELDS_FOR_UPDATE = {"id"}
 
     @staticmethod
+    @log_operation(True)
     async def create_product(db_session: AsyncSession, product: ProductCreate) -> Product:
         """Create a new product."""
                     
@@ -30,6 +32,7 @@ class ProductCrud:
             raise HTTPException(status_code=500, detail="Service creation failed") from e
     
     @staticmethod
+    @log_operation(True)
     async def read_product(db_session: AsyncSession, product_id: int) -> Product:
         """Retrieve a product by ID."""
         
@@ -47,6 +50,7 @@ class ProductCrud:
             raise HTTPException(detail="Product search failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_product(db_session: AsyncSession, fields: ProductUpdate) -> Product:
         """Update an existing product."""
         
@@ -77,6 +81,7 @@ class ProductCrud:
             raise HTTPException(detail="Product update failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_stock(db_session: AsyncSession, product_id: int, new_stock: int, replace: bool = True) -> Product:
         """Update the stock of a product by ID."""
 
@@ -108,6 +113,7 @@ class ProductCrud:
             raise HTTPException(detail="Stock update failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_image(db_session: AsyncSession, storage_client: BaseClient, product_id: int, image: UploadFile) -> Product:
         """Update the image of a product by ID."""
 
@@ -141,6 +147,7 @@ class ProductCrud:
             raise HTTPException(detail="Image update failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_product(db_session: AsyncSession, storage_client: BaseClient, product_id: int) -> bool:
         """Delete a product by ID."""
 
@@ -177,6 +184,7 @@ class ProductCrud:
             raise HTTPException(detail="Product deletion failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def create_product_category(db_session: AsyncSession, product_category: ProductCategory) -> ProductCategory:
         """Create a new product category."""
         
@@ -200,6 +208,7 @@ class ProductCrud:
             raise HTTPException(detail="Failed to create product category", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_product_category(db_session: AsyncSession, product_category: ProductCategory) -> bool:
         """Delete a product category by ID."""
 
@@ -221,6 +230,7 @@ class ProductCrud:
             raise HTTPException(detail="Product category deletion failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def create_category(db_session: AsyncSession, category: CategoryCreate) -> Category:
         """Create a new product category."""
         
@@ -239,6 +249,7 @@ class ProductCrud:
             raise HTTPException(detail="Failed to create category", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_category(db_session: AsyncSession, category_id: int) -> Category:
         """Retrieve a product category by ID."""
         
@@ -256,6 +267,7 @@ class ProductCrud:
             raise HTTPException(detail="Failed to retrieve category", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_category(db_session: AsyncSession, fields: CategoryUpdate) -> Category:
         """Update an existing product category."""
         
@@ -286,6 +298,7 @@ class ProductCrud:
             raise HTTPException(detail="Failed to update category", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_category(db_session: AsyncSession, category_id: int) -> bool:
         """Delete a product category by ID."""
 

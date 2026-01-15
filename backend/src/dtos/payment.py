@@ -1,10 +1,11 @@
 from typing import Optional
 from datetime import datetime, date
 
+from sqlalchemy.sql.expression import Select
 from pydantic import Field, ConfigDict
 
-from models import PaymentMethod, PaymentStatus
-from schemas.abs import BaseCreate, BaseRead, BaseUpdate
+from models import PaymentMethod, PaymentStatus, Payment
+from dtos.abs import BaseCreate, BaseRead, BaseUpdate, BaseFilter
 
 class PaymentCreate(BaseCreate):
     
@@ -80,3 +81,46 @@ class PaymentRead(BaseRead):
                                                   "account_number": "1234567890"
                                               }
                                           })
+
+class PaymentFilter(BaseFilter):
+    
+    client_id: Optional[int] = Field(None, description="Client associated with the payment")
+    max_amount: Optional[float] = Field(None, description="Max amount paid", ge = 0)
+    min_amount: Optional[float] = Field(None, description="Min amount paid", ge = 0)
+    method: Optional[PaymentMethod] = Field(None, description="Payment method used")
+    status: Optional[PaymentStatus] = Field(None, description="Current status of the payment")
+    max_due_date: Optional[date] = Field(None, description="Max due date for the credit payment")
+    min_due_date: Optional[date] = Field(None, description="Min due date for the credit payment")
+    max_interest_rate: Optional[float] = Field(None, description="Max interest rate applied to the credit", ge = 0)
+    min_interest_rate: Optional[float] = Field(None, description="Min interest rate applied to the credit", ge = 0)
+    
+    def apply(self, query:  Select) -> Select:
+        
+        if self.client_id:
+            query = query.where(Payment.client_id == self.client_id)
+        
+        if self.max_amount:
+            query = query.where(Payment.amount <= self.max_amount)
+        
+        if self.min_amount:
+            query = query.where(Payment.amount >= self.min_amount)
+        
+        if self.method:
+            query = query.where(Payment.method == self.method)
+        
+        if self.status:
+            query = query.where(Payment.status == self.status)
+        
+        if self.max_due_date:
+            query = query.where(Payment.due_date <= self.max_due_date)
+        
+        if self.min_due_date:
+            query = query.where(Payment.due_date >= self.min_due_date)
+        
+        if self.max_interest_rate:
+            query = query.where(Payment.interest_rate <= self.max_interest_rate)
+        
+        if self.min_interest_rate:
+            query = query.where(Payment.interest_rate >= self.min_interest_rate)
+        
+        return query

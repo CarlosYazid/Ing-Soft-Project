@@ -5,43 +5,41 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import add_pagination
 from uvicorn import run
-from slowapi import Limiter
-from slowapi.util import get_remote_address
 from slowapi.middleware import SlowAPIMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.extension import _rate_limit_exceeded_handler
+import logfire
 
-from core import SETTINGS
+from core import SETTINGS, LIMITER, setup_logging
 from routes import (
     UserRouter, AuthRouter, OrderRouter,
     ProductRouter, ServiceRouter, OthersRouter,
     InvoiceRouter, FileRouter)
-from db import init_db
-
-limiter = Limiter(
-    key_func=get_remote_address,
-    default_limits=[
-        "120/minute",     # limite sostenido
-        "30/second"      # controla picos/bursts
-    ]
-)
+from db import init_db, init_engine, close_engine
+from middlewares import LoggingContextMiddleware
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    
+    setup_logging()
+
+    logfire.instrument_fastapi(app)
+    logfire.instrument_sqlalchemy()
+    
+    init_engine()
+    
     await init_db()
+    
     yield
+    
+    await close_engine()
 
 app = FastAPI(lifespan=lifespan)
 
 # Paginacion
 add_pagination(app)
 
-# Ratelimiter
-app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-app.add_middleware(SlowAPIMiddleware)
-
-# Middleware configuracion
+# CORS Middleware configuracion
 app.add_middleware(
     CORSMiddleware,
     allow_origins=SETTINGS.allowed_origins,
@@ -49,6 +47,16 @@ app.add_middleware(
     allow_methods=SETTINGS.allow_methods,
     allow_headers=SETTINGS.allow_headers,
 )
+
+# Logging Middleware configuracion
+app.add_middleware(
+    LoggingContextMiddleware
+)
+
+# Ratelimiter
+app.state.limiter = LIMITER
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+app.add_middleware(SlowAPIMiddleware)
 
 # Include routers
 app.include_router(UserRouter)

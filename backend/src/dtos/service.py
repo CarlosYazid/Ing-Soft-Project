@@ -1,10 +1,11 @@
 from typing import Optional
 from datetime import datetime
 
+from sqlalchemy.sql.expression import Select
 from pydantic import Field, ConfigDict
 
-from schemas.abs import BaseCreate, BaseRead, BaseUpdate
-
+from dtos.abs import BaseCreate, BaseRead, BaseUpdate, BaseFilter
+from models import Service, ServiceInput
 
 class ServiceCreate(BaseCreate):
     
@@ -68,3 +69,45 @@ class ServiceRead(BaseRead):
                                                   "cost": 30.00
                                               }
                                           })
+
+class ServiceFilter(BaseFilter):
+    
+    name: Optional[str] = Field(None, description="Name of the service")
+    max_price: Optional[float] = Field(None, description="Max price of the service", gt = 0)
+    min_price: Optional[float] = Field(None, description="Min price of the service", gt = 0)
+    max_cost: Optional[float] = Field(None, description="Max cost of the service", gt = 0)
+    min_cost: Optional[float] = Field(None, description="Min cost of the service", gt = 0)
+    
+    def apply(self, query : Select) -> Select:
+        
+        if self.name:
+            query = query.where(Service.name.ilike(f"%{self.name}%"))
+        
+        if self.max_price:
+            query = query.where(Service.price <= self.max_price)
+        
+        if self.min_price:
+            query = query.where(Service.price >= self.min_price)
+        
+        if self.max_cost:
+            query = query.where(Service.cost <= self.max_cost)
+        
+        if self.min_cost:
+            query = query.where(Service.cost >= self.min_cost)
+        
+        return query
+
+class ServiceInputFilter(BaseFilter):
+    
+    product_id: Optional[int] = Field(None, ge = 0)
+    service_id: Optional[int] = Field(None, ge = 0)
+    
+    def apply(self, query: Select) -> Select:
+        
+        if self.product_id:
+            query = query.where(ServiceInput.product_id == self.product_id)
+        
+        if self.service_id:
+            query = query.where(ServiceInput.service_id == self.service_id)
+        
+        return query

@@ -4,14 +4,16 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from models import Client, Employee
 from utils import UserUtils
-from schemas import ClientCreate, ClientUpdate, EmployeeCreate, EmployeeUpdate
+from dtos import ClientCreate, ClientUpdate, EmployeeCreate, EmployeeUpdate
+from core import log_operation
 
 class UserCrud:
     """CRUD operations for users"""
     
     EXCLUDED_FIELDS_FOR_UPDATE_USER = {"id", "documentid"}
-
+    
     @staticmethod
+    @log_operation(True)
     async def create_employee(db_session : AsyncSession, employee : EmployeeCreate) -> Employee:
         """Create a new employee."""
         
@@ -30,6 +32,7 @@ class UserCrud:
             raise HTTPException(detail="Employee creation failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def read_employee(db_session: AsyncSession, employee_id: int) -> Employee:
         """Retrieve an employee by ID."""
         
@@ -47,6 +50,7 @@ class UserCrud:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def read_employee_by_email(db_session: AsyncSession, email: str) -> Employee:
         """Retrieve an employee by email."""
         
@@ -64,6 +68,7 @@ class UserCrud:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_employee_by_documentid(db_session: AsyncSession, document_id: int) -> Employee:
         """Retrieve an employee by document ID."""
         
@@ -81,6 +86,7 @@ class UserCrud:
             raise HTTPException(detail="Employee retrieval failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def update_employee(db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee."""
         
@@ -113,6 +119,7 @@ class UserCrud:
             raise HTTPException(detail="Employee update failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def update_employee_by_email(db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee by email."""
         
@@ -148,6 +155,7 @@ class UserCrud:
 
     
     @staticmethod
+    @log_operation(True)
     async def update_employee_by_documentid(db_session: AsyncSession, fields: EmployeeUpdate) -> Employee:
         """Update an existing employee by document ID."""
         
@@ -180,6 +188,7 @@ class UserCrud:
             raise HTTPException(detail="Employee update failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_employee(db_session: AsyncSession, employee_id: int) -> bool:
         """Delete an employee by ID."""
         
@@ -206,6 +215,7 @@ class UserCrud:
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_employee_by_email(db_session: AsyncSession, email: str) -> bool:
         """Delete an employee by email."""
         
@@ -234,6 +244,7 @@ class UserCrud:
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
 
     @staticmethod
+    @log_operation(True)
     async def delete_employee_by_documentid(db_session: AsyncSession, document_id: int) -> bool:
         """Delete an employee by document ID."""
         
@@ -262,6 +273,7 @@ class UserCrud:
             raise HTTPException(detail="Employee deletion failed", status_code=500) from e
         
     @staticmethod
+    @log_operation(True)
     async def create_client(db_session: AsyncSession, client_: ClientCreate) -> Client:
         """Create a new client."""
         
@@ -280,6 +292,7 @@ class UserCrud:
             raise HTTPException(detail="Client creation failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_client(db_session: AsyncSession, client_id: int) -> Client:
         """Retrieve a client by ID."""
         
@@ -297,6 +310,7 @@ class UserCrud:
             raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_client_by_email(db_session: AsyncSession, email: str) -> Client:
         """Retrieve a client by email."""
         
@@ -314,6 +328,7 @@ class UserCrud:
             raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def read_client_by_documentid(db_session: AsyncSession, document_id: int) -> Client:   
         """Retrieve a client by document ID."""
         try:
@@ -330,6 +345,7 @@ class UserCrud:
             raise HTTPException(detail="Client retrieval failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_client(db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client."""
         
@@ -362,6 +378,7 @@ class UserCrud:
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_client_by_email(db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client by email."""
         
@@ -394,6 +411,7 @@ class UserCrud:
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def update_client_by_documentid(db_session: AsyncSession, fields: ClientUpdate) -> Client:
         """Update an existing client by document ID."""
         
@@ -426,6 +444,7 @@ class UserCrud:
             raise HTTPException(detail="Client update failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_client(db_session: AsyncSession, client_id: int) -> bool:
         """Delete a client by ID."""
         
@@ -447,6 +466,7 @@ class UserCrud:
             raise HTTPException(detail="Client deletion failed", status_code=500) from e
     
     @staticmethod
+    @log_operation(True)
     async def delete_client_by_email(db_session: AsyncSession, email: str) -> bool:
         """Delete a client by email."""
         
@@ -468,6 +488,7 @@ class UserCrud:
             raise HTTPException(detail="Client deletion failed", status_code=500) from e
       
     @staticmethod
+    @log_operation(True)
     async def delete_client_by_documentid(db_session: AsyncSession, document_id: int) -> bool:
         """Delete a client by document ID."""
         

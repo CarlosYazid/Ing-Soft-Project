@@ -3,10 +3,12 @@ from sqlmodel import select
 from fastapi import HTTPException
 
 from models import Payment
+from core import log_operation
 
 class PaymentUtils:
     
-    @classmethod
+    @staticmethod
+    @log_operation(True)
     async def exist_payment(cls, db_session: AsyncSession, payment_id: int) -> bool:
         """Check if a payment exists by ID."""
         

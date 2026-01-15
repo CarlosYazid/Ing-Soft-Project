@@ -6,14 +6,15 @@ from fastapi import HTTPException, UploadFile
 from botocore.client import BaseClient
 
 from models import Product, Category, ProductCategory
-from core import SETTINGS
+from core import SETTINGS, log_operation
 
 class ProductUtils:
     
     ALLOWED_IMAGE_TYPES = {"image/png", "image/jpeg", "image/webp"}
     
-    @classmethod
-    async def exist_product(cls, db_session: AsyncSession, product_id: int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_product(db_session: AsyncSession, product_id: int) -> bool:
         """Check if a product exists by ID."""
         
         try:
@@ -25,9 +26,9 @@ class ProductUtils:
         except Exception as e:
             raise HTTPException(detail="Product existence check failed", status_code=500) from e
         
-        
-    @classmethod
-    async def upload_image(cls, storage_client : BaseClient, image: UploadFile) -> str:
+    @staticmethod
+    @log_operation(False)
+    async def upload_image(storage_client : BaseClient, image: UploadFile) -> str:
         """Upload an image to the storage."""
 
         if image.content_type not in cls.ALLOWED_IMAGE_TYPES:
@@ -53,14 +54,15 @@ class ProductUtils:
         
         return image_key
 
-    
-    @classmethod
+    @staticmethod
+    @log_operation(True)
     async def delete_image(cls, storage_client: BaseClient, image_key: str) -> None:
         """Delete an image from the storage."""
 
         await storage_client.delete_object(Bucket=SETTINGS.bucket_name, Key=image_key)
     
-    @classmethod
+    @staticmethod
+    @log_operation(True)
     async def exist_category(cls, db_session: AsyncSession, category_id: int) -> bool:
         """Check if a category exists by ID."""
         
@@ -73,7 +75,8 @@ class ProductUtils:
         except Exception as e:
             raise HTTPException(detail="Category existence check failed", status_code=500) from e
     
-    @classmethod
+    @staticmethod
+    @log_operation(True)
     async def exist_product_category(cls, db_session: AsyncSession, product_category: ProductCategory) -> bool:
         """Check if a product category exists by ID."""
 

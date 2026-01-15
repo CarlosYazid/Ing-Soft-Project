@@ -3,11 +3,13 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select
 
 from models import Service, ServiceInput
+from core import log_operation
 
 class ServiceUtils:
     
-    @classmethod
-    async def exist_service(cls, db_session: AsyncSession, service_id: int) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_service(db_session: AsyncSession, service_id: int) -> bool:
         """Check if a service exists by ID."""
         
         try:
@@ -19,8 +21,9 @@ class ServiceUtils:
         except Exception as e:
             raise HTTPException(detail="Service search failed", status_code=500) from e
     
-    @classmethod
-    async def exist_service_input(cls, db_session: AsyncSession, service_input: ServiceInput) -> bool:
+    @staticmethod
+    @log_operation(True)
+    async def exist_service_input(db_session: AsyncSession, service_input: ServiceInput) -> bool:
         """Check if a service input exists by ID."""
         
         try:

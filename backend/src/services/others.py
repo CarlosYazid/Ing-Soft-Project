@@ -7,32 +7,22 @@ from sqlalchemy.sql.expression import Select
 
 from models import Payment, PaymentMethod, PaymentStatus
 from core import SETTINGS
-
+from dtos import PaymentFilter
+from core import log_operation
 class PaymentService:
+    
+    QUERY_PAYMENT_BASE = select(Payment)
 
-    @staticmethod
-    def read_all_payments() -> Select:
-        """Query for retrieve all payments."""
-        return select(Payment)
+    @classmethod
+    def search_payments(cls, filters : PaymentFilter) -> Select:
+        """Query that searches for payments who meet the filters."""
+        return filters.apply(cls.QUERY_PAYMENT_BASE)
     
-    @staticmethod
-    def search_payments_by_status(status: PaymentStatus) -> Select:
-        """Query for retrieve payments by status."""
-        return select(Payment).where(Payment.status is status)
-    
-    @staticmethod
-    def search_payments_by_method(method: PaymentMethod) -> Select:
-        """Query for retrieve payments by method."""
-        return select(Payment).where(Payment.method is method)
-    
-    @staticmethod
-    def search_payments_by_client(client_id: int) -> Select:
-        """Query for retrieve payments by client."""
-        return select(Payment).where(Payment.client_id == client_id)
 class FileService:
     
-    @classmethod
-    async def get_file(cls, storage_client: BaseClient, key: str):
+    @staticmethod
+    @log_operation(True)
+    async def get_file(storage_client: BaseClient, key: str):
         """Retrieve a file by name."""
         
         try:

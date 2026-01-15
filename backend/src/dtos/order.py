@@ -1,10 +1,11 @@
 from typing import Optional
 from datetime import datetime
 
+from sqlalchemy.sql.expression import Select
 from pydantic import Field, ConfigDict
 
-from models import OrderStatus
-from schemas.abs import BaseCreate, BaseRead, BaseUpdate
+from models import OrderStatus, Order, OrderProduct, OrderService
+from dtos.abs import BaseCreate, BaseRead, BaseUpdate, BaseFilter
 
 class OrderCreate(BaseCreate):
     
@@ -64,3 +65,52 @@ class OrderRead(BaseRead):
                                                   "employee_id": 1
                                               }
                                           })
+
+class OrderServiceFilter(BaseFilter):
+    
+    order_id: Optional[int] = Field(None, ge = 0)
+    service_id: Optional[int] = Field(None, ge = 0)
+
+    def apply(self, query: Select) -> Select:
+        
+        if self.order_id:
+            query = query.where(OrderService.order_id == self.order_id)
+        
+        if self.service_id:
+            query = query.where(OrderService.service_id == self.service_id)
+        
+        return query
+
+class OrderProductFilter(BaseFilter):
+    
+    order_id: Optional[int] = Field(None, ge = 0)
+    product_id: Optional[int] = Field(None, ge = 0)
+    
+    def apply(self, query: Select) -> Select:
+        
+        if self.order_id:
+            query = query.where(OrderProduct.order_id == self.order_id)
+        
+        if self.product_id:
+            query = query.where(OrderProduct.product_id == self.product_id)
+        
+        return query
+
+class OrderFilter(BaseFilter):
+    
+    status: Optional[OrderStatus] = Field(None, description="Current status of the order")
+    client_id: Optional[int] = Field(None, ge = 0)
+    employee_id: Optional[int] = Field(None, ge = 0)
+    
+    def apply(self, query: Select) -> Select:
+        
+        if self.status:
+            query = query.where(Order.status == self.status)
+        
+        if self.client_id:
+            query = query.where(Order.client_id == self.client_id)
+        
+        if self.employee_id:
+            query = query.where(Order.employee_id == self.employee_id)
+        
+        return query
